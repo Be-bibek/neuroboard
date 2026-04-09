@@ -1,0 +1,5 @@
+Grid-based obstacle map with reference counting for incremental updates.
+Reference counting allows cells blocked by multiple nets to be correctly
+managed when nets are added/removed.
+
+Grid A* Router

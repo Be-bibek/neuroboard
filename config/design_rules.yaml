@@ -1,0 +1,22 @@
+stackup:
+  F.Cu:
+    h: 0.1
+    t: 0.035
+    er: 4.3
+  B.Cu:
+    h: 0.1
+    t: 0.035
+    er: 4.3
+
+routing:
+  trace_width_min: 0.09
+  trace_width_max: 0.3
+  spacing_min: 0.09
+  impedance_target_diff: 100.0
+  length_match_tolerance: 0.1
+  angle_snap: 45
+
+placement:
+  min_clearance: 15.0
+  board_width: 100.0
+  board_height: 100.0
