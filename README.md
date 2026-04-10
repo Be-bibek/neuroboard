@@ -1,139 +1,130 @@
 # NeuroBoard
 
-> **An Intelligent PCB Compiler & Future Agentic Digital Twin**
+> **An Intelligent, Netlist-Driven PCB Design Platform using KiCad 10 Native IPC**
 
 ![Python](https://img.shields.io/badge/Python-3.x-blue.svg)
 ![Rust](https://img.shields.io/badge/Rust-High%20Performance-orange.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
-![Status](https://img.shields.io/badge/Status-Active%20Development-yellow.svg)
-
-⚠️ **Active Development Notice**: NeuroBoard is currently in **Version 1** and is under active, rapid development. APIs, configuration models, and toolchains are actively being refined as we build towards our ultimate vision.
+![KiCad](https://img.shields.io/badge/KiCad-10.0-purple.svg)
+![Status](https://img.shields.io/badge/Status-Phase%202-brightgreen.svg)
 
 ---
 
 ## 📖 Overview
 
-NeuroBoard is an intelligent PCB compiler that transforms high-level design intents into fully routed, production-ready KiCad PCB layouts. By merging highly deterministic electrical engineering algorithms with AI-driven orchestration, it aims to automate and mathematically optimize the most complex portions of hardware drafting.
+NeuroBoard is an industry-grade PCB design platform that bridges the gap between AI intent and professional hardware engineering. Transitioning into **Phase 2**, NeuroBoard has evolved from a simple geometry router into a **netlist-driven compiler**. It programmatically generates schematics, simulates signal/power integrity, and interacts with KiCad 10 in real-time via a native IPC bridge.
 
-## ⚡ Key Features (Current Version - v1)
+Our primary goal: **Autonomous generation of complex hardware, starting with the Raspberry Pi AI HAT+ with Hailo-8 acceleration.**
 
-- 🧠 **AI-Assisted PCB Design Pipeline**: Transforms top-level intents directly into orchestrated routing commands.
-- 📐 **Intelligent Component Placement**: Leverages Simulated Annealing algorithms to minimize wirelength and topologically align components.
-- 🛣️ **Geometry & Topology-Aware Routing**: Implements pathing constraints restricting movements to rigid, industrial limits.
-- 🔀 **Differential Pair Routing**: Generates perfectly parallel paired traces natively designed for minimizing transmission skew.
-- 📏 **Length Matching**: Incorporates advanced phase tuning and serpentine meander array generation for trace synchronization.
-- ⚡ **Physics-Aware Impedance Control**: Actively modulates trace widths and gaps dynamically by evaluating standard 4-layer copper/prepreg stackups.
-- ✅ **DRC & SI Validation**: Validates clearances, spacing violations, and absolute path impedance mismatches natively.
-- 🦀 **High-Performance Rust Core**: Employs rapid A* graph searching and Cavalier Contours via PyO3 rust bindings safely processing geometry.
-- 🐍 **Python Orchestrator**: High-level, modular Python engine coordinating logic flow.
-- 📦 **YAML Configuration**: Decoupled rules engine driven by `config/design_rules.yaml`.
-- 🖥️ **Command Line Automation**: Orchestrates the entire pipeline straight from the terminal.
+---
 
-## 🏗️ Architecture Stack
+## ⚡ Key Features (Phase 2 - Netlist-Driven)
+
+### 🏗️ Intelligent Architecture
+- 🌐 **Native KiCad 10 IPC**: Direct RAM-to-RAM synchronization using `api.sock`. No more file reloads or rescue cycles.
+- 📐 **Netlist-Driven Routing**: Routes are derived from electrical connectivity (Schematic -> Netlist -> PCB), ensuring production-grade correctness.
+- 🧠 **Agentic Orchestration**: Uses **LangGraph** to coordinate specialized agents for placement, routing, SI, PI, and compliance.
+
+### 🛣️ Advanced Routing
+- 🦀 **Rust Core Router**: High-performance A* pathfinding and geometric solving with Cavalier Contours.
+- 🔀 **Diff-Pair Symmetry**: Strict 100 Ω differential impedance matching with <0.1mm length matching/skew control.
+- 🛣️ **Topology Constraints**: Enforced 45° routing, hierarchical bus corridor management, and obstacle-aware avoidance.
+
+### 🧪 Physics & Validation
+- 📡 **Signal Integrity (scikit-rf)**: S-parameter (S11/S21) simulation for high-speed PCIe gen 3/4 validation.
+- ⚡ **Power Integrity (PySpice)**: NGSpice-backed IR-drop analysis and PDN optimization for high-current AI accelerators.
+- ✅ **Automated DRC/DFM**: Real-time 2D/3D collision detection and manufacturability checks.
+
+---
+
+## 🏗️ The Phase 2 Workflow
 
 ```text
-[ High-Level Design Intent ] -> CLI
-           |
-       +---v---+ 
-       | Python| -> [ Orchestrator ] -> [ YAML Config ]
-       |       | -> [ Simulated Annealing Placement ]
-       |       | -> [ Length Matching / Impedance ] -> [ DRC/SI Validation ] 
-       +-------+
-           | (Bindings)
-       +---v---+
-       |  Rust | -> [ Grid A* Router Engine ]
-       |       | -> [ Parallel Geometry Offset (Cavalier Contours) ]
-       +-------+
-           |
-[ Output: pi-hat.kicad_pcb ] (Native KiCad Layout)
+[ User Intent ] 
+      |
+      v
+[ AI Schematic Gen ] -> (SKiDL) -> [ Netlist (.net) ]
+      |                                  |
+      v                                  v
+[ Placement Agent ] <------- [ IPC RAM Sync ] ------> [ KiCad 10 Editor ]
+      |                                  |
+      v                                  v
+[ Rust Geometry Core ] <---- [ Net-Guided Routing ]
+      |
+      v
+[ SI & PDN Validation ] -> (scikit-rf / PySpice)
+      |
+      v
+[ Final Native Commit ] -> (IPC: push_commit)
 ```
+
+---
 
 ## 🛠️ Technology Stack
 
-- **Core Logic & Orchestration**: Python 3
-- **Routing & Pathfinding Operations**: Rust (PyO3, cavalier_contours)
-- **Geometry Processing**: Shapely (Python)
-- **Configuration Parsing**: YAML
-- **EDA Target**: KiCad (.kicad_pcb structural API)
+- **Orchestration**: Python 3.x, LangGraph, FastAPI
+- **Routing Engine**: Rust (PyO3 bindings)
+- **Schematic Engine**: SKiDL
+- **Simulations**: scikit-rf, PySpice (NGSpice)
+- **CAD Bridge**: KiCad 10 Native IPC (`kicad-python`)
+- **Frontend (Coming Soon)**: Tauri + React
 
-## 🚀 Installation Instructions
+---
 
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/Be-bibek/neuroboard.git
-   cd neuroboard
-   ```
+## 🚀 Getting Started
 
-2. **Install Python Dependencies**
-   ```bash
-   pip install shapely pyyaml networkx
-   ```
+### 1. Prerequisites
+- **KiCad 10.0+**
+- **Rust (Cargo/rustup)**
+- **Python 3.12+**
+- **NGSpice** (for PDN simulation)
 
-3. **Compile the Rust Engine**
-   Ensure you have Rust and Cargo installed via rustup.
-   ```bash
-   cd engines/routing/rust_router
-   cargo build --release
-   # Move/Rename the compiled .dll/.so to grid_router.pyd (Windows) or grid_router.so (Linux)
-   ```
-
-## 💻 Usage Example
-
-Execute the comprehensive AI compiling pipeline natively through the CLI:
-
+### 2. Installation
 ```bash
-python main.py "Design a PCIe interface"
+git clone https://github.com/Be-bibek/neuroboard.git
+cd neuroboard
+pip install -r requirements.txt
 ```
 
-## 🔄 Example Workflow
+### 3. Compile the Solver
+```bash
+cd engines/routing/rust_router
+cargo build --release
+# Rename target/release/grid_router.dll to grid_router.pyd (Windows)
+```
 
-1. **Initialization**: Parser absorbs intent and loads board stackup rules (`config/design_rules.yaml`).
-2. **AI Placement**: Simulated Annealing groups components locally to minimize cross-talk and transmission distances.
-3. **Trace Orchestration**: Detects differential pairings and forces the Rust backend geometry offsets to construct strict trace groupings limit.
-4. **Length & Phase Tuning**: Calculates mismatches and injects meander serpentines to synchronize pairs.
-5. **DRC / Finalization**: Checks the array for crossover intersections and writes the geometry payloads back to the KiCad PCB natively.
+---
 
 ## 📂 Project Structure
 
-```bash
+```text
 NeuroBoard/
-├── ai_core/               # Python SI, Orchestration, Validation, Placement
-│   ├── placement/         # Cost & Sim Annealing logic
-│   ├── routing/           # Topology, Corridor generation, Diff pairs
-│   ├── si/                # Impedance calculations & stackup models
-│   ├── system/            # Error handling, Logging, Orchestrator
-│   └── validation/        # DRC & SI checks
-├── config/                # Global YAML design rules
-├── engines/routing/       # Highly optimized Rust Core algorithms
-├── main.py                # Command Line pipeline entry
-└── README.md              
+├── ai_core/               # Core Intelligence
+│   ├── api/               # FastAPI Backend for Tauri
+│   ├── schematic/         # SKiDL generation logic
+│   ├── si/                # scikit-rf SI simulation
+│   ├── power_integrity/   # PySpice PDN analysis
+│   ├── system/            # IPC Client, State Manager, Orchestrator
+│   └── routing/           # Topology & Bus Hierarchy
+├── config/                # Central neuroboard_config.yaml
+├── docs/                  # Phase 2 Architecture & Specs
+├── engines/routing/       # High-performance Rust Core
+└── reports/               # Unified validation JSON exports
 ```
 
-## 🔮 Roadmap / Future Work
+---
 
-**Transforming into an Agentic Digital Twin for PCB Manufacturing:**
-- 🤖 **LangGraph Integration**: Orchestrating complex swarms of AI agents handling explicit disciplines (e.g. signal integrity agent, thermal expert agent).
-- 📚 **LangChain RAG Processing**: Automating constraints natively by retrieving and interpreting component datasheet PDFs logically.
-- ☁️ **AWS Bedrock Scale**: Powering enterprise-level agent execution logic into a cloud infrastructure.
-- 🖥️ **Tauri + React Native Platform**: Leaving the terminal for a full iterative graphical workspace.
-- 🧾 **Auto-BOM**: Direct API part fulfillment handling.
-- 🏭 **Manufacturing & Analysis**: Full multi-layer Gerber generation simulation checks.
-- 📡 **Live KiCad IPC**: Shifting from direct file IO hacking to a fluid KiCad Real-Time binding channel.
+## 🤝 Documentation & Roadmap
 
-## 🤝 Contribution Guidelines
+- [Architecture Overview](docs/phase2_architecture.md)
+- [RPi HAT+ Specification](docs/rpi_hat_spec.md)
+- [Development Roadmap](docs/development_roadmap.md)
 
-Contributions are incredibly welcome! As we expand from a static compiler to a multi-agent topology, there are multiple avenues for collaboration.
-1. Fork the Project.
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`).
-4. Push to the Branch (`git push origin feature/AmazingFeature`).
-5. Open a Pull Request.
+---
 
 ## 📄 License
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
-## 👤 Author Information
+---
 
-**Bibek**  
-- GitHub: [@Be-bibek](https://github.com/Be-bibek)
+**Author**: Bibek ([@Be-bibek](https://github.com/Be-bibek))

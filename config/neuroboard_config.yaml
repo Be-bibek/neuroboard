@@ -1,0 +1,26 @@
+kicad:
+  ipc_socket_path: "ipc:///C:/Users/Bibek/AppData/Local/Temp/kicad/api.sock"
+
+stackup:
+  dielectric_constant: 4.3
+  dielectric_thickness_mm: 0.1
+  copper_thickness_mm: 0.035
+
+routing:
+  trace_width_mm: 0.15
+  clearance_mm: 0.15
+  via_drill_mm: 0.3
+  via_pad_mm: 0.6
+  differential_impedance_ohm: 100
+
+freerouting:
+  executable_path: "C:/freerouting/freerouting.jar"
+
+logging:
+  level: "INFO"
+  file: "logs/neuroboard.log"
+
+modules:
+  enable_si_scikit_rf: false
+  enable_pdn_pyspice: false
+  enable_freerouting_fallback: false

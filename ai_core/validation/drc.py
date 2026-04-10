@@ -12,18 +12,37 @@ class GlobalDRC:
         Validates the geometric state of all final routed nets against DRC limits.
         """
         log.info("Running Global Design Rule Check (DRC)...")
+        from shapely.strtree import STRtree
+        import time
+        
         lines = []
         for net, path in final_nets.items():
             if len(path) < 2:
                 log.error(f"DRC Failure: Net {net} is incomplete.")
                 raise GeometryConstraintError(f"Net {net} incomplete.")
-            lines.append((net, geom.LineString(path)))
+            lines.append({"net": net, "line": geom.LineString(path).simplify(0.01)})
             
-        # Check crossings & spacings
-        for i in range(len(lines)):
-            net1, line1 = lines[i]
-            for j in range(i+1, len(lines)):
-                net2, line2 = lines[j]
+        if not lines:
+            log.info("DRC Passed: No traces to check.")
+            return True
+
+        geometries = [item["line"] for item in lines]
+        tree = STRtree(geometries)
+
+        start_time = time.time()
+        # Check crossings & spacings using spatial index
+        for i, item in enumerate(lines):
+            net1, line1 = item["net"], item["line"]
+            
+            # Query the STRtree with a buffer representing the min clearance + arbitrary tolerance
+            search_radius = (self.spacing * 0.95) + 0.1
+            nearby_indices = tree.query(line1.buffer(search_radius))
+            
+            for j in nearby_indices:
+                if j <= i:
+                    continue  # Unidirectional check, no self-check
+                    
+                net2, line2 = lines[j]["net"], lines[j]["line"]
                 
                 # Crossing check
                 if line1.intersects(line2):
@@ -41,5 +60,5 @@ class GlobalDRC:
                     log.error(f"DRC Clearance Violation: {net1} and {net2} too close! {dist:.3f}mm")
                     # Warning rather than fatal error since we handled this geometrically
         
-        log.info("DRC Passed: 0 overlapping traces.")
+        log.info(f"DRC Checks completed in {time.time()-start_time:.2f}s")
         return True

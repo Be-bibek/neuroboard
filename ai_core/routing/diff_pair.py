@@ -12,21 +12,48 @@ class DiffPairEngine:
         pairs = []
         unpaired = []
         
-        # Simple detection: if the user ordered them properly, every 2 adjacent nets might be a pair.
-        # But for robustness, we look for P/N or +/- suffix match if names are available.
-        # Here we just iterate in chunks of 2 since PCIe is inherently paired.
+        # Build mapping of net names to pad geometry coordinates
+        pad_map = {}
+        for idx, pad in enumerate(ordered_bus):
+            # If names exist use them, else use index based fallback
+            name = pin_mapping_names[idx] if idx < len(pin_mapping_names) else f"NET_{idx}"
+            pad_map[name] = pad
+
+        # Step 1: Detect specific differential pair name patterns
+        import re
+        diff_pattern = re.compile(r"^(.*?)([-_+PN])([_]?)(.*)$", re.IGNORECASE)
         
-        i = 0
-        while i < len(ordered_bus) - 1:
-            pad1 = ordered_bus[i]
-            pad2 = ordered_bus[i+1]
+        paired_names = set()
+        
+        # Look for explicit suffixes +/-, P/N
+        for name in pad_map.keys():
+            if name in paired_names: continue
             
-            # Form a differential pair
-            pairs.append((pad1, pad2))
+            if name.endswith('+') or name.endswith('P'):
+                base = name[:-1]
+                target_n = base + ('-' if name.endswith('+') else 'N')
+                if target_n in pad_map and target_n not in paired_names:
+                    pairs.append((pad_map[name], pad_map[target_n]))
+                    paired_names.update([name, target_n])
+                    continue
+            
+            # Explicit D+/D- matching or TX+/TX- via fallback (e.g., USB_D+, USB_D-)
+            if "D+" in name:
+                target_n = name.replace("D+", "D-")
+                if target_n in pad_map and target_n not in paired_names:
+                    pairs.append((pad_map[name], pad_map[target_n]))
+                    paired_names.update([name, target_n])
+                    continue
+
+        # Step 2: Fallback to proximity coupling for any leftovers (Legacy behaviour handling)
+        remaining = [p for n, p in pad_map.items() if n not in paired_names]
+        i = 0
+        while i < len(remaining) - 1:
+            pairs.append((remaining[i], remaining[i+1]))
             i += 2
             
-        if len(ordered_bus) % 2 != 0:
-            unpaired.append(ordered_bus[-1])
+        if len(remaining) % 2 != 0:
+            unpaired.append(remaining[-1])
             
         return pairs, unpaired
 

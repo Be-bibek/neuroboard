@@ -94,5 +94,51 @@ class PlacementOptimizer:
                     current_cost = new_cost
                     
             temp *= cooling_rate
-            
+                
         return best_placement, best_cost
+
+    def snap_connectors_to_axis(self,
+                                placement: dict,
+                                connector_refs: list) -> dict:
+        """
+        Post-SA refinement: snap connector pairs to share either the same X
+        or the same Y coordinate, whichever reduces the misalignment more.
+        This minimises the meander the router needs to introduce.
+        """
+        snapped = dict(placement)
+        for i in range(len(connector_refs)):
+            for j in range(i + 1, len(connector_refs)):
+                c1, c2 = connector_refs[i], connector_refs[j]
+                if c1 not in snapped or c2 not in snapped:
+                    continue
+                x1, y1, r1 = snapped[c1]
+                x2, y2, r2 = snapped[c2]
+
+                dx, dy = abs(x2 - x1), abs(y2 - y1)
+                # Snap along whichever axis already has less misalignment
+                if dx <= dy:
+                    # Align on X axis (same column) — snap c2's X to c1's X
+                    snapped[c2] = (x1, y2, r2)
+                else:
+                    # Align on Y axis (same row) — snap c2's Y to c1's Y
+                    snapped[c2] = (x2, y1, r2)
+
+        return snapped
+
+    def optimize_with_snap(self,
+                           components: dict,
+                           netlist: list,
+                           critical_buses: dict,
+                           connector_refs: list,
+                           steps: int = 5000) -> tuple:
+        """
+        Full optimisation flow: SA → axis snap → final cost evaluation.
+        Returns (snapped_placement, final_cost).
+        """
+        init_place = self.generate_initial_placement(components)
+        sa_place, sa_cost = self.optimize_simulated_annealing(
+            init_place, netlist, critical_buses, steps=steps
+        )
+        snapped = self.snap_connectors_to_axis(sa_place, connector_refs)
+        final_cost = self.cost_model.evaluate_cost(snapped, netlist, critical_buses)
+        return snapped, final_cost

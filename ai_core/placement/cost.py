@@ -1,9 +1,21 @@
 import math
+from typing import Dict, List, Tuple
 
 class PlacementCostModel:
-    def __init__(self, board_width=150, board_height=150):
-        self.board_width = board_width
+    def __init__(self, board_width=150, board_height=150,
+                 hs_axis_penalty=800.0,
+                 meander_penalty_per_mm=20.0,
+                 face_to_face_bonus=300.0):
+        self.board_width  = board_width
         self.board_height = board_height
+
+        # --- Tunable weights for new HAT-aware cost terms ---
+        # High penalty when HS connectors are not aligned on a common X or Y axis
+        self.hs_axis_penalty = hs_axis_penalty
+        # Penalty per mm of excess routing length vs. straight-line distance
+        self.meander_penalty_per_mm = meander_penalty_per_mm
+        # Reward for face-to-face (pin-field facing each other) orientation
+        self.face_to_face_bonus = face_to_face_bonus
 
     def evaluate_cost(self, placement_dict, netlist, critical_buses):
         """
@@ -44,7 +56,24 @@ class PlacementCostModel:
                     if (r1 - r2) % 180 != 0:
                         rot_penalty = 500.0 # High penalty for non-orthogonal mismatches
                         
+                    # [NEW] Face-to-face orientation bonus
+                    # Connectors face each other when their rotations differ by exactly 180°
+                    if abs((r1 - r2) % 360 - 180) < 1.0:
+                        total_cost -= self.face_to_face_bonus  # reward
+
                     total_cost += (alignment_penalty + rot_penalty)
+
+                    # [NEW] High-speed axis alignment penalty
+                    # HS connectors should share either the same X or the same Y coordinate
+                    axis_err = min(dx, dy)  # 0 when perfectly aligned on one axis
+                    total_cost += axis_err * self.hs_axis_penalty
+
+                    # [NEW] Meander length penalty
+                    # Ideal route length is Manhattan distance; excess implies unwanted meanders
+                    manhattan_dist = dx + dy
+                    straight_dist  = math.hypot(dx, dy)
+                    excess_length  = manhattan_dist - straight_dist  # always ≥ 0
+                    total_cost    += excess_length * self.meander_penalty_per_mm
                     
         # 3. Component Congestion & Overlap (Repulsion)
         comps = list(placement_dict.items())

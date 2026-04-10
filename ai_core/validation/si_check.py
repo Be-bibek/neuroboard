@@ -21,9 +21,38 @@ class SignalIntegrityValidator:
         len_n = line_n.length
         mismatch = abs(len_p - len_n)
         
-        if mismatch > self.tolerance_skew:
+        pass_skew = mismatch <= self.tolerance_skew
+        if not pass_skew:
             log.warning(f"SI Violation: Phase skew {mismatch:.3f}mm exceeds {self.tolerance_skew}mm limit!")
         else:
             log.info(f" SI Skew OK: {mismatch:.3f}mm mismatch.")
             
-        return mismatch
+        # 2. Constant differential spacing
+        # Sample points along the longer line to ensure constant separation
+        # This checks the freespace distance between the traces
+        num_samples = 20
+        spacing_violations = 0
+        min_dist = float('inf')
+        max_dist = 0.0
+        
+        for i in range(num_samples):
+            pt = line_p.interpolate(i / float(num_samples - 1), normalized=True)
+            dist = pt.distance(line_n)
+            
+            min_dist = min(min_dist, dist)
+            max_dist = max(max_dist, dist)
+            
+        # Allowed variance in spacing
+        spacing_variance = max_dist - min_dist
+        pass_spacing = spacing_variance <= 0.05  # 0.05mm tolerance
+        
+        if not pass_spacing:
+            log.warning(f"SI Violation: Inconsistent diff pair spacing. Variance: {spacing_variance:.3f}mm (target <= 0.05mm)")
+        else:
+            log.info(f" SI Spacing OK: Variance {spacing_variance:.3f}mm across trace length.")
+
+        return {
+            "skew_mm": round(mismatch, 4),
+            "spacing_variance_mm": round(spacing_variance, 4),
+            "passed": pass_skew and pass_spacing
+        }
