@@ -1,0 +1,305 @@
+WARNING: KICAD6_SYMBOL_DIR environment variable is missing, so the default KiCad symbol libraries won't be searched. @ [C:\Users\Bibek\NeuroBoard\<frozen importlib._bootstrap_external>:759=>C:\Users\Bibek\NeuroBoard\<frozen importlib._bootstrap>:491]
+WARNING: KICAD7_SYMBOL_DIR environment variable is missing, so the default KiCad symbol libraries won't be searched. @ [C:\Users\Bibek\NeuroBoard\<frozen importlib._bootstrap_external>:759=>C:\Users\Bibek\NeuroBoard\<frozen importlib._bootstrap>:491]
+WARNING: KICAD9_SYMBOL_DIR environment variable is missing, so the default KiCad symbol libraries won't be searched. @ [C:\Users\Bibek\NeuroBoard\<frozen importlib._bootstrap_external>:759=>C:\Users\Bibek\NeuroBoard\<frozen importlib._bootstrap>:491]
+WARNING: fp-lib-table file was not found. Component footprints are not available.
+WARNING: fp-lib-table file was not found. Component footprints are not available.
+WARNING: fp-lib-table file was not found. Component footprints are not available.
+WARNING: fp-lib-table file was not found. Component footprints are not available.
+WARNING: Missing tag on Conn_02x20_Odd_Even instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:60.
+WARNING: Random tag b3Mjpvwh1_ generated for Conn_02x20_Odd_Even.
+WARNING: Missing tag on LED instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:328.
+WARNING: Random tag DEfgvq0kb7 generated for LED.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:332.
+WARNING: Random tag HjIbH92Rqx generated for R.
+WARNING: Missing tag on 24LC32 instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:107.
+WARNING: Random tag kWHXuoZ_1Y generated for 24LC32.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:125.
+WARNING: Random tag ZUoGwbbrqR generated for R.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:125.
+WARNING: Random tag 8C7_8wnomm generated for R.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag N40EPYfP5X generated for C.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag VElXuY9yz7 generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag Tkij5Yj09P generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag wIia9OH6B2 generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag 0npspKqAi5 generated for MountingHole.
+WARNING: Missing tag on  instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\dynamic_generator.py:100.
+INFO: 27 warnings found while generating netlist.
+INFO: 0 errors found while generating netlist.
+
+WARNING: Missing tag on Conn_02x20_Odd_Even instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:60.
+WARNING: Random tag b3Mjpvwh1_ generated for Conn_02x20_Odd_Even.
+WARNING: Missing tag on LED instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:328.
+WARNING: Random tag DEfgvq0kb7 generated for LED.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:332.
+WARNING: Random tag HjIbH92Rqx generated for R.
+WARNING: Missing tag on 24LC32 instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:107.
+WARNING: Random tag kWHXuoZ_1Y generated for 24LC32.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:125.
+WARNING: Random tag ZUoGwbbrqR generated for R.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:125.
+WARNING: Random tag 8C7_8wnomm generated for R.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag N40EPYfP5X generated for C.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag VElXuY9yz7 generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag Tkij5Yj09P generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag wIia9OH6B2 generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag 0npspKqAi5 generated for MountingHole.
+WARNING: Missing tag on  instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\dynamic_generator.py:100.
+INFO: 50 warnings found while generating netlist.
+INFO: 0 errors found while generating netlist.
+
+WARNING: Missing tag on Conn_02x20_Odd_Even instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:60.
+WARNING: Random tag D4YkfGNvZV generated for Conn_02x20_Odd_Even.
+WARNING: Missing tag on Conn_01x16 instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:243.
+WARNING: Random tag QombpD1eAN generated for Conn_01x16.
+WARNING: Missing tag on Conn_02x38_Odd_Even instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:270.
+WARNING: Random tag mRFpPaVWgA generated for Conn_02x38_Odd_Even.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag l8Gdp1CYQ_ generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag L74MTF0I4U generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag DqpOWGNres generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag ruIioRSezI generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag AnA5KR1Wxa generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag wV18AVIMnn generated for C.
+WARNING: Missing tag on Micro_SD_Card instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:168.
+WARNING: Random tag BbvQzkDiNb generated for Micro_SD_Card.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag yJbOiDdxnu generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag VxV0pfbH_w generated for C.
+WARNING: Missing tag on Micro_SD_Card instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:168.
+WARNING: Random tag OXPV7mbjhQ generated for Micro_SD_Card.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag JnSWkMVhZ8 generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag gbtQ8yTeRN generated for C.
+WARNING: Missing tag on LED instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:328.
+WARNING: Random tag gW1Lh9XvAx generated for LED.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:332.
+WARNING: Random tag Fv1Zg8O0SB generated for R.
+WARNING: Missing tag on LED instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:328.
+WARNING: Random tag U8rYHEBUq1 generated for LED.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:332.
+WARNING: Random tag 0f3pDMxb1l generated for R.
+WARNING: Missing tag on 24LC32 instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:107.
+WARNING: Random tag nYv3Sra7fT generated for 24LC32.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:125.
+WARNING: Random tag EVROEXfnRt generated for R.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:125.
+WARNING: Random tag KDHAUuSrph generated for R.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag mhHWlnET9H generated for C.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag rgmolaHr9I generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag Rh2E2KDBld generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag 7EZzeNdjJt generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag _hWMXoGCB2 generated for MountingHole.
+WARNING: Missing tag on  instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\dynamic_generator.py:100.
+INFO: 105 warnings found while generating netlist.
+INFO: 0 errors found while generating netlist.
+
+WARNING: Missing tag on Conn_02x20_Odd_Even instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:60.
+WARNING: Random tag D4YkfGNvZV generated for Conn_02x20_Odd_Even.
+WARNING: Missing tag on Conn_01x16 instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:243.
+WARNING: Random tag QombpD1eAN generated for Conn_01x16.
+WARNING: Missing tag on Conn_02x38_Odd_Even instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:270.
+WARNING: Random tag mRFpPaVWgA generated for Conn_02x38_Odd_Even.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag l8Gdp1CYQ_ generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag L74MTF0I4U generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag DqpOWGNres generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag ruIioRSezI generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag AnA5KR1Wxa generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag wV18AVIMnn generated for C.
+WARNING: Missing tag on Micro_SD_Card instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:168.
+WARNING: Random tag BbvQzkDiNb generated for Micro_SD_Card.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag yJbOiDdxnu generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag VxV0pfbH_w generated for C.
+WARNING: Missing tag on Micro_SD_Card instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:168.
+WARNING: Random tag OXPV7mbjhQ generated for Micro_SD_Card.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag JnSWkMVhZ8 generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag gbtQ8yTeRN generated for C.
+WARNING: Missing tag on LED instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:328.
+WARNING: Random tag gW1Lh9XvAx generated for LED.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:332.
+WARNING: Random tag Fv1Zg8O0SB generated for R.
+WARNING: Missing tag on LED instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:328.
+WARNING: Random tag U8rYHEBUq1 generated for LED.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:332.
+WARNING: Random tag 0f3pDMxb1l generated for R.
+WARNING: Missing tag on 24LC32 instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:107.
+WARNING: Random tag nYv3Sra7fT generated for 24LC32.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:125.
+WARNING: Random tag EVROEXfnRt generated for R.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:125.
+WARNING: Random tag KDHAUuSrph generated for R.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag mhHWlnET9H generated for C.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag rgmolaHr9I generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag Rh2E2KDBld generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag 7EZzeNdjJt generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag _hWMXoGCB2 generated for MountingHole.
+WARNING: Missing tag on  instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\dynamic_generator.py:100.
+INFO: 160 warnings found while generating netlist.
+INFO: 0 errors found while generating netlist.
+
+WARNING: Missing tag on Conn_02x20_Odd_Even instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:60.
+WARNING: Random tag D4YkfGNvZV generated for Conn_02x20_Odd_Even.
+WARNING: Missing tag on Conn_01x16 instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:243.
+WARNING: Random tag QombpD1eAN generated for Conn_01x16.
+WARNING: Missing tag on Conn_02x38_Odd_Even instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:270.
+WARNING: Random tag mRFpPaVWgA generated for Conn_02x38_Odd_Even.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag l8Gdp1CYQ_ generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag L74MTF0I4U generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag DqpOWGNres generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag ruIioRSezI generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag AnA5KR1Wxa generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag wV18AVIMnn generated for C.
+WARNING: Missing tag on Micro_SD_Card instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:168.
+WARNING: Random tag BbvQzkDiNb generated for Micro_SD_Card.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag yJbOiDdxnu generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag VxV0pfbH_w generated for C.
+WARNING: Missing tag on Micro_SD_Card instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:168.
+WARNING: Random tag OXPV7mbjhQ generated for Micro_SD_Card.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag JnSWkMVhZ8 generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag gbtQ8yTeRN generated for C.
+WARNING: Missing tag on LED instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:328.
+WARNING: Random tag gW1Lh9XvAx generated for LED.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:332.
+WARNING: Random tag Fv1Zg8O0SB generated for R.
+WARNING: Missing tag on LED instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:328.
+WARNING: Random tag U8rYHEBUq1 generated for LED.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:332.
+WARNING: Random tag 0f3pDMxb1l generated for R.
+WARNING: Missing tag on 24LC32 instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:107.
+WARNING: Random tag nYv3Sra7fT generated for 24LC32.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:125.
+WARNING: Random tag EVROEXfnRt generated for R.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:125.
+WARNING: Random tag KDHAUuSrph generated for R.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag mhHWlnET9H generated for C.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag rgmolaHr9I generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag Rh2E2KDBld generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag 7EZzeNdjJt generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag _hWMXoGCB2 generated for MountingHole.
+WARNING: Missing tag on  instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\dynamic_generator.py:100.
+INFO: 215 warnings found while generating netlist.
+INFO: 0 errors found while generating netlist.
+
+WARNING: Missing tag on  instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\dynamic_generator.py:100.
+INFO: 216 warnings found while generating netlist.
+INFO: 0 errors found while generating netlist.
+
+WARNING: Missing tag on Conn_02x20_Odd_Even instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:60.
+WARNING: Random tag vQR8mPkOPU generated for Conn_02x20_Odd_Even.
+WARNING: Missing tag on LED instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:328.
+WARNING: Random tag 2o2vzhHatQ generated for LED.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:332.
+WARNING: Random tag VkXBmVUDHN generated for R.
+WARNING: Missing tag on 24LC32 instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:107.
+WARNING: Random tag NWWmbgtK8A generated for 24LC32.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:125.
+WARNING: Random tag xJ7LsV_Xzk generated for R.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:125.
+WARNING: Random tag DiiC1SA8lp generated for R.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag rK4y07E44E generated for C.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag kepCauFvUJ generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag HNKAkLccvo generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag VjBRAYhkrx generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag JmJSPZfQTZ generated for MountingHole.
+WARNING: Missing tag on  instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\dynamic_generator.py:100.
+INFO: 239 warnings found while generating netlist.
+INFO: 0 errors found while generating netlist.
+
+WARNING: Missing tag on LED instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:328.
+WARNING: Random tag g4GnMZbbjT generated for LED.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:332.
+WARNING: Random tag kSQIn9YGoO generated for R.
+WARNING: Missing tag on Conn_02x20_Odd_Even instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:60.
+WARNING: Random tag yKuNds83t2 generated for Conn_02x20_Odd_Even.
+WARNING: Missing tag on 24LC32 instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:107.
+WARNING: Random tag t7UApa3cZ8 generated for 24LC32.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:125.
+WARNING: Random tag Jk29SGxvmQ generated for R.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:125.
+WARNING: Random tag BmgPsFu24b generated for R.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag mu_XvnQ06v generated for C.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag 3RE_oTfk5n generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag VL0xvs2M83 generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag iIgce2X0vM generated for MountingHole.
+WARNING: Missing tag on MountingHole instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:377.
+WARNING: Random tag XxJofq4J6C generated for MountingHole.
+WARNING: Missing tag on  instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\dynamic_generator.py:100.
+INFO: 262 warnings found while generating netlist.
+INFO: 0 errors found while generating netlist.
+
+WARNING: Missing tag on Micro_SD_Card instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:168.
+WARNING: Random tag 0QtL31FLcp generated for Micro_SD_Card.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag YAkISQxBGX generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag GyEbcS9Lyk generated for C.
+WARNING: Missing tag on Micro_SD_Card instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\modules.py:168.
+WARNING: Random tag F9WH2oG8KC generated for Micro_SD_Card.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag qI8aXZ3UYG generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\foundation.py:169.
+WARNING: Random tag JAd2JmFEwv generated for C.
+WARNING: Missing tag on  instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\dynamic_generator.py:100.
+INFO: 275 warnings found while generating netlist.
+INFO: 0 errors found while generating netlist.
+

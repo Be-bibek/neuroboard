@@ -1,0 +1,44 @@
+{
+  "Connector_Generic:Conn_02x20_Odd_Even": {
+    "source": "kicad_local",
+    "symbol_lib": "Connector_Generic",
+    "symbol_name": "Conn_02x20_Odd_Even",
+    "footprint": "Connector_PinSocket_2.54mm:PinSocket_2x20_P2.54mm_Vertical"
+  },
+  "Memory_EEPROM:24LC32": {
+    "source": "kicad_local",
+    "symbol_lib": "Memory_EEPROM",
+    "symbol_name": "24LC32",
+    "footprint": "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+  },
+  "Device:R": {
+    "source": "kicad_local",
+    "symbol_lib": "Device",
+    "symbol_name": "R",
+    "footprint": "Resistor_SMD:R_0402_1005Metric"
+  },
+  "Mechanical:MountingHole": {
+    "source": "kicad_local",
+    "symbol_lib": "Mechanical",
+    "symbol_name": "MountingHole",
+    "footprint": "MountingHole:MountingHole_2.7mm_M2.5"
+  },
+  "Device:C": {
+    "source": "kicad_local",
+    "symbol_lib": "Device",
+    "symbol_name": "C",
+    "footprint": "Capacitor_SMD:C_0402_1005Metric"
+  },
+  "Connector_Generic:Conn_01x16": {
+    "source": "kicad_local",
+    "symbol_lib": "Connector_Generic",
+    "symbol_name": "Conn_01x16",
+    "footprint": "Connector_FFC-FPC:Hirose_FH12-16S-0.5SH_1x16-1MP_P0.50mm_Horizontal"
+  },
+  "Connector:Micro_SD_Card": {
+    "source": "kicad_local",
+    "symbol_lib": "Connector",
+    "symbol_name": "Micro_SD_Card",
+    "footprint": "Connector_Card:microSD_HC_Molex_104031-0811"
+  }
+}

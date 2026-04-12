@@ -1,60 +1,59 @@
 # NeuroBoard
 
-> **An Intelligent, Netlist-Driven PCB Design Platform using KiCad 10 Native IPC**
+> **An Intelligent, AI-Native PCB Compiler & Copilot using KiCad 10 Native IPC**
 
 ![Python](https://img.shields.io/badge/Python-3.x-blue.svg)
 ![Rust](https://img.shields.io/badge/Rust-High%20Performance-orange.svg)
 ![KiCad](https://img.shields.io/badge/KiCad-10.0-purple.svg)
-![Status](https://img.shields.io/badge/Status-Phase%202-brightgreen.svg)
+![React](https://img.shields.io/badge/React-18.x-blue.svg)
+![Tauri](https://img.shields.io/badge/Tauri-Cross%20Platform-orange.svg)
+![Status](https://img.shields.io/badge/Status-Phase%208.1%20Hardened-brightgreen.svg)
 
 ---
 
 ## 📖 Overview
 
-NeuroBoard is an industry-grade PCB design platform that bridges the gap between AI intent and professional hardware engineering. Transitioning into **Phase 2**, NeuroBoard has evolved from a simple geometry router into a **netlist-driven compiler**. It programmatically generates schematics, simulates signal/power integrity, and interacts with KiCad 10 in real-time via a native IPC bridge.
+NeuroBoard is a production-grade PCB design platform that bridges the gap between AI intent and professional hardware engineering. Now in **Phase 8.1 (Hardened IPC-First)**, the platform has evolved into a full-stack **Prompt-to-Hardware Compiler**. It enables real-time, bidirectional synchronization between an AI design agent and the KiCad 10 UI, featuring a transactional design system with full rollback support.
 
-Our primary goal: **Autonomous generation of complex hardware, starting with the Raspberry Pi AI HAT+ with Hailo-8 acceleration.**
-
----
-
-## ⚡ Key Features (Phase 2 - Netlist-Driven)
-
-### 🏗️ Intelligent Architecture
-- 🌐 **Native KiCad 10 IPC**: Direct RAM-to-RAM synchronization using `api.sock`. No more file reloads or rescue cycles.
-- 📐 **Netlist-Driven Routing**: Routes are derived from electrical connectivity (Schematic -> Netlist -> PCB), ensuring production-grade correctness.
-- 🧠 **Agentic Orchestration**: Uses **LangGraph** to coordinate specialized agents for placement, routing, SI, PI, and compliance.
-
-### 🛣️ Advanced Routing
-- 🦀 **Rust Core Router**: High-performance A* pathfinding and geometric solving with Cavalier Contours.
-- 🔀 **Diff-Pair Symmetry**: Strict 100 Ω differential impedance matching with <0.1mm length matching/skew control.
-- 🛣️ **Topology Constraints**: Enforced 45° routing, hierarchical bus corridor management, and obstacle-aware avoidance.
-
-### 🧪 Physics & Validation
-- 📡 **Signal Integrity (scikit-rf)**: S-parameter (S11/S21) simulation for high-speed PCIe gen 3/4 validation.
-- ⚡ **Power Integrity (PySpice)**: NGSpice-backed IR-drop analysis and PDN optimization for high-current AI accelerators.
-- ✅ **Automated DRC/DFM**: Real-time 2D/3D collision detection and manufacturability checks.
+### 🌐 Version 1: NeuroBoard Digital Twin (Tauri Website)
+The **NeuroBoard Digital Twin** is our new flagship interface. Built with **Tauri + React + Vite**, it provides a real-time visual cockpit for monitoring AI synthesis, manual edit detection, and electrical health checks. Version 1 features a glassmorphic dashboard that mirrors your KiCad canvas in real-time.
 
 ---
 
-## 🏗️ The Phase 2 Workflow
+## ⚡ Key Features (Phase 8.1 - Hardened)
+
+### 🏗️ Production IPC-First Architecture
+- 🌐 **Real-Time ki-link**: RAM-to-RAM synchronization using KiCad 10's `api.sock`.
+- 🔄 **Transactional Rollback**: Atomic design commits. If synthesis fails, the canvas reverts to its previous stable state automatically.
+- 🧪 **Execution Modes**: Seamless switching between `IPC` (Live UI), `Headless` (Fast Synthesis), and `Simulation` (Logic Verification).
+
+### 🧠 Intelligent Design DSL & Orchestration
+- 📐 **NeuroModule DSL**: An Atopile-inspired hardware-as-code layer with built-in electrical constraints.
+- ⚡ **Constraint-Aware Synthesis**: Automatic impedance matching, voltage domain validation, and frequency-aware routing.
+- 🔍 **Delta-Based Monitoring**: Detects manual user edits (moves/adds/deletes) and provides real-time AI feedback or validation triggers.
+
+### 🛰️ Integrated Digital Twin
+- 🖥️ **Tauri Desktop App**: High-performance UI for monitoring the AI's "thought process" and hardware health.
+- 📡 **Live Telemetry**: Real-time ERC/DRC reporting and Signal Integrity heatmaps within the dashboard.
+
+---
+
+## 🏗️ Hardware DSL Workflow
 
 ```text
-[ User Intent ] 
-      |
-      v
-[ AI Schematic Gen ] -> (SKiDL) -> [ Netlist (.net) ]
-      |                                  |
-      v                                  v
-[ Placement Agent ] <------- [ IPC RAM Sync ] ------> [ KiCad 10 Editor ]
-      |                                  |
-      v                                  v
-[ Rust Geometry Core ] <---- [ Net-Guided Routing ]
-      |
-      v
-[ SI & PDN Validation ] -> (scikit-rf / PySpice)
-      |
-      v
-[ Final Native Commit ] -> (IPC: push_commit)
+[ Natural Language / Intent ] 
+          |
+          v
+[ NeuroBoard Compiler ] <--- [ Neural Part Resolver (LCSC) ]
+          |
+          v
+[ Hardware DSL (NeuroModule) ] ----> [ Electrical Constraints Check ]
+          |
+          v
+[ KiCad IPC Transaction ] <-----> [ NeuroBoard Digital Twin (v1) ]
+          |
+          v
+[ Live KiCad 10 Canvas ]
 ```
 
 ---
@@ -67,12 +66,12 @@ Our primary goal: **Autonomous generation of complex hardware, starting with the
       <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZW9lY2xmbnFiemlrc3BpbHJpZHlhYmMwc3N0bXk5eWhsajJwemtpaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/78XCFBGOlS6keY1Bil/giphy.gif" width="250" alt="Coding Ninja" />
     </td>
     <td align="center">
-      <h3>Core Architecture & Languages</h3>
-      <img src="https://skillicons.dev/icons?i=python,rust,bash,git,github,cmake" />
-      <h3>Solvers & Orchestration</h3>
-      <img src="https://skillicons.dev/icons?i=fastapi,docker,linux,aws,anaconda,numpy" />
-      <h3>Future Platform (UI)</h3>
-      <img src="https://skillicons.dev/icons?i=react,html,css,vscode,postman,figma" />
+      <h3>AI Core & Pipeline</h3>
+      <img src="https://skillicons.dev/icons?i=python,rust,bash,git,github,fastapi,docker" />
+      <h3>Frontend & Digital Twin (v1)</h3>
+      <img src="https://skillicons.dev/icons?i=react,typescript,tailwind,vite,html,css" />
+      <h3>EDA & Simulation</h3>
+      <img src="https://skillicons.dev/icons?i=anaconda,numpy,vscode" />
     </td>
   </tr>
 </table>
@@ -83,9 +82,9 @@ Our primary goal: **Autonomous generation of complex hardware, starting with the
 
 ### 1. Prerequisites
 - **KiCad 10.0+**
-- **Rust (Cargo/rustup)**
+- **Node.js & npm** (for the Digital Twin)
 - **Python 3.12+**
-- **NGSpice** (for PDN simulation)
+- **Rust (Cargo/rustup)**
 
 ### 2. Installation
 ```bash
@@ -94,11 +93,16 @@ cd neuroboard
 pip install -r requirements.txt
 ```
 
-### 3. Compile the Solver
+### 3. Launch the Digital Twin
 ```bash
-cd engines/routing/rust_router
-cargo build --release
-# Rename target/release/grid_router.dll to grid_router.pyd (Windows)
+cd frontend
+npm install
+npm run tauri dev
+```
+
+### 4. Run the Compiler
+```bash
+python main.py "build schematic"
 ```
 
 ---
@@ -107,26 +111,23 @@ cargo build --release
 
 ```text
 NeuroBoard/
-├── ai_core/               # Core Intelligence
-│   ├── api/               # FastAPI Backend for Tauri
-│   ├── schematic/         # SKiDL generation logic
-│   ├── si/                # scikit-rf SI simulation
-│   ├── power_integrity/   # PySpice PDN analysis
+├── ai_core/               # AI-First EDA Logic
+│   ├── schematic/         # NeuroModule DSL & Synthesis
 │   ├── system/            # IPC Client, State Manager, Orchestrator
-│   └── routing/           # Topology & Bus Hierarchy
+│   └── routing/           # Route Topology & Bus Engines
+├── frontend/              # Digital Twin (v1) - Tauri + React
 ├── config/                # Central neuroboard_config.yaml
-├── docs/                  # Phase 2 Architecture & Specs
-├── engines/routing/       # High-performance Rust Core
-└── reports/               # Unified validation JSON exports
+├── docs/                  # Phase 8.1 Specs & Architecture
+├── engines/               # Rust Core Router & Solvers
+└── reports/               # Master Validation JSONs
 ```
 
 ---
 
-## 🤝 Documentation & Roadmap
-
-- [Architecture Overview](docs/phase2_architecture.md)
-- [RPi HAT+ Specification](docs/rpi_hat_spec.md)
-- [Development Roadmap](docs/development_roadmap.md)
+## 🤝 Roadmap
+- [x] Phase 8.1: Hardened IPC Architecture & Transactional Safety
+- [ ] Phase 8.2: Multi-Sheet Orchestration & DataCursor Expansion
+- [ ] Phase 9.0: Fully Heterogeneous Board Synthesis (Pi HAT+ Complete)
 
 ---
 

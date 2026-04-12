@@ -1,89 +1,111 @@
 """
-main.py — NeuroBoard CLI Entry Point
+main.py — NeuroBoard CLI Entry Point (Phase 8.1 Edition)
 
-Usage
------
-  # Validate existing Pi HAT design (no routing):
-  python main.py "Validate existing Raspberry Pi HAT design"
-
-  # Full routing compilation pipeline:
-  python main.py "Route existing design"
+Usage:
+  python main.py "build schematic"             # Live IPC synthesis
+  python main.py "validate design"             # Validation pipeline
+  python main.py --preflight                   # Dependency & environment check
+  python main.py --mode simulation "build schematic"  # Force simulation mode
 """
 
+import os
 import sys
 import argparse
-sys.path.insert(0, r'C:\Users\Bibek\NeuroBoard\ai_core')
+
+# Ensure ai_core is in the path
+ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(ROOT, 'ai_core'))
 
 from system.orchestrator import CompilerOrchestrator
+from system.execution_mode import ExecutionMode
 from system.logger import log
 
-# ---------------------------------------------------------------------------
-# Intent classification
-# ---------------------------------------------------------------------------
 
-VALIDATE_KEYWORDS = {"validate", "validation", "check", "verify", "benchmark"}
+def _parse_mode(s: str) -> ExecutionMode:
+    mapping = {
+        "ipc":        ExecutionMode.IPC,
+        "headless":   ExecutionMode.HEADLESS,
+        "simulation": ExecutionMode.SIMULATION,
+        "sim":        ExecutionMode.SIMULATION,
+    }
+    try:
+        return mapping[s.lower()]
+    except KeyError:
+        raise argparse.ArgumentTypeError(
+            f"Unknown mode '{s}'. Choose from: ipc, headless, simulation"
+        )
 
-def _is_validation_intent(intent: str) -> bool:
-    """Return True when the user intent describes a validation/benchmarking run."""
-    lower = intent.lower()
-    return any(kw in lower for kw in VALIDATE_KEYWORDS)
-
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description="NeuroBoard EDA Compiler & Validator")
-    parser.add_argument("intent", type=str, help="High-level design intent or command")
+    parser = argparse.ArgumentParser(
+        description="NeuroBoard — AI-native PCB Compiler & Copilot",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=__doc__
+    )
+    parser.add_argument(
+        "intent", nargs="?", default="",
+        help="High-level design intent or command"
+    )
+    parser.add_argument(
+        "--mode", "-m", type=_parse_mode, default=None,
+        metavar="MODE",
+        help="Execution mode: ipc | headless | simulation  (default: auto-detect)"
+    )
+    parser.add_argument(
+        "--preflight", action="store_true",
+        help="Run dependency & environment validation then exit"
+    )
     args = parser.parse_args()
 
-    log.info(f"Received High-Level Intent: '{args.intent}'")
-
-    compiler = CompilerOrchestrator(
-        board_path   = "pi-hat.kicad_pcb",
-        config_path  = r"C:\Users\Bibek\NeuroBoard\config\design_rules.yaml",
-    )
+    config_path = os.path.join(ROOT, "config", "neuroboard_config.yaml")
+    log.info(f"--- NEUROBOARD START (Phase 8.1: IPC-First) ---")
 
     try:
-        if _is_validation_intent(args.intent):
-            # ── VALIDATION MODE ────────────────────────────────────────────
-            log.info("Mode: VALIDATION PIPELINE (no new routing will be generated).")
-            report = compiler.run_validation_pipeline()
+        compiler = CompilerOrchestrator(config_path=config_path, mode=args.mode)
 
-            overall = "PASS" if report.get("overall_pass") else "FAIL"
-            log.info(f"Validation complete — Overall: {overall}")
-            log.info(
-                f"  HAT Compliance  : {'PASS' if report['hat_compliance']['passed'] else 'FAIL'}"
-            )
-            log.info(
-                f"  Manufacturability: {'PASS' if report['manufacturability']['passed'] else 'FAIL'}"
-            )
-            pi = report["power_integrity"]
-            log.info(
-                f"  Power Integrity : {pi['zones_generated']} zones, "
-                f"{pi['vias_stitched']} stitch vias"
-            )
-            log.info(
-                "  Report saved  -> reports/pi_hat_validation_report.json"
-            )
+        # ── Preflight / environment check ─────────────────────────────
+        if args.preflight:
+            log.info("Mode: PREFLIGHT CHECK")
+            report = compiler.preflight(strict=False)
+            overall = report.get("overall", "?")
+            log.info(f"[Preflight] Overall: {overall}")
+            sys.exit(0 if overall in ("PASS", "WARN") else 1)
+
+        if not args.intent:
+            parser.print_help()
+            sys.exit(0)
+
+        log.info(f"Command: '{args.intent}'  |  Mode: {compiler.mode}")
+        lower_intent = args.intent.lower()
+
+        # ── Route dispatcher ──────────────────────────────────────────
+        if "sync" in lower_intent and "pcb" in lower_intent:
+            log.info("Mode: PCB SYNC ONLY")
+            compiler.sync_pcb()
+
+        elif "build" in lower_intent and "schematic" in lower_intent:
+            log.info("Mode: LIVE SCHEMATIC SYNTHESIS")
+            result = compiler.build_live_schematic()
+            log.info(f"[Build] Result: {result.get('status')} | "
+                     f"Parts: {result.get('parts_generated', '?')}")
+
+        elif "validate" in lower_intent or "check" in lower_intent:
+            log.info("Mode: VALIDATION PIPELINE")
+            compiler.run_validation_pipeline()
+
+        elif "preflight" in lower_intent or "env" in lower_intent:
+            compiler.preflight()
+
         else:
-            # ── ROUTING MODE ───────────────────────────────────────────────
-            log.info("Mode: FULL ROUTING PIPELINE.")
-            src_ref = "FPC-16P-0.5mm"
-            dst_ref = "CONN-SMD_APCI0107-P001A"
-            mapping = {
-                "2": "73",
-                "3": "75",
-                "5": "67",
-                "6": "69",
-            }
-            compiler.run_full_pipeline(src_ref, dst_ref, mapping)
+            log.info("Mode: FULL GENERATIVE PIPELINE")
+            compiler.run_full_pipeline(prompt=args.intent)
 
-        log.info("System Exited Cleanly (0).")
+        log.info("--- SYSTEM EXIT CLEANLY (0) ---")
 
     except Exception as exc:
-        log.critical(f"FATAL DOMAIN ERROR: {exc}")
+        log.critical(f"FATAL: {exc}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 
 

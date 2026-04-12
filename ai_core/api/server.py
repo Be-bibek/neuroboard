@@ -1,55 +1,284 @@
+"""
+ai_core/api/server.py
+======================
+NeuroBoard FastAPI Backend — Phase 5 (Copilot Intelligence)
+
+Endpoints
+---------
+POST /api/v1/copilot/prompt         → parse NLP + suggest components (Stage 1+2)
+POST /api/v1/copilot/confirm        → confirm BOM + generate netlist (Stage 3+4+5)
+POST /api/v1/pipeline/run           → run full Phase 2 placement + routing + validation
+GET  /api/v1/validation/report      → latest JSON validation report
+GET  /api/v1/board/state            → live KiCad IPC state (REST snapshot)
+WS   /api/v1/live_stream            → real-time KiCad board state (WebSocket)
+"""
+
 import os
+import sys
 import json
 import logging
+import asyncio
 import uvicorn
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pathlib import Path
 
-from ai_core.system.ipc_client import IPCClient
-from ai_core.system.orchestrator import CompilerOrchestrator
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import Any, Dict, List, Optional
+
+# ── Resolve imports regardless of CWD ─────────────────────────────────────
+_AI_CORE = Path(__file__).resolve().parent.parent
+if str(_AI_CORE) not in sys.path:
+    sys.path.insert(0, str(_AI_CORE))
 
 log = logging.getLogger("SystemLogger")
-app = FastAPI(title="NeuroBoard API", version="3.0", description="Backend for Tauri Frontend")
+if not log.handlers:
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s │ %(message)s")
 
-ipc = IPCClient()
-orchestrator = CompilerOrchestrator()
+# ── App ────────────────────────────────────────────────────────────────────
+app = FastAPI(
+    title="NeuroBoard Copilot API",
+    version="5.0",
+    description="AI-native PCB design backend for the Tauri Copilot frontend",
+)
 
-class RoutingRequest(BaseModel):
-    src_ref: str
-    dst_ref: str
-    pin_mapping: dict
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ── Lazy-load heavy modules (avoids import errors if deps missing) ─────────
+_pipeline      = None
+_orchestrator  = None
+_ipc           = None
+
+
+def _get_pipeline():
+    global _pipeline
+    if _pipeline is None:
+        from copilot.pipeline import CopilotPipeline
+        _pipeline = CopilotPipeline()
+    return _pipeline
+
+
+def _get_orchestrator():
+    global _orchestrator
+    if _orchestrator is None:
+        from system.orchestrator import CompilerOrchestrator
+        _orchestrator = CompilerOrchestrator()
+    return _orchestrator
+
+
+def _get_ipc():
+    global _ipc
+    if _ipc is None:
+        from system.ipc_client import IPCClient
+        _ipc = IPCClient()
+    return _ipc
+
+
+# ── Pydantic models ────────────────────────────────────────────────────────
+
+class CopilotPromptRequest(BaseModel):
+    intent: str
+
+class CopilotConfirmRequest(BaseModel):
+    """
+    Sent by the frontend when the user approves the component list.
+    Includes the internal spec + manifest returned from /copilot/prompt.
+    """
+    spec: Dict[str, Any]
+    manifest: Dict[str, Any]
+    netlist_path: Optional[str] = None
+
+class PipelineRunRequest(BaseModel):
+    force_sim: bool = False
+
+class LcscFetchRequest(BaseModel):
+    lcsc_number: str
+
+class SchematicBuildRequest(BaseModel):
+    module_class: str = "PiHatModule"
+    manifest_path: Optional[str] = None
+
+class AddModuleRequest(BaseModel):
+    module_class: str
+    name: str
+    config: Optional[Dict[str, Any]] = None
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  COPILOT ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════════
+
+@app.post("/api/v1/copilot/prompt")
+async def copilot_prompt(req: CopilotPromptRequest):
+    """
+    Stage 1+2: Parse user intent → return structured spec + component suggestions.
+    Fast (~50ms). No schematic generation yet — just shows what will be built.
+    """
+    try:
+        result = _get_pipeline().parse_and_suggest(req.intent)
+        return result
+    except Exception as e:
+        log.error(f"[API] /copilot/prompt error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v1/copilot/confirm")
+async def copilot_confirm(req: CopilotConfirmRequest, background_tasks: BackgroundTasks):
+    """
+    Stage 3+4+5: User confirmed the BOM.
+    Fetch libraries → generate SKiDL netlist → validate connectivity.
+    Runs synchronously (may take a few seconds for SKiDL).
+    """
+    try:
+        result = _get_pipeline().confirm_and_generate(
+            spec=req.spec,
+            manifest=req.manifest,
+            netlist_path=req.netlist_path or "pi_hat.net",
+        )
+        return result
+    except Exception as e:
+        log.error(f"[API] /copilot/confirm error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  PIPELINE (Placement + Routing + Validation)
+# ═══════════════════════════════════════════════════════════════════════════
+
+@app.post("/api/v1/pipeline/run")
+async def run_full_pipeline(req: PipelineRunRequest):
+    """
+    Phase 2 full pipeline: Placement → Routing → SI/PDN/DRC Validation.
+    Requires a netlist to be present (run /copilot/confirm first).
+    """
+    try:
+        report = _get_orchestrator().run_full_pipeline()
+        return {"status": "success", "report": report}
+    except Exception as e:
+        log.error(f"[API] /pipeline/run error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/v1/schematic/build")
+async def build_schematic(req: SchematicBuildRequest):
+    """
+    Phase 8.1 API: Trigger the live schematic builder pipeline via IPC.
+    """
+    try:
+        report = _get_orchestrator().build_live_schematic(
+            module_class=req.module_class,
+            manifest_path=req.manifest_path
+        )
+        return {"status": "success", "report": report}
+    except Exception as e:
+        log.error(f"[API] /schematic/build error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/v1/schematic/add_module")
+async def add_module(req: AddModuleRequest):
+    """
+    Phase 8.1 API: Dynamically inject a specific NeuroModule into the live project.
+    """
+    try:
+        report = _get_orchestrator().build_live_schematic(module_class=req.module_class)
+        return {"status": "success", "report": report}
+    except Exception as e:
+        log.error(f"[API] /schematic/add_module error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/v1/library/fetch_lcsc")
+async def fetch_lcsc_part(req: LcscFetchRequest):
+    """
+    Phase 8.1 API: Fetch footprint and symbol dynamically from LCSC using JLC2KiCadLib.
+    """
+    try:
+        from system.lcsc_fetcher import LcscFetcher
+        fetcher = LcscFetcher()
+        res = fetcher.fetch_component(req.lcsc_number)
+        if res["status"] != "success":
+            raise Exception(res.get("error", "Unknown error fetching part"))
+        return res
+    except Exception as e:
+        log.error(f"[API] /library/fetch_lcsc error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  BOARD STATE & VALIDATION REPORT
+# ═══════════════════════════════════════════════════════════════════════════
 
 @app.get("/api/v1/board/state")
-def get_live_board_state():
-    """ Retrieves live KiCad IPC state for Tauri visualization. """
+def get_board_state():
+    """REST snapshot of current KiCad IPC board state."""
     try:
+        ipc = _get_ipc()
         if not ipc.board:
             ipc.connect()
         return {"status": "success", "state": ipc.get_board_state()}
     except Exception as e:
-        log.error(f"Failed to get board state: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        log.warning(f"[API] Board state unavailable (KiCad may be closed): {e}")
+        return {"status": "ipc_offline", "state": {}}
 
-@app.post("/api/v1/route")
-def execute_routing(req: RoutingRequest):
-    """ Executes validation pipeline. """
+
+@app.get("/api/v1/validation/report")
+def get_validation_report():
+    """Returns the latest neuroboard_validation.json report."""
+    paths = [
+        Path("reports/neuroboard_validation.json"),
+        Path("reports/pi_hat_validation_report.json"),
+        Path(__file__).parent.parent.parent / "reports" / "neuroboard_validation.json",
+    ]
+    for p in paths:
+        if p.exists():
+            try:
+                return json.loads(p.read_text())
+            except Exception:
+                pass
+    raise HTTPException(status_code=404, detail="No validation report found. Run the pipeline first.")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  WEBSOCKET — Live Digital Twin
+# ═══════════════════════════════════════════════════════════════════════════
+
+@app.websocket("/api/v1/live_stream")
+async def live_stream(websocket: WebSocket):
+    """
+    Streams live KiCad IPC board state at 1 Hz.
+    Falls back to empty state if KiCad is offline.
+    """
+    await websocket.accept()
+    log.info("[WS] Digital Twin viewer connected")
     try:
-        # Assuming run_full_pipeline generates the validation report and commits via IPC
-        report = orchestrator.run_full_pipeline(req.src_ref, req.dst_ref, req.pin_mapping)
-        return {"status": "success", "report": report}
+        ipc = _get_ipc()
+        while True:
+            try:
+                if not ipc.board:
+                    ipc.connect()
+                state = ipc.get_board_state()
+            except Exception:
+                state = {}
+            await websocket.send_json({"type": "board_update", "state": state})
+            await asyncio.sleep(1.0)
+    except WebSocketDisconnect:
+        log.info("[WS] Digital Twin viewer disconnected")
     except Exception as e:
-        log.error(f"Routing failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        log.error(f"[WS] Unexpected error: {e}")
 
-@app.get("/api/v1/reports/latest")
-def get_latest_report():
-    """ Serves the newest neuroboard_validation.json report. """
-    report_path = "reports/neuroboard_validation.json"
-    if not os.path.exists(report_path):
-        raise HTTPException(status_code=404, detail="No report found.")
-    
-    with open(report_path, "r") as f:
-        return json.load(f)
 
+# ═══════════════════════════════════════════════════════════════════════════
+#  Healthcheck
+# ═══════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/v1/health")
+def health():
+    return {"status": "ok", "version": "5.0", "service": "NeuroBoard Copilot API"}
+
+
+# ── Entry ──────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")

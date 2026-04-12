@@ -1,19 +1,13 @@
 """
 ai_core/system/orchestrator.py
 ================================
-NeuroBoard Compiler Orchestrator (v3 — Validation & Power Integrity Edition)
-
-Extends the deterministic multi-agent pipeline with:
-  - HATComplianceAgent      — Raspberry Pi HAT spec validation
-  - ManufacturabilityAgent  — DFM checks
-  - GroundPlaneAgent        — Ground planes & via stitching
-  - CorridorOptimizer       — Routing corridor enforcement
-  - Report Generation       — Unified JSON report to reports/
+NeuroBoard Compiler Orchestrator (v4 — IPC-First, Phase 8.1 Hardened)
 
 Execution modes
 ---------------
   python main.py "Route existing design"          → full routing pipeline
-  python main.py "Validate existing Raspberry Pi HAT design"  → validation-only mode
+  python main.py "Validate existing design"        → validation-only mode
+  python main.py "build schematic"                 → live IPC synthesis
 """
 
 import os
@@ -26,6 +20,10 @@ import datetime
 
 from system.logger import log
 from system.errors import RoutingError
+from system.execution_mode import ExecutionMode, EnvironmentProbe
+from system.env_validator  import EnvironmentValidator
+from system.state_manager  import LiveStateManager, DeltaType
+from validation.report     import MasterReport, ValidationReport
 
 from routing.bus_pipeline          import BusPipeline
 from routing.corridor_optimizer    import CorridorOptimizer
@@ -37,11 +35,14 @@ from validation.manufacturability  import ManufacturabilityAgent, _build_mock_bo
 from power_integrity.pdn           import PDNAgent, PDNReport
 from power_integrity.ground_plane  import _build_mock_board_data as _pi_board_data
 from integration.freerouting       import FreeroutingIntegration
-from system.state_manager          import LiveStateManager
 
 from si.sparameter_analysis import SParameterAnalysis
 from power_integrity.pdn_simulator import PDNSimulator
 from system.ipc_client import IPCClient
+from schematic.dynamic_generator import DynamicSchematicGenerator
+from placement.board_initializer import BoardInitializer
+from placement.generative_placer_v2 import GenerativePlacerV2
+from schematic.live_builder import LiveSchematicBuilder
 
 try:
     from typing import TypedDict, Dict, Any
@@ -61,13 +62,11 @@ except ImportError:
 
 
 # ---------------------------------------------------------------------------
-# Path constants
+# Path constants (Fallbacks - now primarily driven by config)
 # ---------------------------------------------------------------------------
-BOARD_PCB_PATH    = r"C:\Users\Bibek\Documents\pi-hat\pi-hat.kicad_pcb"
-PADS_JSON_PATH    = r"C:\Users\Bibek\NeuroBoard\ai_core\live_pads_val.json"
-CONFIG_PATH       = r"C:\Users\Bibek\NeuroBoard\config\design_rules.yaml"
-REPORTS_DIR       = r"C:\Users\Bibek\NeuroBoard\reports"
-REPORT_FILE       = os.path.join(REPORTS_DIR, "pi_hat_validation_report.json")
+NEUROBOARD_ROOT   = r"C:\Users\Bibek\NeuroBoard"
+CONFIG_PATH       = os.path.join(NEUROBOARD_ROOT, "config", "neuroboard_config.yaml")
+REPORTS_DIR       = os.path.join(NEUROBOARD_ROOT, "reports")
 
 # ---------------------------------------------------------------------------
 # Watchdog Worker
@@ -102,116 +101,329 @@ class CompilerOrchestrator:
     Deterministic: random.seed(42) is set at construction.
     """
 
-    def __init__(self,
-                 board_path: str  = "pi-hat.kicad_pcb",
-                 config_path: str = CONFIG_PATH):
+    def __init__(self, config_path: str = CONFIG_PATH,
+                 mode: ExecutionMode = None):
         random.seed(42)   # determinism
 
-        self.board_path   = board_path
-        self.config       = self._load_config(config_path)
-        self.cache: dict  = {}
+        self.config = self._load_config(config_path)
 
-        r_cfg = self.config["routing"]
-        self.drc          = GlobalDRC(r_cfg["trace_width_min"], r_cfg["spacing_min"])
+        # Execution mode — auto-detect if not provided
+        self.mode: ExecutionMode = mode or EnvironmentProbe.detect()
+        log.info(f"[Orchestrator] Mode: {self.mode}")
+
+        # Project-specific paths
+        proj_cfg = self.config.get("project", {})
+        base_dir = proj_cfg.get("base_dir", "")
+        pcb_name = proj_cfg.get("pcb_file", "circuit.kicad_pcb").replace(
+            "${project.name}", proj_cfg.get("name", "PiHAT-KiCAD-Pro-Legacy")
+        )
+
+        self.board_path   = os.path.join(base_dir, pcb_name)
+        self.netlist_path = os.path.join(base_dir, proj_cfg.get("net_file", "pi_hat.net"))
+        self.report_file  = os.path.join(REPORTS_DIR, "neuroboard_validation.json")
+
+        self.cache: dict = {}
+
+        r_cfg      = self.config.get("routing", {})
+        tc_min     = r_cfg.get("trace_width_min", 0.15)
+        tc_spacing = r_cfg.get("spacing_min", 0.15)
+
+        self.drc          = GlobalDRC(tc_min, tc_spacing)
         self.si_validator = SignalIntegrityValidator()
 
-        # Validation agents
         dfm_rules = {
-            "trace_width_min_mm":   r_cfg["trace_width_min"],
-            "trace_width_max_mm":   r_cfg["trace_width_max"],
-            "trace_spacing_min_mm": r_cfg["spacing_min"],
+            "trace_width_min_mm":   tc_min,
+            "trace_width_max_mm":   r_cfg.get("trace_width_max", 0.5),
+            "trace_spacing_min_mm": tc_spacing,
         }
-        self.hat_agent   = HATComplianceAgent()
-        self.mfg_agent   = ManufacturabilityAgent(dfm_rules)
-        self.pi_agent    = PDNAgent()
-        self.freerouting = FreeroutingIntegration()
-        self.corridor_opt = CorridorOptimizer(
-            trace_width = r_cfg["trace_width_min"],
-            spacing     = r_cfg["spacing_min"],
-        )
-        self.live_state  = LiveStateManager()
+        self.hat_agent    = HATComplianceAgent()
+        self.mfg_agent    = ManufacturabilityAgent(dfm_rules)
+        self.pi_agent     = PDNAgent()
+        self.freerouting  = FreeroutingIntegration()
+        self.corridor_opt = CorridorOptimizer(trace_width=tc_min, spacing=tc_spacing)
+        self.live_state   = LiveStateManager()
+
+        # Register a delta callback that logs every human edit
+        self.live_state.register_on_delta(self._on_design_delta)
+
+    def _on_design_delta(self, deltas) -> None:
+        """Callback fired by LiveStateManager on every detected design change."""
+        for d in deltas:
+            log.info(f"[Orchestrator] Design delta: {d}")
+            if d.delta_type == DeltaType.NET_EDIT:
+                log.warning("[Orchestrator] Net edit detected — consider re-running ERC.")
+
+    def preflight(self, strict: bool = False) -> dict:
+        """
+        Run the environment validator and return the report dict.
+        Call this explicitly from main.py for a startup self-check.
+        """
+        report_path = os.path.join(REPORTS_DIR, "env_report.json")
+        env_report  = EnvironmentValidator.run(report_path=report_path, strict=strict)
+        return env_report.to_dict()
 
     # ------------------------------------------------------------------
-    # Config & pads loading
+    # Config loading
     # ------------------------------------------------------------------
 
     def _load_config(self, path: str) -> dict:
-        with open(path, "r") as f:
-            return yaml.safe_load(f)
+        try:
+            with open(path, "r") as f:
+                return yaml.safe_load(f)
+        except Exception as e:
+            log.error(f"Failed to load config at {path}: {e}")
+            return {}
+
+    # ------------------------------------------------------------------
+    # ROUTING PIPELINE
+    # ------------------------------------------------------------------
+
+    def build_live_schematic(self, module_class: str = "PiHatModule", manifest_path: str = None) -> dict:
+        """
+        Phase 8.1: Live AI-Powered Schematic Generation in KiCad 10.
+        Consolidates the generative Hardware DSL with the KiCad 10 IPC bridge.
+        """
+        log.info(f"--- NEUROBOARD LIVE SCHEMATIC SYNTHESIS START: {module_class} ---")
+        
+        ipc = IPCClient()
+        if not ipc.connect():
+            log.error("[Orchestrator] Could not connect to KiCad IPC. Aborting live build.")
+            return {"status": "ERROR", "error": "IPC_CONNECTION_FAILED"}
+
+        # 1. Reset Power Domains for fresh synthesis
+        from schematic.foundation import PowerDomain
+        PowerDomain.reset()
+
+        # 2. Part Resolution (LCSC Fetcher)
+        from system.lcsc_fetcher import LcscFetcher
+        fetcher = LcscFetcher()
+        
+        # 3. Dynamic Module Resolution
+        # In a real system, we'd import the module_class dynamically.
+        # For this prototype, we'll use the PiHatModule example.
+        try:
+            from schematic.examples.pi_hat import PiHatModule
+            # In a production version, we would map module_class string to a registry.
+            top_module = PiHatModule("TOP_LEVEL_HAT")
+            log.info(f"[Orchestrator] DSL Graph built with {len(top_module.parts)} parts and {len(top_module.nets)} nets.")
+        except Exception as e:
+            log.error(f"[Orchestrator] DSL Build failed: {e}")
+            return {"status": "ERROR", "error": str(e)}
+
+        # 4. Transactional Injection
+        builder = LiveSchematicBuilder(ipc)
+        success = False
+        
+        # Wrap the builder in a transaction if the builder supports it, 
+        # or handle batching inside the builder.
+        with ipc.begin_batch():
+            success = builder.build_from_module(top_module)
+        
+        if success:
+            ipc.annotate_components()
+            log.info("[Orchestrator] Live injection complete. Running ERC...")
+            report_file = os.path.join(REPORTS_DIR, "erc_report.json")
+            ipc.run_erc(report_file)
+        
+        # 5. Hybrid Sync
+        self.live_state.sync_schematic(ipc)
+
+        return {
+            "status": "SUCCESS" if success else "FAIL",
+            "module": module_class,
+            "parts_generated": len(top_module.parts),
+            "timestamp": datetime.datetime.utcnow().isoformat() + "Z"
+        }
+
+    def run_full_pipeline(self, prompt: str = None, manifest_path: str = None) -> dict:
+        """
+        Execute Phase 7+8: AI schematic generation, ERC validation, and PCB sync.
+        """
+        log.info(f"--- NEUROBOARD PIPELINE START: {self.config.get('project', {}).get('name')} ---")
+        
+        # 1. AI-Driven Schematic Generation
+        gen = DynamicSchematicGenerator()
+        if manifest_path:
+            log.info(f"Step 1: Parsing YAML Spec -> {manifest_path}")
+            result = gen.generate_from_yaml(manifest_path, self.netlist_path)
+        else:
+            # Fallback to default design.yaml if no specific one provided
+            default_yaml = os.path.join(NEUROBOARD_ROOT, "specs", "design.yaml")
+            log.info(f"Step 1: Using default design spec -> {default_yaml}")
+            result = gen.generate_from_yaml(default_yaml, self.netlist_path)
+
+        if not result["success"]:
+            log.error(f"[Orchestrator] Schematic synthesis failed: {result.get('error')}")
+            return result
+
+        # 2. PCB Synchronization & Initialization
+        sync_result = self.sync_pcb(result)
+        if not sync_result["success"]:
+            return sync_result
+
+        # 3. Generative Placement (Phase 9)
+        log.info("Step 3: Running Generative Placement Solver...")
+        placement_result = self.run_generative_placement(result)
+        
+        # 4. Physics & Compliance Verifications (Mocked for now)
+        si = SParameterAnalysis()
+        si_metrics = si.simulate_differential_pair(length_mm=45.0, frequency_ghz=5.0)
+        
+        pdn = PDNSimulator()
+        pdn_metrics = pdn.analyze_power_rail("3.3V_SYS", 3.3, 2.0, 0.05)
+        
+        report = {
+            "status": "SUCCESS" if sync_result["success"] else "PARTIAL_SUCCESS",
+            "project_name": self.config.get("project", {}).get("name"),
+            "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+            "schematic": {
+                "modules": result["module_count"],
+                "erc_warnings": result["erc_warnings"]
+            },
+            "placement": placement_result,
+            "pcb": sync_result,
+            "signal_integrity": si_metrics,
+            "power_integrity": pdn_metrics,
+        }
+        
+        os.makedirs(os.path.dirname(self.report_file), exist_ok=True)
+        with open(self.report_file, "w") as f:
+            json.dump(report, f, indent=4)
+            
+        log.info(f"Pipeline complete. Report -> {self.report_file}")
+        return report
+
+    def sync_pcb(self, schematic_result: dict = None) -> dict:
+        """
+        Phase 8: Synchronize validated netlist to KiCad and initialize board geometry.
+        """
+        log.info("--- Phase 8: KiCad PCB Sync & Initialization ---")
+        
+        ipc = IPCClient()
+        ipc_online = ipc.connect()
+        
+        if not ipc_online:
+            log.warning("[Orchestrator] Running in SIMULATION MODE (No KiCad IPC).")
+            return {"success": True, "mode": "simulation"}
+
+        try:
+            # 1. Netlist Sync (F8)
+            log.info("[Orchestrator] Step 8.1: Syncing netlist via kicad-cli...")
+            ipc.sync_netlist_to_board(self.netlist_path)
+            
+            # 2. Board Initialization (Outline + Anchors)
+            log.info("[Orchestrator] Step 8.2: Initializing board geometry & anchors...")
+            init = BoardInitializer(ipc)
+            
+            # We need the original manifest or the placement_metadata to init
+            # For now, we use a placeholder or re-load design.yaml if needed
+            # In Phase 8, we expect the manifest to be part of the schematic_result
+            # Let's assume placement_metadata contains what we need for initialization.
+            
+            # RE-LOAD MANIFEST (as a shortcut for Phase 8 initialization)
+            from schematic.ingredient_loader import IngredientLoader
+            default_yaml = os.path.join(NEUROBOARD_ROOT, "specs", "design.yaml")
+            manifest     = IngredientLoader(default_yaml).load()
+            
+            init.initialize(manifest)
+            
+            return {
+                "success": True,
+                "mode":    "live",
+                "socket":   ipc._socket_path,
+                "project":  ipc._project_name
+            }
+        except Exception as e:
+            log.error(f"[Orchestrator] Sync failed: {e}")
+            return {"success": False, "error": str(e)}
+
+    def run_generative_placement(self, schematic_result: dict) -> dict:
+        """
+        Phase 9: Multi-objective force-directed placement.
+        """
+        log.info("--- Phase 9: Generative Placement Simulation ---")
+        
+        # 1. Initialize Engine
+        from schematic.ingredient_loader import BOARD_PROFILES
+        default_yaml = os.path.join(NEUROBOARD_ROOT, "specs", "design.yaml")
+        
+        # Determine dimensions from profile
+        from schematic.ingredient_loader import IngredientLoader
+        manifest = IngredientLoader(default_yaml).load()
+        constraints = manifest.get("constraints", {})
+        width  = constraints.get("board_width_mm") or 100.0
+        height = constraints.get("board_height_mm") or 100.0
+
+        placer = GenerativePlacerV2(board_width=width, board_height=height)
+        
+        # 2. Load Design Graph
+        placer.load_from_netlist(
+            self.netlist_path, 
+            schematic_result.get("placement_metadata", [])
+        )
+        
+        # 3. Set Anchors (from Profile)
+        mh_pos = constraints.get("mounting_holes", [])
+        for i, pos in enumerate(mh_pos):
+            # Try to find corresponding MH nodes in graph
+            # The netlist usually names them H1, H2...
+            placer.set_anchor(f"H{i+1}", pos["x"], pos["y"])
+            
+        gpio = constraints.get("gpio_header")
+        if gpio:
+            placer.set_anchor("J1", gpio["pin1_x"], gpio["pin1_y"])
+
+        # 4. Run Physics Solver
+        placer.run(iterations=250)
+        
+        # 5. Push to KiCad (IPC)
+        solved = placer.get_solved_positions()
+        summary = placer.get_layout_summary()
+        
+        ipc = IPCClient()
+        if ipc.connect():
+            log.info(f"[Orchestrator] Pushing {len(solved)} solved positions to KiCad...")
+            commit = ipc.begin_commit()
+            try:
+                # Resolve live footprints
+                fp_map = {fp.reference_field.text.value: fp 
+                          for fp in ipc.board.get_footprints() 
+                          if fp.reference_field}
+                
+                for s in solved:
+                    if s["ref"] in fp_map:
+                        fp = fp_map[s["ref"]]
+                        # Move to solved pos (convert to kipy nm)
+                        from kipy.geometry import Vector2
+                        fp.position = Vector2.from_xy_mm(s["x"], s["y"])
+                        fp.orientation.degrees = s.get("rot", 0.0)
+                
+                ipc.push_commit(commit, "Phase 9: Generative Placement")
+            except Exception as e:
+                log.error(f"[Orchestrator] IPC Placement Push failed: {e}")
+                ipc._safe_cancel_commit()
+        
+        return {
+            "success": True,
+            "summary": summary,
+            "components_placed": len(solved)
+        }
 
     def _load_pads(self) -> dict:
         if "pads" in self.cache:
             return self.cache["pads"]
-        with open(PADS_JSON_PATH, "r") as f:
+        
+        # Default fallback if no live pads found
+        pads_path = os.path.join(NEUROBOARD_ROOT, "ai_core", "live_pads_val.json")
+        if not os.path.exists(pads_path):
+            log.warning(f"Pads file not found at {pads_path}. Using empty mock.")
+            return {}
+            
+        with open(pads_path, "r") as f:
             pads = json.load(f)
         self.cache["pads"] = pads
         return pads
 
-    # ------------------------------------------------------------------
-    # ROUTING PIPELINE  (unchanged algorithmic flow)
-    # ------------------------------------------------------------------
-
-    def run_full_pipeline(self, src_ref: str, dst_ref: str, pin_mapping: dict) -> dict:
-        """
-        Execute the deterministic routing pipeline and return a unified report dict.
-        """
-        log.info("--- NEUROBOARD COMPLETION RUN (v3) ---")
-        pads_info = self._load_pads()
-
-        pipeline = BusPipeline(
-            pads_info,
-            target_zdiff=self.config["routing"]["impedance_target_diff"],
-        )
-
-        # Placement
-        netlist        = [(src_ref, dst_ref, 10.0)]
-        critical_buses = {"HIGH_SPEED": [(src_ref, dst_ref)]}
-        pipeline.evaluate_optimal_component_placement(netlist, critical_buses)
-
-        # Routing
-        log.info("Executing Differential Spine Router...")
-        route_passed = True
-        neuro_metrics = {}
-        try:
-            final_nets = pipeline.route_bus(src_ref, dst_ref, pin_mapping)
-        except Exception as exc:
-            log.warning(f"Engine failed to resolve topology: {exc}. Handing over to Freerouting fallback.")
-            final_nets = {}
-            route_passed = False
-
-        # DRC
-        self.drc.check_routing_violations(final_nets)
-
-        # SI
-        paths = list(final_nets.values())
-        skew  = 0.0
-        if len(paths) >= 2:
-            skew_data = self.si_validator.validate_diff_pair("TX+", paths[0], "TX-", paths[1])
-            skew = skew_data.get('skew_mm', 0.0)
-
-        # Corridor check
-        corridor_report = self._run_corridor_check(src_ref, dst_ref, final_nets)
-
-        # Commit to KiCad
-        log.info("Writing payload segments to KiCAD buffer...")
-        self._commit_to_kicad(final_nets)
-        log.info("BOARD COMPILED SUCCESSFULLY.")
-
-        # Routing statistics
-        routing_stats = self._compute_routing_stats(final_nets, skew)
-        
-        # Freerouting Benchmarking & Fallback
-        neuro_metrics = {
-            "passed": route_passed,
-            "total_length_mm": routing_stats.get("total_trace_length_mm", 0.0),
-            "via_count": 0,  # Mocked via count since NeuroBoard currently relies on pads mostly
-            "drc_violations": 0
-        }
-        log.info("Executing Freerouting Benchmark...")
-        fr_metrics = self.freerouting.run_autorouter(self.board_path)
-        benchmark_report = self.freerouting.generate_benchmark(neuro_metrics, fr_metrics)
-
-        return {"routing": routing_stats, "corridor": corridor_report.to_dict(), "freerouting_benchmark": benchmark_report}
 
     def _run_corridor_check(self, src_ref, dst_ref, final_nets):
         """Run the corridor optimizer over the final routed nets."""
@@ -406,6 +618,7 @@ class CompilerOrchestrator:
             return self._parse_kicad_board_info()
         except Exception as exc:
             log.warning(f"[Orchestrator] KiCad parse failed ({exc}); using mock board_info.")
+            from validation.hat_compliance import _build_mock_board_info
             return _build_mock_board_info(self.board_path)
 
     def _extract_board_data(self) -> dict:
@@ -450,7 +663,7 @@ class CompilerOrchestrator:
 
     def _parse_kicad_board_info(self) -> dict:
         import re
-        target = BOARD_PCB_PATH if not os.path.isabs(self.board_path) else self.board_path
+        target = self.board_path
         with open(target, "r", encoding="utf-8") as f:
             content = f.read()
 
@@ -510,7 +723,7 @@ class CompilerOrchestrator:
 
     def _parse_kicad_board_data(self) -> dict:
         import re
-        target = BOARD_PCB_PATH if not os.path.isabs(self.board_path) else self.board_path
+        target = self.board_path
         with open(target, "r", encoding="utf-8") as f:
             content = f.read()
 
@@ -693,7 +906,7 @@ class CompilerOrchestrator:
                     f' (width 0.15) (layer "F.Cu") (net 0))'
                 )
 
-        target_path = BOARD_PCB_PATH
+        target_path = self.board_path
         with open(target_path, "r", encoding="utf-8") as f:
             board_str = f.read()
 

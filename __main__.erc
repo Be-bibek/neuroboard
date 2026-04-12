@@ -1,0 +1,524 @@
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 4/GND of 24LC32/U1.
+ERC WARNING: Insufficient drive current on net +3V3 for pin POWER-IN pin 8/VCC of 24LC32/U1.
+ERC WARNING: Unconnected pin: PASSIVE pin 3/Pin_3 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 5/Pin_5 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 7/Pin_7 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 8/Pin_8 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 10/Pin_10 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 11/Pin_11 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 12/Pin_12 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 13/Pin_13 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 15/Pin_15 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 16/Pin_16 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 18/Pin_18 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 19/Pin_19 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 21/Pin_21 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 22/Pin_22 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 23/Pin_23 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 24/Pin_24 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 26/Pin_26 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 29/Pin_29 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 31/Pin_31 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 32/Pin_32 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 33/Pin_33 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 35/Pin_35 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 36/Pin_36 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 37/Pin_37 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 38/Pin_38 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 40/Pin_40 of Conn_02x20_Odd_Even/J1.
+ERC INFO: 28 warnings found while running ERC.
+ERC INFO: 0 errors found while running ERC.
+
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 4/GND of 24LC32/U1.
+ERC WARNING: Insufficient drive current on net +3V3 for pin POWER-IN pin 8/VCC of 24LC32/U1.
+ERC WARNING: Unconnected pin: PASSIVE pin 3/Pin_3 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 5/Pin_5 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 7/Pin_7 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 8/Pin_8 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 10/Pin_10 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 11/Pin_11 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 12/Pin_12 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 13/Pin_13 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 15/Pin_15 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 16/Pin_16 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 18/Pin_18 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 19/Pin_19 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 21/Pin_21 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 22/Pin_22 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 23/Pin_23 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 24/Pin_24 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 26/Pin_26 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 29/Pin_29 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 31/Pin_31 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 32/Pin_32 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 33/Pin_33 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 35/Pin_35 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 36/Pin_36 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 37/Pin_37 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 38/Pin_38 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 40/Pin_40 of Conn_02x20_Odd_Even/J1.
+ERC INFO: 28 warnings found while running ERC.
+ERC INFO: 0 errors found while running ERC.
+
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 1/DAT2 of Micro_SD_Card/J10) attached to net SD1_DAT2.
+ERC WARNING: Only one pin (INPUT pin 3/CMD of Micro_SD_Card/J11) attached to net SD2_CMD.
+ERC WARNING: No drivers for net SD2_CMD.
+ERC WARNING: Insufficient drive current on net SD2_CMD for pin INPUT pin 3/CMD of Micro_SD_Card/J11.
+ERC WARNING: Only one pin (INPUT pin 5/CLK of Micro_SD_Card/J10) attached to net SD1_CLK.
+ERC WARNING: No drivers for net SD1_CLK.
+ERC WARNING: Insufficient drive current on net SD1_CLK for pin INPUT pin 5/CLK of Micro_SD_Card/J10.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 2/DAT3/CD of Micro_SD_Card/J11) attached to net SD2_DAT3.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 7/DAT0 of Micro_SD_Card/J10) attached to net SD1_DAT0.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 2/DAT3/CD of Micro_SD_Card/J10) attached to net SD1_DAT3.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 1/DAT2 of Micro_SD_Card/J11) attached to net SD2_DAT2.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 8/DAT1 of Micro_SD_Card/J10) attached to net SD1_DAT1.
+ERC WARNING: Insufficient drive current on net +3V3 for pin POWER-IN pin 8/VCC of 24LC32/U1.
+ERC WARNING: Insufficient drive current on net +3V3 for pin POWER-IN pin 4/VDD of Micro_SD_Card/J11.
+ERC WARNING: Insufficient drive current on net +3V3 for pin POWER-IN pin 4/VDD of Micro_SD_Card/J10.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 7/DAT0 of Micro_SD_Card/J11) attached to net SD2_DAT0.
+ERC WARNING: Only one pin (INPUT pin 3/CMD of Micro_SD_Card/J10) attached to net SD1_CMD.
+ERC WARNING: No drivers for net SD1_CMD.
+ERC WARNING: Insufficient drive current on net SD1_CMD for pin INPUT pin 3/CMD of Micro_SD_Card/J10.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 8/DAT1 of Micro_SD_Card/J11) attached to net SD2_DAT1.
+ERC WARNING: Only one pin (INPUT pin 5/CLK of Micro_SD_Card/J11) attached to net SD2_CLK.
+ERC WARNING: No drivers for net SD2_CLK.
+ERC WARNING: Insufficient drive current on net SD2_CLK for pin INPUT pin 5/CLK of Micro_SD_Card/J11.
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 6/VSS of Micro_SD_Card/J10.
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 4/GND of 24LC32/U1.
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 6/VSS of Micro_SD_Card/J11.
+ERC WARNING: Unconnected pin: PASSIVE pin 3/Pin_3 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 5/Pin_5 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 7/Pin_7 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 8/Pin_8 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 10/Pin_10 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 11/Pin_11 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 12/Pin_12 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 13/Pin_13 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 15/Pin_15 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 16/Pin_16 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 18/Pin_18 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 19/Pin_19 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 21/Pin_21 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 22/Pin_22 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 23/Pin_23 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 24/Pin_24 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 26/Pin_26 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 29/Pin_29 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 31/Pin_31 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 32/Pin_32 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 33/Pin_33 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 35/Pin_35 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 36/Pin_36 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 37/Pin_37 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 38/Pin_38 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 40/Pin_40 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 2/Pin_2 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 3/Pin_3 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 6/Pin_6 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 9/Pin_9 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 10/Pin_10 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 11/Pin_11 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 12/Pin_12 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 13/Pin_13 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 14/Pin_14 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 15/Pin_15 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 6/Pin_6 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 7/Pin_7 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 8/Pin_8 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 9/Pin_9 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 10/Pin_10 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 11/Pin_11 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 12/Pin_12 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 13/Pin_13 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 14/Pin_14 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 15/Pin_15 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 16/Pin_16 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 17/Pin_17 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 18/Pin_18 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 19/Pin_19 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 20/Pin_20 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 21/Pin_21 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 22/Pin_22 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 23/Pin_23 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 24/Pin_24 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 25/Pin_25 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 26/Pin_26 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 27/Pin_27 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 28/Pin_28 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 29/Pin_29 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 30/Pin_30 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 31/Pin_31 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 32/Pin_32 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 34/Pin_34 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 35/Pin_35 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 36/Pin_36 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 37/Pin_37 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 38/Pin_38 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 40/Pin_40 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 42/Pin_42 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 44/Pin_44 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 46/Pin_46 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 48/Pin_48 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 50/Pin_50 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 52/Pin_52 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 53/Pin_53 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 54/Pin_54 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 55/Pin_55 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 56/Pin_56 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 58/Pin_58 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 59/Pin_59 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 60/Pin_60 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 61/Pin_61 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 62/Pin_62 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 63/Pin_63 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 64/Pin_64 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 65/Pin_65 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 66/Pin_66 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 67/Pin_67 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 68/Pin_68 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 69/Pin_69 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 76/Pin_76 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin SH/SHIELD of Micro_SD_Card/J10.
+ERC WARNING: Unconnected pin: PASSIVE pin SH/SHIELD of Micro_SD_Card/J11.
+ERC INFO: 120 warnings found while running ERC.
+ERC INFO: 0 errors found while running ERC.
+
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 1/DAT2 of Micro_SD_Card/J10) attached to net SD1_DAT2.
+ERC WARNING: Only one pin (INPUT pin 3/CMD of Micro_SD_Card/J11) attached to net SD2_CMD.
+ERC WARNING: No drivers for net SD2_CMD.
+ERC WARNING: Insufficient drive current on net SD2_CMD for pin INPUT pin 3/CMD of Micro_SD_Card/J11.
+ERC WARNING: Only one pin (INPUT pin 5/CLK of Micro_SD_Card/J10) attached to net SD1_CLK.
+ERC WARNING: No drivers for net SD1_CLK.
+ERC WARNING: Insufficient drive current on net SD1_CLK for pin INPUT pin 5/CLK of Micro_SD_Card/J10.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 2/DAT3/CD of Micro_SD_Card/J11) attached to net SD2_DAT3.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 7/DAT0 of Micro_SD_Card/J10) attached to net SD1_DAT0.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 2/DAT3/CD of Micro_SD_Card/J10) attached to net SD1_DAT3.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 1/DAT2 of Micro_SD_Card/J11) attached to net SD2_DAT2.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 8/DAT1 of Micro_SD_Card/J10) attached to net SD1_DAT1.
+ERC WARNING: Insufficient drive current on net +3V3 for pin POWER-IN pin 4/VDD of Micro_SD_Card/J10.
+ERC WARNING: Insufficient drive current on net +3V3 for pin POWER-IN pin 4/VDD of Micro_SD_Card/J11.
+ERC WARNING: Insufficient drive current on net +3V3 for pin POWER-IN pin 8/VCC of 24LC32/U1.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 7/DAT0 of Micro_SD_Card/J11) attached to net SD2_DAT0.
+ERC WARNING: Only one pin (INPUT pin 3/CMD of Micro_SD_Card/J10) attached to net SD1_CMD.
+ERC WARNING: No drivers for net SD1_CMD.
+ERC WARNING: Insufficient drive current on net SD1_CMD for pin INPUT pin 3/CMD of Micro_SD_Card/J10.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 8/DAT1 of Micro_SD_Card/J11) attached to net SD2_DAT1.
+ERC WARNING: Only one pin (INPUT pin 5/CLK of Micro_SD_Card/J11) attached to net SD2_CLK.
+ERC WARNING: No drivers for net SD2_CLK.
+ERC WARNING: Insufficient drive current on net SD2_CLK for pin INPUT pin 5/CLK of Micro_SD_Card/J11.
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 6/VSS of Micro_SD_Card/J11.
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 4/GND of 24LC32/U1.
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 6/VSS of Micro_SD_Card/J10.
+ERC WARNING: Unconnected pin: PASSIVE pin 3/Pin_3 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 5/Pin_5 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 7/Pin_7 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 8/Pin_8 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 10/Pin_10 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 11/Pin_11 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 12/Pin_12 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 13/Pin_13 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 15/Pin_15 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 16/Pin_16 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 18/Pin_18 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 19/Pin_19 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 21/Pin_21 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 22/Pin_22 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 23/Pin_23 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 24/Pin_24 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 26/Pin_26 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 29/Pin_29 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 31/Pin_31 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 32/Pin_32 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 33/Pin_33 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 35/Pin_35 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 36/Pin_36 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 37/Pin_37 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 38/Pin_38 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 40/Pin_40 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 2/Pin_2 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 3/Pin_3 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 6/Pin_6 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 9/Pin_9 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 10/Pin_10 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 11/Pin_11 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 12/Pin_12 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 13/Pin_13 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 14/Pin_14 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 15/Pin_15 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 6/Pin_6 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 7/Pin_7 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 8/Pin_8 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 9/Pin_9 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 10/Pin_10 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 11/Pin_11 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 12/Pin_12 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 13/Pin_13 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 14/Pin_14 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 15/Pin_15 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 16/Pin_16 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 17/Pin_17 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 18/Pin_18 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 19/Pin_19 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 20/Pin_20 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 21/Pin_21 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 22/Pin_22 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 23/Pin_23 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 24/Pin_24 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 25/Pin_25 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 26/Pin_26 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 27/Pin_27 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 28/Pin_28 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 29/Pin_29 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 30/Pin_30 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 31/Pin_31 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 32/Pin_32 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 34/Pin_34 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 35/Pin_35 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 36/Pin_36 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 37/Pin_37 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 38/Pin_38 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 40/Pin_40 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 42/Pin_42 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 44/Pin_44 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 46/Pin_46 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 48/Pin_48 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 50/Pin_50 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 52/Pin_52 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 53/Pin_53 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 54/Pin_54 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 55/Pin_55 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 56/Pin_56 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 58/Pin_58 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 59/Pin_59 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 60/Pin_60 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 61/Pin_61 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 62/Pin_62 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 63/Pin_63 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 64/Pin_64 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 65/Pin_65 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 66/Pin_66 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 67/Pin_67 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 68/Pin_68 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 69/Pin_69 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 76/Pin_76 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin SH/SHIELD of Micro_SD_Card/J10.
+ERC WARNING: Unconnected pin: PASSIVE pin SH/SHIELD of Micro_SD_Card/J11.
+ERC INFO: 120 warnings found while running ERC.
+ERC INFO: 0 errors found while running ERC.
+
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 1/DAT2 of Micro_SD_Card/J10) attached to net SD1_DAT2.
+ERC WARNING: Only one pin (INPUT pin 3/CMD of Micro_SD_Card/J11) attached to net SD2_CMD.
+ERC WARNING: No drivers for net SD2_CMD.
+ERC WARNING: Insufficient drive current on net SD2_CMD for pin INPUT pin 3/CMD of Micro_SD_Card/J11.
+ERC WARNING: Only one pin (INPUT pin 5/CLK of Micro_SD_Card/J10) attached to net SD1_CLK.
+ERC WARNING: No drivers for net SD1_CLK.
+ERC WARNING: Insufficient drive current on net SD1_CLK for pin INPUT pin 5/CLK of Micro_SD_Card/J10.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 2/DAT3/CD of Micro_SD_Card/J11) attached to net SD2_DAT3.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 7/DAT0 of Micro_SD_Card/J10) attached to net SD1_DAT0.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 2/DAT3/CD of Micro_SD_Card/J10) attached to net SD1_DAT3.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 1/DAT2 of Micro_SD_Card/J11) attached to net SD2_DAT2.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 8/DAT1 of Micro_SD_Card/J10) attached to net SD1_DAT1.
+ERC WARNING: Insufficient drive current on net +3V3 for pin POWER-IN pin 4/VDD of Micro_SD_Card/J11.
+ERC WARNING: Insufficient drive current on net +3V3 for pin POWER-IN pin 4/VDD of Micro_SD_Card/J10.
+ERC WARNING: Insufficient drive current on net +3V3 for pin POWER-IN pin 8/VCC of 24LC32/U1.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 7/DAT0 of Micro_SD_Card/J11) attached to net SD2_DAT0.
+ERC WARNING: Only one pin (INPUT pin 3/CMD of Micro_SD_Card/J10) attached to net SD1_CMD.
+ERC WARNING: No drivers for net SD1_CMD.
+ERC WARNING: Insufficient drive current on net SD1_CMD for pin INPUT pin 3/CMD of Micro_SD_Card/J10.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 8/DAT1 of Micro_SD_Card/J11) attached to net SD2_DAT1.
+ERC WARNING: Only one pin (INPUT pin 5/CLK of Micro_SD_Card/J11) attached to net SD2_CLK.
+ERC WARNING: No drivers for net SD2_CLK.
+ERC WARNING: Insufficient drive current on net SD2_CLK for pin INPUT pin 5/CLK of Micro_SD_Card/J11.
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 4/GND of 24LC32/U1.
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 6/VSS of Micro_SD_Card/J11.
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 6/VSS of Micro_SD_Card/J10.
+ERC WARNING: Unconnected pin: PASSIVE pin 3/Pin_3 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 5/Pin_5 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 7/Pin_7 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 8/Pin_8 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 10/Pin_10 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 11/Pin_11 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 12/Pin_12 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 13/Pin_13 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 15/Pin_15 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 16/Pin_16 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 18/Pin_18 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 19/Pin_19 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 21/Pin_21 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 22/Pin_22 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 23/Pin_23 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 24/Pin_24 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 26/Pin_26 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 29/Pin_29 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 31/Pin_31 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 32/Pin_32 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 33/Pin_33 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 35/Pin_35 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 36/Pin_36 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 37/Pin_37 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 38/Pin_38 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 40/Pin_40 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 2/Pin_2 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 3/Pin_3 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 6/Pin_6 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 9/Pin_9 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 10/Pin_10 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 11/Pin_11 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 12/Pin_12 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 13/Pin_13 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 14/Pin_14 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 15/Pin_15 of Conn_01x16/J2.
+ERC WARNING: Unconnected pin: PASSIVE pin 6/Pin_6 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 7/Pin_7 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 8/Pin_8 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 9/Pin_9 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 10/Pin_10 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 11/Pin_11 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 12/Pin_12 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 13/Pin_13 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 14/Pin_14 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 15/Pin_15 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 16/Pin_16 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 17/Pin_17 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 18/Pin_18 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 19/Pin_19 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 20/Pin_20 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 21/Pin_21 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 22/Pin_22 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 23/Pin_23 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 24/Pin_24 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 25/Pin_25 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 26/Pin_26 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 27/Pin_27 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 28/Pin_28 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 29/Pin_29 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 30/Pin_30 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 31/Pin_31 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 32/Pin_32 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 34/Pin_34 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 35/Pin_35 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 36/Pin_36 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 37/Pin_37 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 38/Pin_38 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 40/Pin_40 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 42/Pin_42 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 44/Pin_44 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 46/Pin_46 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 48/Pin_48 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 50/Pin_50 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 52/Pin_52 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 53/Pin_53 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 54/Pin_54 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 55/Pin_55 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 56/Pin_56 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 58/Pin_58 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 59/Pin_59 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 60/Pin_60 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 61/Pin_61 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 62/Pin_62 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 63/Pin_63 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 64/Pin_64 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 65/Pin_65 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 66/Pin_66 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 67/Pin_67 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 68/Pin_68 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 69/Pin_69 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin 76/Pin_76 of Conn_02x38_Odd_Even/J3.
+ERC WARNING: Unconnected pin: PASSIVE pin SH/SHIELD of Micro_SD_Card/J10.
+ERC WARNING: Unconnected pin: PASSIVE pin SH/SHIELD of Micro_SD_Card/J11.
+ERC INFO: 120 warnings found while running ERC.
+ERC INFO: 0 errors found while running ERC.
+
+ERC INFO: No errors or warnings found while running ERC.
+
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 4/GND of 24LC32/U1.
+ERC WARNING: Insufficient drive current on net +3V3 for pin POWER-IN pin 8/VCC of 24LC32/U1.
+ERC WARNING: Unconnected pin: PASSIVE pin 3/Pin_3 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 5/Pin_5 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 7/Pin_7 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 8/Pin_8 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 10/Pin_10 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 11/Pin_11 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 12/Pin_12 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 13/Pin_13 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 15/Pin_15 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 16/Pin_16 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 18/Pin_18 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 19/Pin_19 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 21/Pin_21 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 22/Pin_22 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 23/Pin_23 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 24/Pin_24 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 26/Pin_26 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 29/Pin_29 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 31/Pin_31 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 32/Pin_32 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 33/Pin_33 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 35/Pin_35 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 36/Pin_36 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 37/Pin_37 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 38/Pin_38 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 40/Pin_40 of Conn_02x20_Odd_Even/J1.
+ERC INFO: 28 warnings found while running ERC.
+ERC INFO: 0 errors found while running ERC.
+
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 4/GND of 24LC32/U1.
+ERC WARNING: Insufficient drive current on net +3V3 for pin POWER-IN pin 8/VCC of 24LC32/U1.
+ERC WARNING: Unconnected pin: PASSIVE pin 3/Pin_3 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 5/Pin_5 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 7/Pin_7 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 8/Pin_8 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 10/Pin_10 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 11/Pin_11 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 12/Pin_12 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 13/Pin_13 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 15/Pin_15 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 16/Pin_16 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 18/Pin_18 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 19/Pin_19 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 21/Pin_21 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 22/Pin_22 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 23/Pin_23 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 24/Pin_24 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 26/Pin_26 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 29/Pin_29 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 31/Pin_31 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 32/Pin_32 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 33/Pin_33 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 35/Pin_35 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 36/Pin_36 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 37/Pin_37 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 38/Pin_38 of Conn_02x20_Odd_Even/J1.
+ERC WARNING: Unconnected pin: PASSIVE pin 40/Pin_40 of Conn_02x20_Odd_Even/J1.
+ERC INFO: 28 warnings found while running ERC.
+ERC INFO: 0 errors found while running ERC.
+
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 7/DAT0 of Micro_SD_Card/J10) attached to net SD1_DAT0.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 1/DAT2 of Micro_SD_Card/J10) attached to net SD1_DAT2.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 8/DAT1 of Micro_SD_Card/J10) attached to net SD1_DAT1.
+ERC WARNING: Only one pin (INPUT pin 5/CLK of Micro_SD_Card/J10) attached to net SD1_CLK.
+ERC WARNING: No drivers for net SD1_CLK.
+ERC WARNING: Insufficient drive current on net SD1_CLK for pin INPUT pin 5/CLK of Micro_SD_Card/J10.
+ERC WARNING: Only one pin (INPUT pin 3/CMD of Micro_SD_Card/J11) attached to net SD2_CMD.
+ERC WARNING: No drivers for net SD2_CMD.
+ERC WARNING: Insufficient drive current on net SD2_CMD for pin INPUT pin 3/CMD of Micro_SD_Card/J11.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 2/DAT3/CD of Micro_SD_Card/J10) attached to net SD1_DAT3.
+ERC WARNING: Only one pin (INPUT pin 3/CMD of Micro_SD_Card/J10) attached to net SD1_CMD.
+ERC WARNING: No drivers for net SD1_CMD.
+ERC WARNING: Insufficient drive current on net SD1_CMD for pin INPUT pin 3/CMD of Micro_SD_Card/J10.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 2/DAT3/CD of Micro_SD_Card/J11) attached to net SD2_DAT3.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 8/DAT1 of Micro_SD_Card/J11) attached to net SD2_DAT1.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 1/DAT2 of Micro_SD_Card/J11) attached to net SD2_DAT2.
+ERC WARNING: Only one pin (INPUT pin 5/CLK of Micro_SD_Card/J11) attached to net SD2_CLK.
+ERC WARNING: No drivers for net SD2_CLK.
+ERC WARNING: Insufficient drive current on net SD2_CLK for pin INPUT pin 5/CLK of Micro_SD_Card/J11.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 7/DAT0 of Micro_SD_Card/J11) attached to net SD2_DAT0.
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 6/VSS of Micro_SD_Card/J11.
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 6/VSS of Micro_SD_Card/J10.
+ERC WARNING: Insufficient drive current on net +3V3 for pin POWER-IN pin 4/VDD of Micro_SD_Card/J10.
+ERC WARNING: Insufficient drive current on net +3V3 for pin POWER-IN pin 4/VDD of Micro_SD_Card/J11.
+ERC WARNING: Unconnected pin: PASSIVE pin SH/SHIELD of Micro_SD_Card/J10.
+ERC WARNING: Unconnected pin: PASSIVE pin SH/SHIELD of Micro_SD_Card/J11.
+ERC INFO: 26 warnings found while running ERC.
+ERC INFO: 0 errors found while running ERC.
+

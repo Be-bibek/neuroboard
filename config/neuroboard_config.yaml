@@ -1,6 +1,24 @@
+project:
+  name: "PiHAT-KiCAD-Pro-Legacy"
+  base_dir: "C:/Users/Bibek/Documents/pi-hat/PiHAT-KiCAD-Pro-Legacy"
+  pcb_file: "${project.name}.kicad_pcb"
+  sch_file: "${project.name}.kicad_sch"
+  pro_file: "${project.name}.kicad_pro"
+  net_file: "pi_hat.net"
+
 kicad:
   ipc_socket_path: "ipc:///C:/Users/Bibek/AppData/Local/Temp/kicad/api.sock"
+  auto_refresh: true
+  auto_launch: true
+  binary_path: "C:/Program Files/KiCad/10.0/bin/kicad.exe"
 
+library:
+  base_path: "C:/Users/Bibek/NeuroBoard/lib"
+  tools:
+    jlc2kicadlib: "C:/Users/Bibek/AppData/Roaming/Python/Python314/Scripts/JLC2KiCadLib.exe"
+  cache:
+    enabled: true
+    ttl_days: 30
 stackup:
   dielectric_constant: 4.3
   dielectric_thickness_mm: 0.1

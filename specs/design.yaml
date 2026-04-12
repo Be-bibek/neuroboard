@@ -1,0 +1,27 @@
+# specs/design.yaml
+# ==================
+# Example YAML Design Specification
+# This file drives the AI schematic synthesis pipeline.
+
+design:
+  name: "NeuroBoard_AI_HAT_Plus"
+  version: "1.0.0"
+  seed: 42
+
+modules:
+  - type: gpio_header
+  
+  - type: pcie_accelerator
+    model: "hailo_8"
+    lanes: 1
+
+  - type: sd_card
+    count: 2
+
+  - type: status_led
+    color: green
+    count: 2
+
+constraints:
+  profile: raspberry_pi_hat_plus
+  hat_compliance: true

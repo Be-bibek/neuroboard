@@ -1,0 +1,44 @@
+stackup:
+  layer_count: 4
+  layers:
+    - name: F.Cu
+      type: copper
+      thickness_mm: 0.035
+    - name: Prepreg_1_2
+      type: dielectric
+      thickness_mm: 0.1
+      epsilon_r: 4.3
+    - name: In1.Cu
+      type: copper
+      thickness_mm: 0.035
+    - name: Core_2_3
+      type: dielectric
+      thickness_mm: 1.2
+      epsilon_r: 4.5
+    - name: In2.Cu
+      type: copper
+      thickness_mm: 0.035
+    - name: Prepreg_3_4
+      type: dielectric
+      thickness_mm: 0.1
+      epsilon_r: 4.3
+    - name: B.Cu
+      type: copper
+      thickness_mm: 0.035
+
+impedance_targets:
+  differential:
+    target_ohm: 100
+    tolerance_percent: 10
+    trace_width_mm: 0.15
+    trace_spacing_mm: 0.15
+  single_ended:
+    target_ohm: 50
+    tolerance_percent: 10
+    trace_width_mm: 0.2
+
+routing_rules:
+  length_matching_tolerance_mm: 0.1
+  min_clearance_mm: 0.15
+  via_drill_mm: 0.3
+  via_pad_mm: 0.6

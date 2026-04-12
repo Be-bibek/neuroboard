@@ -1,0 +1,27 @@
+WARNING: KICAD6_SYMBOL_DIR environment variable is missing, so the default KiCad symbol libraries won't be searched. @ [C:\Users\Bibek\NeuroBoard\<frozen importlib._bootstrap_external>:759=>C:\Users\Bibek\NeuroBoard\<frozen importlib._bootstrap>:491]
+WARNING: KICAD7_SYMBOL_DIR environment variable is missing, so the default KiCad symbol libraries won't be searched. @ [C:\Users\Bibek\NeuroBoard\<frozen importlib._bootstrap_external>:759=>C:\Users\Bibek\NeuroBoard\<frozen importlib._bootstrap>:491]
+WARNING: KICAD9_SYMBOL_DIR environment variable is missing, so the default KiCad symbol libraries won't be searched. @ [C:\Users\Bibek\NeuroBoard\<frozen importlib._bootstrap_external>:759=>C:\Users\Bibek\NeuroBoard\<frozen importlib._bootstrap>:491]
+WARNING: fp-lib-table file was not found. Component footprints are not available.
+WARNING: fp-lib-table file was not found. Component footprints are not available.
+WARNING: fp-lib-table file was not found. Component footprints are not available.
+WARNING: fp-lib-table file was not found. Component footprints are not available.
+WARNING: Missing tag on Conn_02x20_Odd_Even instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\hat_generator.py:39.
+WARNING: Random tag ZIc5L3wAF6 generated for Conn_02x20_Odd_Even.
+WARNING: Missing tag on 24LC32 instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\hat_generator.py:50.
+WARNING: Random tag f7YETJV4rM generated for 24LC32.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\hat_generator.py:60.
+WARNING: Random tag pSztr2cN1A generated for R.
+WARNING: Missing tag on R instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\hat_generator.py:62.
+WARNING: Random tag tmhAlvU0x9 generated for R.
+WARNING: Missing tag on Conn_02x38_Odd_Even instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\hat_generator.py:85.
+WARNING: Random tag UYqQf_T9ms generated for Conn_02x38_Odd_Even.
+WARNING: Missing tag on Conn_01x16 instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\hat_generator.py:93.
+WARNING: Random tag w4KtHLdQgN generated for Conn_01x16.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\hat_generator.py:116.
+WARNING: Random tag U5tv5tvNq6 generated for C.
+WARNING: Missing tag on C instantiated at C:\Users\Bibek\NeuroBoard\ai_core\schematic\hat_generator.py:118.
+WARNING: Random tag eFI_7DZC2j generated for C.
+WARNING: Missing tag on  instantiated at C:\Users\Bibek\NeuroBoard\<frozen importlib._bootstrap>:491.
+INFO: 21 warnings found while generating netlist.
+INFO: 0 errors found while generating netlist.
+
