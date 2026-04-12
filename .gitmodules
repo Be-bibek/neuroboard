@@ -1,0 +1,6 @@
+[submodule "engines/routing"]
+	path = engines/routing
+	url = https://github.com/drandyhaas/KiCadRoutingTools.git
+[submodule "bridge/mcp"]
+	path = bridge/mcp
+	url = https://github.com/mixelpixx/KiCAD-MCP-Server.git
