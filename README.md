@@ -1,49 +1,75 @@
-# NeuroBoard
+# 🧠 NeuroBoard
 
-> **An Intelligent, AI-Native PCB Compiler & Copilot using KiCad 10 Native IPC**
+<p align="center">
+  <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZW9lY2xmbnFiemlrc3BpbHJpZHlhYmMwc3N0bXk5eWhsajJwemtpaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/78XCFBGOlS6keY1Bil/giphy.gif" width="300" alt="NeuroBoard Logo Animation" />
+</p>
 
-![Python](https://img.shields.io/badge/Python-3.x-blue.svg)
-![Rust](https://img.shields.io/badge/Rust-High%20Performance-orange.svg)
-![KiCad](https://img.shields.io/badge/KiCad-10.0-purple.svg)
-![React](https://img.shields.io/badge/React-18.x-blue.svg)
-![Tauri](https://img.shields.io/badge/Tauri-Cross%20Platform-orange.svg)
-![Status](https://img.shields.io/badge/Status-Phase%208.1%20Hardened-brightgreen.svg)
+<h3 align="center">The World's First Prompt-to-Hardware Compiler</h3>
 
----
+<p align="center">
+  <b>Bridging AI Intent with Professional Engineering through KiCad 10 Native IPC</b>
+</p>
 
-## 📖 Overview
-
-NeuroBoard is a production-grade PCB design platform that bridges the gap between AI intent and professional hardware engineering. Now in **Phase 8.1 (Hardened IPC-First)**, the platform has evolved into a full-stack **Prompt-to-Hardware Compiler**. It enables real-time, bidirectional synchronization between an AI design agent and the KiCad 10 UI, featuring a transactional design system with full rollback support.
-
-### 🌐 [Live Demo & Digital Twin](https://Be-bibek.github.io/neuroboard/)
-The **NeuroBoard Digital Twin** is our new flagship interface. Built with **Tauri + React + Vite**, it provides a real-time visual cockpit for monitoring AI synthesis, manual edit detection, and electrical health checks. 
-
-[![NeuroBoard UI Preview](https://raw.githubusercontent.com/Be-bibek/neuroboard/main/docs/ui_preview.webp)](https://Be-bibek.github.io/neuroboard/)
-
-### 📥 [Download Desktop App](https://github.com/Be-bibek/neuroboard/releases/latest)
-Get the high-performance Tauri desktop application for Windows, macOS, and Linux to enable full KiCad 10 IPC integration.
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-Phase%208.1%20Hardened-brightgreen.svg?style=for-the-badge" alt="Project Status" />
+  <img src="https://img.shields.io/badge/KiCad-10.0-purple.svg?style=for-the-badge" alt="KiCad Version" />
+  <img src="https://img.shields.io/badge/Python-3.12%2B-blue.svg?style=for-the-badge" alt="Python Version" />
+</p>
 
 ---
 
-## ⚡ Key Features (Phase 8.1 - Hardened)
+## 🎯 Our Mission: Autonomous Hardware Engineering
 
-### 🏗️ Production IPC-First Architecture
-- 🌐 **Real-Time ki-link**: RAM-to-RAM synchronization using KiCad 10's `api.sock`.
-- 🔄 **Transactional Rollback**: Atomic design commits. If synthesis fails, the canvas reverts to its previous stable state automatically.
-- 🧪 **Execution Modes**: Seamless switching between `IPC` (Live UI), `Headless` (Fast Synthesis), and `Simulation` (Logic Verification).
+NeuroBoard is built with a singular goal: **to transform high-level natural language intent into production-ready PCB designs.** By leveraging an agentic AI orchestration layer and a custom hardware DSL, we eliminate the traditional bottlenecks of manual schematic entry and layout.
 
-### 🧠 Intelligent Design DSL & Orchestration
-- 📐 **NeuroModule DSL**: An Atopile-inspired hardware-as-code layer with built-in electrical constraints.
-- ⚡ **Constraint-Aware Synthesis**: Automatic impedance matching, voltage domain validation, and frequency-aware routing.
-- 🔍 **Delta-Based Monitoring**: Detects manual user edits (moves/adds/deletes) and provides real-time AI feedback or validation triggers.
-
-### 🛰️ Integrated Digital Twin
-- 🖥️ **Tauri Desktop App**: High-performance UI for monitoring the AI's "thought process" and hardware health.
-- 📡 **Live Telemetry**: Real-time ERC/DRC reporting and Signal Integrity heatmaps within the dashboard.
+### 🌟 Why NeuroBoard is Unique
+- **AI-Native, Not Just AI-Assisted**: NeuroBoard doesn't just suggest traces; it *synthesizes* entire functional modules from high-level specifications.
+- **Transactional Design Architecture**: The first solution to implement atomic commits and rollbacks for a live EDA canvas, ensuring your KiCad project is always in a valid state.
+- **Digital Twin Syncing**: A real-time bridge that mirrors your AI's "thought process" on a high-fidelity web dashboard.
 
 ---
 
-## 🏗️ Hardware DSL Workflow
+## 🌐 Live Experience & Downloads
+
+### 🚀 [Live Demo Component (Digital Twin)]
+Experience the NeuroBoard interface in your browser. Monitor real-time synthesis, manual edit detection, and validation reports.
+
+👉 **[CLICK HERE FOR LIVE DEMO](https://Be-bibek.github.io/neuroboard/)**
+
+### 📥 [Download Desktop Copilot]
+Get the production-ready Tauri application for full KiCad 10 IPC integration.
+
+👉 **[DOWNLOAD FOR WINDOWS/MAC/LINUX](https://github.com/Be-bibek/neuroboard/releases/latest)**
+
+---
+
+## ✨ Features (Phase 8.1 - Hardened)
+
+### 🏗️ Hardware DSL & Synthesis
+- **NeuroModule DSL**: Define hardware like software with a native, constraint-aware DSL inspired by Atopile.
+- **Neural Part Resolver**: Auto-fetch symbols and footprints from the LCSC database (3M+ parts).
+- <p><img src="https://skillicons.dev/icons?i=python,rust" alt="Languages" /></p>
+
+### 📡 Real-Time IPC Bridge (ki-link)
+- **Zero-Latency RAM Sync**: Direct communication via `api.sock` for instant KiCad UI updates.
+- **Transactional Pipeline**: Atomic design changes with full rollback support on DRC/ERC failure.
+
+### 🧪 Validation & Health Checks
+- **Signal Integrity**: Real-time S-parameter analysis for high-speed differential pairs.
+- **Power Integrity**: NGSpice-backed PDN analysis for high-current AI accelerators.
+- <p><img src="https://skillicons.dev/icons?i=anaconda,numpy,fastapi" alt="Validation Stack" /></p>
+
+---
+
+## 🛠️ Technology Stack
+
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=python,rust,typescript,react,tailwind,vite,fastapi,docker,ubuntu,github,vscode" alt="Complete Tech Stack" />
+</p>
+
+---
+
+## 🏗️ The Compiler Pipeline
 
 ```text
 [ Natural Language / Intent ] 
@@ -63,82 +89,28 @@ Get the high-performance Tauri desktop application for Windows, macOS, and Linux
 
 ---
 
-<h2 align="center">⚒️ Tech Stack ⚒️</h2>
-<br/>
-<table align="center">
-  <tr>
-    <td align="center" width="300">
-      <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZW9lY2xmbnFiemlrc3BpbHJpZHlhYmMwc3N0bXk5eWhsajJwemtpaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/78XCFBGOlS6keY1Bil/giphy.gif" width="250" alt="Coding Ninja" />
-    </td>
-    <td align="center">
-      <h3>AI Core & Pipeline</h3>
-      <img src="https://skillicons.dev/icons?i=python,rust,bash,git,github,fastapi,docker" />
-      <h3>Frontend & Digital Twin (v1)</h3>
-      <img src="https://skillicons.dev/icons?i=react,typescript,tailwind,vite,html,css" />
-      <h3>EDA & Simulation</h3>
-      <img src="https://skillicons.dev/icons?i=anaconda,numpy,vscode" />
-    </td>
-  </tr>
-</table>
-
----
-
-## 🚀 Getting Started
-
-### 1. Prerequisites
-- **KiCad 10.0+**
-- **Node.js & npm** (for the Digital Twin)
-- **Python 3.12+**
-- **Rust (Cargo/rustup)**
-
-### 2. Installation
-```bash
-git clone https://github.com/Be-bibek/neuroboard.git
-cd neuroboard
-pip install -r requirements.txt
-```
-
-### 3. Launch the Digital Twin
-```bash
-cd frontend
-npm install
-npm run tauri dev
-```
-
-### 4. Run the Compiler
-```bash
-python main.py "build schematic"
-```
-
----
-
 ## 📂 Project Structure
 
 ```text
 NeuroBoard/
-├── ai_core/               # AI-First EDA Logic
+├── ai_core/               # AI-First EDA Logic (Python/Rust)
 │   ├── schematic/         # NeuroModule DSL & Synthesis
 │   ├── system/            # IPC Client, State Manager, Orchestrator
 │   └── routing/           # Route Topology & Bus Engines
-├── frontend/              # Digital Twin (v1) - Tauri + React
+├── frontend/              # Digital Twin (v1) - Tauri + React + Vite
 ├── config/                # Central neuroboard_config.yaml
 ├── docs/                  # Phase 8.1 Specs & Architecture
 ├── engines/               # Rust Core Router & Solvers
-└── reports/               # Master Validation JSONs
+└── reports/               # Master Validation Reports
 ```
 
 ---
 
 ## 🤝 Roadmap
+- [x] Phase 1-7: Core Routing & Initial IPC
 - [x] Phase 8.1: Hardened IPC Architecture & Transactional Safety
-- [ ] Phase 8.2: Multi-Sheet Orchestration & DataCursor Expansion
+- [ ] Phase 8.2: Multi-Sheet Orchestration & Targeted Routing
 - [ ] Phase 9.0: Fully Heterogeneous Board Synthesis (Pi HAT+ Complete)
-
----
-
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
