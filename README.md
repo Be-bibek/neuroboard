@@ -15,8 +15,13 @@
 
 NeuroBoard is a production-grade PCB design platform that bridges the gap between AI intent and professional hardware engineering. Now in **Phase 8.1 (Hardened IPC-First)**, the platform has evolved into a full-stack **Prompt-to-Hardware Compiler**. It enables real-time, bidirectional synchronization between an AI design agent and the KiCad 10 UI, featuring a transactional design system with full rollback support.
 
-### 🌐 Version 1: NeuroBoard Digital Twin (Tauri Website)
-The **NeuroBoard Digital Twin** is our new flagship interface. Built with **Tauri + React + Vite**, it provides a real-time visual cockpit for monitoring AI synthesis, manual edit detection, and electrical health checks. Version 1 features a glassmorphic dashboard that mirrors your KiCad canvas in real-time.
+### 🌐 [Live Demo & Digital Twin](https://Be-bibek.github.io/neuroboard/)
+The **NeuroBoard Digital Twin** is our new flagship interface. Built with **Tauri + React + Vite**, it provides a real-time visual cockpit for monitoring AI synthesis, manual edit detection, and electrical health checks. 
+
+[![NeuroBoard UI Preview](https://raw.githubusercontent.com/Be-bibek/neuroboard/main/docs/ui_preview.webp)](https://Be-bibek.github.io/neuroboard/)
+
+### 📥 [Download Desktop App](https://github.com/Be-bibek/neuroboard/releases/latest)
+Get the high-performance Tauri desktop application for Windows, macOS, and Linux to enable full KiCad 10 IPC integration.
 
 ---
 
