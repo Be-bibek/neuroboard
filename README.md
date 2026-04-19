@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Status-Phase%208.1%20Hardened-brightgreen.svg?style=for-the-badge" alt="Project Status" />
+  <img src="https://img.shields.io/badge/Status-Phase%208.3%20Net--Engine-brightgreen.svg?style=for-the-badge" alt="Project Status" />
   <img src="https://img.shields.io/badge/KiCad-10.0-purple.svg?style=for-the-badge" alt="KiCad Version" />
   <img src="https://img.shields.io/badge/Python-3.12%2B-blue.svg?style=for-the-badge" alt="Python Version" />
 </p>
@@ -113,7 +113,8 @@ NeuroBoard/
 ## 🤝 Roadmap
 - [x] Phase 1-7: Core Routing & Initial IPC
 - [x] Phase 8.1: Hardened IPC Architecture & Transactional Safety
-- [ ] Phase 8.2: Multi-Sheet Orchestration & Targeted Routing
+- [x] Phase 8.2: End-to-End Vertical Slice (UI -> IPC -> Canvas)
+- [x] Phase 8.3: Net Connection Engine & Native KiCad 10 IPC
 - [ ] Phase 9.0: Fully Heterogeneous Board Synthesis (Pi HAT+ Complete)
 
 ---
