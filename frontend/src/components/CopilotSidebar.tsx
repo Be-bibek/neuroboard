@@ -107,25 +107,14 @@ function parseCommand(
 
 // ── Main Copilot Sidebar ───────────────────────────────────────────────────
 export function CopilotSidebar() {
-  const {
-    selectedTemplate,
-    activeModules,
-    addModule,
-    clearTemplate,
-    setView,
-    syncStatus,
-    executionLogs,
-    violations,
-  } = useNeuroStore((s) => ({
-    selectedTemplate: s.selectedTemplate,
-    activeModules: s.activeModules,
-    addModule: s.addModule,
-    clearTemplate: s.clearTemplate,
-    setView: s.setView,
-    syncStatus: s.syncStatus,
-    executionLogs: s.executionLogs,
-    violations: s.violations,
-  }));
+  const selectedTemplate = useNeuroStore((s) => s.selectedTemplate);
+  const activeModules = useNeuroStore((s) => s.activeModules);
+  const addModule = useNeuroStore((s) => s.addModule);
+  const clearTemplate = useNeuroStore((s) => s.clearTemplate);
+  const setView = useNeuroStore((s) => s.setView);
+  const syncStatus = useNeuroStore((s) => s.syncStatus);
+  const executionLogs = useNeuroStore((s) => s.executionLogs);
+  const violations = useNeuroStore((s) => s.violations);
 
   const [messages, setMessages] = useState<Message[]>([
     {

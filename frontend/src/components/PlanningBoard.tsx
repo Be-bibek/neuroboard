@@ -104,11 +104,9 @@ function ObjectsLibrary() {
 function BoardCanvas() {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   
-  const { selectedTemplate, activeModules, addModule } = useNeuroStore((s) => ({
-    selectedTemplate: s.selectedTemplate,
-    activeModules: s.activeModules,
-    addModule: s.addModule,
-  }));
+  const selectedTemplate = useNeuroStore((s) => s.selectedTemplate);
+  const activeModules = useNeuroStore((s) => s.activeModules);
+  const addModule = useNeuroStore((s) => s.addModule);
 
   const requiredIds = selectedTemplate?.requiredModules ?? [];
   const initialNodes = buildNodes(activeModules, requiredIds);
@@ -204,10 +202,8 @@ function BoardCanvas() {
 
 // ── Planning Board Main ────────────────────────────────────────────────────
 export function PlanningBoard() {
-  const { selectedTemplate, setView } = useNeuroStore((s) => ({
-    selectedTemplate: s.selectedTemplate,
-    setView: s.setView,
-  }));
+  const selectedTemplate = useNeuroStore((s) => s.selectedTemplate);
+  const setView = useNeuroStore((s) => s.setView);
 
   return (
     <div className="w-full h-full flex flex-col bg-slate-950">
