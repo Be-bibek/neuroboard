@@ -1,11 +1,12 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Bot, Send, CircuitBoard, CheckCircle2,
-  AlertCircle, Loader2, X, PlusCircle, Layout,
+  AlertCircle, Loader2, X, PlusCircle, Layout, Cpu,
 } from "lucide-react";
 import { useNeuroStore } from "../store/useNeuroStore";
 import { getCompatibleModules, getModuleById } from "../templates/registry";
 import { sendCommand } from "../network/syncEngine";
+import { addModule as apiAddModule } from "../api/pcbClient";
 import type { PCBModule } from "../templates/registry";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -14,7 +15,7 @@ type Stage = "idle" | "processing" | "done" | "error";
 interface Message {
   role: "user" | "assistant";
   content: string;
-  modules?: PCBModule[];   // suggested module list after a command
+  modules?: PCBModule[];
 }
 
 // ── Quick Suggestion Chip ──────────────────────────────────────────────────
@@ -69,6 +70,22 @@ function ModuleCard({
   );
 }
 
+// ── Execution Log Row ──────────────────────────────────────────────────────
+function LogRow({ msg }: { msg: string }) {
+  const isOk = msg.includes("[OK]") || msg.includes("added") || msg.includes("placed") || msg.includes("Created");
+  const isErr = msg.includes("[ERROR]") || msg.includes("Failed") || msg.includes("failed");
+  const color = isErr
+    ? "text-rose-400"
+    : isOk
+    ? "text-emerald-400"
+    : "text-slate-500";
+  return (
+    <div className={`text-[10px] font-mono leading-relaxed ${color}`}>
+      {msg}
+    </div>
+  );
+}
+
 // ── Parse user command and return relevant modules ─────────────────────────
 function parseCommand(
   input: string,
@@ -77,31 +94,25 @@ function parseCommand(
   const lower = input.toLowerCase();
   const allCompatible = templateId ? getCompatibleModules(templateId) : [];
 
-  // "add nvme / pcie / m.2"
   if (/nvme|pcie|m\.2|ssd/i.test(lower)) {
     const m = getModuleById("nvme-m2");
     return m ? { action: "ADD_MODULE", modules: [m] } : null;
   }
-  // "add usb / usb-c"
   if (/usb/i.test(lower)) {
     const m = getModuleById("usb-c-port");
     return m ? { action: "ADD_MODULE", modules: [m] } : null;
   }
-  // "add led / indicator"
   if (/led|light|indicator/i.test(lower)) {
     const m = getModuleById("led-indicator");
     return m ? { action: "ADD_MODULE", modules: [m] } : null;
   }
-  // "add eeprom / hat eeprom"
   if (/eeprom/i.test(lower)) {
     const m = getModuleById("eeprom-hat");
     return m ? { action: "ADD_MODULE", modules: [m] } : null;
   }
-  // "show modules / what can I add / list modules"
   if (/show|list|what|modules?/i.test(lower)) {
     return { action: "LIST_MODULES", modules: allCompatible.slice(0, 4) };
   }
-
   return null;
 }
 
@@ -115,17 +126,19 @@ export function CopilotSidebar() {
   const syncStatus = useNeuroStore((s) => s.syncStatus);
   const executionLogs = useNeuroStore((s) => s.executionLogs);
   const violations = useNeuroStore((s) => s.violations);
+  const appendLog = useNeuroStore((s) => s.appendLog);
 
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
       content: selectedTemplate
-        ? `✅ Template loaded: **${selectedTemplate.name}**\n\nTell me what to add. Try:\n• "Add NVMe slot"\n• "Add USB-C port"\n• "Show available modules"`
+        ? `Template loaded: ${selectedTemplate.name}\n\nTell me what to add. Try:\n• "Add NVMe slot"\n• "Add USB-C port"\n• "Show available modules"`
         : "Select a template first.",
     },
   ]);
   const [input, setInput] = useState("");
   const [stage, setStage] = useState<Stage>("idle");
+  const [nvmeLoading, setNvmeLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -134,6 +147,59 @@ export function CopilotSidebar() {
 
   const addMsg = (m: Message) => setMessages((prev) => [...prev, m]);
 
+  // ── PHASE 2: addModule API call ──────────────────────────────────────────
+  const handleAddNvmeModule = useCallback(async () => {
+    if (nvmeLoading) return;
+    setNvmeLoading(true);
+    appendLog("[Action] Adding NVMe module...");
+    addMsg({ role: "assistant", content: "Adding NVMe module... sending to backend." });
+
+    try {
+      const result = await apiAddModule("NVME_SLOT");
+
+      // Log each resolved step in UI
+      for (const execResult of result.execution_results) {
+        if (execResult.status === "success") {
+          appendLog(`[OK] ${execResult.module} placed at (${execResult.placed_at?.join(", ")})`);
+        } else {
+          appendLog(`[ERROR] ${execResult.module}: ${execResult.reason}`);
+        }
+      }
+
+      const succeeded = result.execution_results.filter((r) => r.status === "success");
+      const failed = result.execution_results.filter((r) => r.status === "failed");
+
+      const summary = [
+        ...succeeded.map((r) => `+ ${r.module} placed`),
+        ...failed.map((r) => `x ${r.module} failed: ${r.reason}`),
+      ].join("\n");
+
+      addMsg({
+        role: "assistant",
+        content:
+          succeeded.length > 0
+            ? `NVMe module added! Resolved sequence:\n${summary}`
+            : `Module placement failed:\n${summary}`,
+      });
+
+      appendLog(
+        succeeded.length > 0
+          ? `[OK] NVMe module added. ${succeeded.length} component(s) placed.`
+          : `[ERROR] NVMe placement failed.`
+      );
+    } catch (err: any) {
+      const errMsg = err?.message ?? "Unknown error";
+      appendLog(`[ERROR] Failed to add module: ${errMsg}`);
+      addMsg({
+        role: "assistant",
+        content: `Failed to add NVMe module.\n\nError: ${errMsg}\n\nMake sure the backend is running on port 8000.`,
+      });
+    } finally {
+      setNvmeLoading(false);
+    }
+  }, [nvmeLoading, appendLog, addModule]);
+
+  // ── Chat submit ───────────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || stage === "processing") return;
@@ -144,7 +210,7 @@ export function CopilotSidebar() {
     setStage("processing");
 
     const result = parseCommand(userInput, selectedTemplate?.id);
-    await new Promise((r) => setTimeout(r, 600)); // simulate AI thinking
+    await new Promise((r) => setTimeout(r, 400));
 
     if (!result) {
       addMsg({
@@ -154,13 +220,13 @@ export function CopilotSidebar() {
     } else if (result.action === "LIST_MODULES") {
       addMsg({
         role: "assistant",
-        content: `Here are modules compatible with **${selectedTemplate?.name}**:`,
+        content: `Here are modules compatible with ${selectedTemplate?.name}:`,
         modules: result.modules,
       });
     } else if (result.action === "ADD_MODULE") {
       addMsg({
         role: "assistant",
-        content: `Found ${result.modules.length} module(s). Click **Add** to place in KiCad via IPC:`,
+        content: `Found ${result.modules.length} module(s). Click Add to place in KiCad via IPC:`,
         modules: result.modules,
       });
     }
@@ -170,7 +236,6 @@ export function CopilotSidebar() {
 
   const handleAddModule = (module: PCBModule) => {
     addModule(module);
-    // Fire the real IPC command to the backend
     sendCommand({
       type: "ADD_MODULE",
       payload: {
@@ -182,7 +247,7 @@ export function CopilotSidebar() {
     });
     addMsg({
       role: "assistant",
-      content: `${module.icon} **${module.name}** added to the board. KiCad IPC command sent.`,
+      content: `${module.icon} ${module.name} added to the board. KiCad IPC command sent.`,
     });
   };
 
@@ -193,7 +258,6 @@ export function CopilotSidebar() {
       ? "bg-amber-400 animate-pulse"
       : "bg-red-500";
 
-  // Quick-suggestion chips based on template
   const quickSuggestions =
     selectedTemplate?.id === "rpi-hat"
       ? ["Add NVMe slot", "Add EEPROM", "Add LED indicator", "List modules"]
@@ -219,12 +283,10 @@ export function CopilotSidebar() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* KiCad sync status */}
           <span className="flex items-center gap-1.5 text-[10px] text-slate-400">
             <span className={`w-1.5 h-1.5 rounded-full ${syncDot}`} />
             {syncStatus}
           </span>
-          {/* Planning board toggle */}
           <button
             onClick={() => setView("PLANNING_BOARD")}
             title="Open Planning Board"
@@ -232,7 +294,6 @@ export function CopilotSidebar() {
           >
             <Layout size={13} />
           </button>
-          {/* Change template */}
           <button
             onClick={clearTemplate}
             title="Change Template"
@@ -241,6 +302,32 @@ export function CopilotSidebar() {
             <X size={13} />
           </button>
         </div>
+      </div>
+
+      {/* ── PHASE 1: Add NVMe Module CTA Button ─────────────────────────── */}
+      <div className="px-3 pt-3 pb-1 flex-shrink-0">
+        <button
+          id="btn-add-nvme"
+          onClick={handleAddNvmeModule}
+          disabled={nvmeLoading}
+          className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all
+            ${nvmeLoading
+              ? "bg-slate-700 text-slate-400 cursor-not-allowed"
+              : "bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white shadow-lg shadow-teal-900/30"
+            }`}
+        >
+          {nvmeLoading ? (
+            <>
+              <Loader2 size={14} className="animate-spin" />
+              Adding NVMe module...
+            </>
+          ) : (
+            <>
+              <Cpu size={14} />
+              Add NVMe Module
+            </>
+          )}
+        </button>
       </div>
 
       {/* Messages */}
@@ -262,7 +349,6 @@ export function CopilotSidebar() {
                 }`}
               >
                 <p className="whitespace-pre-line">{msg.content}</p>
-                {/* Module cards */}
                 {msg.modules?.map((m) => (
                   <ModuleCard
                     key={m.id}
@@ -298,7 +384,7 @@ export function CopilotSidebar() {
         </div>
       )}
 
-      {/* Input */}
+      {/* Text input */}
       <form
         onSubmit={handleSubmit}
         className="flex gap-2 p-3 border-t border-slate-800 bg-slate-950/60 flex-shrink-0"
@@ -322,13 +408,14 @@ export function CopilotSidebar() {
         </button>
       </form>
 
-      {/* Execution Log Footer */}
+      {/* ── PHASE 3 & 4: Execution Log Panel ─────────────────────────────── */}
       {executionLogs.length > 0 && (
-        <div className="border-t border-slate-800 bg-slate-950/80 px-3 py-2 max-h-20 overflow-y-auto flex-shrink-0">
-          {executionLogs.slice(-4).map((log, i) => (
-            <div key={i} className="text-[10px] font-mono text-slate-500 leading-relaxed">
-              {log}
-            </div>
+        <div className="border-t border-slate-800 bg-slate-950/90 px-3 py-2 max-h-28 overflow-y-auto flex-shrink-0">
+          <div className="text-[9px] text-slate-600 font-mono uppercase tracking-widest mb-1">
+            Execution Log
+          </div>
+          {executionLogs.slice(-10).map((log, i) => (
+            <LogRow key={i} msg={log} />
           ))}
         </div>
       )}

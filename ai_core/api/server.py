@@ -50,6 +50,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from api.ipc_routes import router as ipc_router, active_ws_connections
+app.include_router(ipc_router)
+
 # ── Lazy-load heavy modules (avoids import errors if deps missing) ─────────
 _pipeline      = None
 _orchestrator  = None
@@ -244,6 +247,42 @@ def get_validation_report():
 # ═══════════════════════════════════════════════════════════════════════════
 #  WEBSOCKET — Live Digital Twin
 # ═══════════════════════════════════════════════════════════════════════════
+
+@app.websocket("/ws/sync")
+async def ws_sync(websocket: WebSocket):
+    """
+    Phase 8.2 Sync WebSocket expected by the frontend syncEngine.ts.
+    Streams EXECUTION_STATUS and DELTA_UPDATE events in real-time.
+    """
+    await websocket.accept()
+    active_ws_connections.append(websocket)
+    log.info(f"[WS/sync] Frontend connected. Total: {len(active_ws_connections)}")
+    try:
+        while True:
+            # Push a heartbeat board state every 2s so the UI stays alive
+            try:
+                ipc = _get_ipc()
+                if not ipc.board:
+                    ipc.connect()
+                state = ipc.get_board_state()
+                comp_count = len(state.get("components", []))
+                net_count = len(state.get("nets", []))
+            except Exception:
+                comp_count, net_count = 0, 0
+
+            await websocket.send_json({
+                "type": "PCB_STATE_UPDATE",
+                "payload": {"component_count": comp_count, "net_count": net_count}
+            })
+            await asyncio.sleep(2.0)
+    except WebSocketDisconnect:
+        log.info("[WS/sync] Frontend disconnected")
+    except Exception as e:
+        log.error(f"[WS/sync] Error: {e}")
+    finally:
+        if websocket in active_ws_connections:
+            active_ws_connections.remove(websocket)
+
 
 @app.websocket("/api/v1/live_stream")
 async def live_stream(websocket: WebSocket):
