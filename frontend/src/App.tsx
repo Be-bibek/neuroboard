@@ -1,18 +1,15 @@
-import { useState } from "react";
-import axios from "axios";
-import {
-  CircuitBoard, Zap, Play,
-} from "lucide-react";
-import { CopilotPanel }       from "./components/CopilotPanel";
-import { PCBViewer2D }        from "./components/PCBViewer2D";
-import { WorkflowGraph }      from "./components/WorkflowGraph";
-import { ValidationPanel }    from "./components/ValidationPanel";
-import { ComponentLibrary }   from "./components/ComponentLibrary";
 
-const API = "http://127.0.0.1:8000";
+import {
+  CircuitBoard
+} from "lucide-react";
+import { CopilotSidebar } from "./components/CopilotSidebar";
+import { PlanningBoard } from "./components/PlanningBoard";
+import { useUIStore } from "./store/useUIStore";
 
 /* ── Top Header ─────────────────────────────────────────────────────────── */
-function Header({ onRunPipeline, running }: { onRunPipeline: () => void; running: boolean }) {
+function Header() {
+  const { viewMode, toggleViewMode } = useUIStore();
+
   return (
     <header className="flex items-center justify-between px-5 py-3
                        bg-slate-950 border-b border-slate-800 flex-shrink-0">
@@ -24,35 +21,17 @@ function Header({ onRunPipeline, running }: { onRunPipeline: () => void; running
         </div>
         <div>
           <span className="text-lg font-bold text-slate-100 tracking-tight">NeuroBoard</span>
-          <span className="text-xs text-teal-400 ml-2 font-mono">v5.0 · Copilot Edition</span>
+          <span className="text-xs text-teal-400 ml-2 font-mono">v5.0 · Copilot</span>
         </div>
-      </div>
-
-      {/* Status pills */}
-      <div className="flex items-center gap-2 text-xs font-mono">
-        <span className="flex items-center gap-1.5 px-3 py-1 rounded-full
-                         bg-slate-800 border border-slate-700 text-slate-300">
-          <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
-          KiCad IPC
-        </span>
-        <span className="flex items-center gap-1.5 px-3 py-1 rounded-full
-                         bg-slate-800 border border-slate-700 text-slate-300">
-          <Zap size={10} className="text-amber-400" />
-          Hailo-8 · 26 TOPS
-        </span>
       </div>
 
       {/* Actions */}
       <div className="flex items-center gap-2">
         <button
-          onClick={onRunPipeline}
-          disabled={running}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold
-                     bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white transition-colors"
+          onClick={toggleViewMode}
+          className="px-3 py-1.5 rounded-lg text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
         >
-          {running
-            ? <span className="animate-pulse">Running…</span>
-            : <><Play size={14} /> Run Full Pipeline</>}
+          {viewMode === 'SIDEBAR' ? 'Open Planning Board' : 'Back to Copilot Sidebar'}
         </button>
       </div>
     </header>
@@ -61,59 +40,27 @@ function Header({ onRunPipeline, running }: { onRunPipeline: () => void; running
 
 /* ── Main App ───────────────────────────────────────────────────────────── */
 export default function App() {
-  const [pipelineRunning, setPipelineRunning] = useState(false);
-
-  const handleRunPipeline = async () => {
-    setPipelineRunning(true);
-    try {
-      await axios.post(`${API}/api/v1/pipeline/run`, { force_sim: false });
-    } catch (e) {
-      console.error("Pipeline error:", e);
-    } finally {
-      setPipelineRunning(false);
-    }
-  };
+  const viewMode = useUIStore(state => state.viewMode);
 
   return (
-    <div className="flex flex-col w-full h-screen bg-slate-950 text-slate-100
-                    overflow-hidden font-sans antialiased">
+    <div className="flex flex-col w-full h-screen bg-slate-950 text-slate-100 overflow-hidden font-sans antialiased">
       {/* Top bar */}
-      <Header onRunPipeline={handleRunPipeline} running={pipelineRunning} />
+      <Header />
 
-      {/* Main body: three column layout */}
+      {/* Main UI Area */}
       <div className="flex flex-1 min-h-0 overflow-hidden">
-
-        {/* ── Left: Copilot Chat + Component Library ──────────────── */}
-        <aside className="w-[360px] flex-shrink-0 flex flex-col border-r border-slate-800">
-          {/* Copilot chat takes most of this column */}
-          <div className="flex-1 min-h-0">
-            <CopilotPanel />
+        {viewMode === 'SIDEBAR' ? (
+          <div className="w-full flex justify-center">
+            {/* The slim sidebar copilot view, matching the user's rectangular requirement */}
+            <div className="w-full max-w-[450px] shadow-2xl shadow-black h-full">
+              <CopilotSidebar />
+            </div>
           </div>
-          {/* Component library below it */}
-          <div className="h-52 flex-shrink-0 border-t border-slate-800">
-            <ComponentLibrary />
+        ) : (
+          <div className="w-full h-full">
+            <PlanningBoard />
           </div>
-        </aside>
-
-        {/* ── Center: PCB Canvas + Workflow Graph ─────────────────── */}
-        <main className="flex flex-col flex-1 min-w-0 p-3 gap-3">
-          {/* 2D Live PCB digital twin — gets most of the space */}
-          <div className="flex-1 min-h-0">
-            <PCBViewer2D />
-          </div>
-          {/* LangGraph execution flow below */}
-          <div className="h-52 flex-shrink-0">
-            <WorkflowGraph />
-          </div>
-        </main>
-
-        {/* ── Right: Validation + Inspect ─────────────────────────── */}
-        <aside className="w-72 flex-shrink-0 flex flex-col border-l border-slate-800 p-3 gap-3">
-          <div className="flex-1 min-h-0">
-            <ValidationPanel />
-          </div>
-        </aside>
-
+        )}
       </div>
     </div>
   );
