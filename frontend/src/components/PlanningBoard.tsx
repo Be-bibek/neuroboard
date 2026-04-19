@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback } from "react";
 import ReactFlow, {
   Controls,
   Background,
@@ -7,91 +7,111 @@ import ReactFlow, {
   addEdge,
   Connection,
   Edge,
-  Node
-} from 'reactflow';
-import 'reactflow/dist/style.css';
+  Node,
+} from "reactflow";
+import "reactflow/dist/style.css";
+import { useNeuroStore } from "../store/useNeuroStore";
 
-// Mock initial nodes for the Hardware Planning Board
-const initialNodes: Node[] = [
-  {
-    id: 'rpi-gpio',
-    type: 'default',
-    data: { label: 'Raspberry Pi GPIO Header' },
-    position: { x: 250, y: 100 },
-    style: {
-      background: '#1e293b',
-      color: '#f8fafc',
-      border: '1px solid #334155',
-      borderRadius: '8px',
-      padding: '12px',
-      width: 200,
-    }
-  },
-  {
-    id: 'nvme-m2',
-    type: 'default',
-    data: { label: 'M.2 NVMe Socket (PCIe)' },
-    position: { x: 250, y: 300 },
-    style: {
-      background: '#1e293b',
-      color: '#f8fafc',
-      border: '1px solid #334155',
-      borderRadius: '8px',
-      padding: '12px',
-      width: 200,
-    }
-  },
-  {
-    id: 'pi-hat-power',
-    type: 'default',
-    data: { label: '5V to 3.3V Buck Converter' },
-    position: { x: 50, y: 200 },
-    style: {
-      background: '#1e293b',
-      color: '#f8fafc',
-      border: '1px solid #334155',
-      borderRadius: '8px',
-      padding: '12px',
-      width: 180,
-    }
-  }
-];
+// ── Node Style helpers ─────────────────────────────────────────────────────
+const NODE_BASE: React.CSSProperties = {
+  background: "#1e293b",
+  color: "#f8fafc",
+  border: "1px solid #334155",
+  borderRadius: "10px",
+  padding: "12px 16px",
+  minWidth: 160,
+  fontSize: 13,
+};
 
-const initialEdges: Edge[] = [
-  { id: 'e-power-nvme', source: 'pi-hat-power', target: 'nvme-m2', animated: true, style: { stroke: '#0ea5e9' } },
-  { id: 'e-rpi-nvme', source: 'rpi-gpio', target: 'nvme-m2', label: 'PCIe x1' }
-];
+const REQUIRED_NODE: React.CSSProperties = {
+  ...NODE_BASE,
+  borderColor: "#0ea5e9",
+  background: "#0c1a2e",
+};
 
+// ── Convert active modules to React Flow nodes ─────────────────────────────
+function buildNodes(
+  modules: { id: string; name: string; icon: string }[],
+  requiredIds: string[]
+): Node[] {
+  return modules.map((m, i) => ({
+    id: m.id,
+    data: { label: `${m.icon} ${m.name}` },
+    position: { x: 60 + (i % 3) * 220, y: 80 + Math.floor(i / 3) * 120 },
+    style: requiredIds.includes(m.id) ? REQUIRED_NODE : NODE_BASE,
+  }));
+}
+
+// ── Planning Board ─────────────────────────────────────────────────────────
 export function PlanningBoard() {
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const { selectedTemplate, activeModules, setView } = useNeuroStore((s) => ({
+    selectedTemplate: s.selectedTemplate,
+    activeModules: s.activeModules,
+    setView: s.setView,
+  }));
 
-  const onConnect = useCallback((params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
+  const requiredIds = selectedTemplate?.requiredModules ?? [];
+  const initialNodes = buildNodes(activeModules, requiredIds);
+
+  const [nodes, , onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+  const onConnect = useCallback(
+    (params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)),
+    [setEdges]
+  );
+
+  const isEmpty = activeModules.length === 0;
 
   return (
     <div className="w-full h-full flex flex-col bg-slate-950">
-      <div className="p-4 border-b border-slate-800 bg-slate-900 flex justify-between items-center">
+      {/* Toolbar */}
+      <div className="flex items-center justify-between px-5 py-3 border-b border-slate-800 bg-slate-900 flex-shrink-0">
         <div>
-          <h2 className="text-lg font-bold text-slate-100">Hardware Planning Board</h2>
-          <p className="text-xs text-slate-400">Drag modules to define logical intent before AI synthesis.</p>
+          <h2 className="text-sm font-bold text-slate-100">
+            {selectedTemplate ? `${selectedTemplate.icon} ${selectedTemplate.name}` : "Planning Board"}
+          </h2>
+          <p className="text-xs text-slate-500">
+            Drag and connect hardware modules before synthesis.
+          </p>
         </div>
-        <button className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded font-semibold text-sm transition-colors">
-          Synthesize to KiCad Canvas
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setView("SIDEBAR")}
+            className="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors"
+          >
+            ← Back to Copilot
+          </button>
+          <button className="text-xs px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-semibold transition-colors">
+            Synthesize to KiCad →
+          </button>
+        </div>
       </div>
+
+      {/* Canvas */}
       <div className="flex-1">
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          fitView
-          minZoom={0.2}
-        >
-          <Background color="#334155" gap={16} size={1} />
-          <Controls className="bg-slate-800 text-white border-slate-700" />
-        </ReactFlow>
+        {isEmpty ? (
+          <div className="flex flex-col items-center justify-center h-full text-center">
+            <span className="text-5xl mb-4">🔲</span>
+            <p className="text-slate-400 font-semibold">No modules added yet</p>
+            <p className="text-slate-600 text-sm mt-1">
+              Use the Copilot Sidebar to add modules like "Add NVMe slot"
+            </p>
+          </div>
+        ) : (
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            fitView
+            minZoom={0.2}
+          >
+            <Background color="#334155" gap={16} size={1} />
+            <Controls />
+          </ReactFlow>
+        )}
       </div>
     </div>
   );
