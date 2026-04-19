@@ -79,6 +79,18 @@ function handleMessage(raw: string) {
       break;
     }
 
+    case "NET_CREATED": {
+      store.appendLog(`[Net] Created: ${event.payload.net}`);
+      break;
+    }
+
+    case "NET_CONNECTED": {
+      store.appendLog(
+        `[Pin] ${event.payload.ref}.${event.payload.pad} -> ${event.payload.net}`
+      );
+      break;
+    }
+
     default:
       console.log("[NeuroSync] Unknown event:", event.type);
   }

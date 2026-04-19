@@ -1,31 +1,44 @@
 /**
- * api/pcbClient.ts
+ * api/pcbClient.ts — Phase 8.3
  * HTTP API client for the NeuroBoard FastAPI backend.
- * Phase 8.2 — Direct POST calls for PCB module placement.
  */
 
 const API_BASE = "http://127.0.0.1:8000";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
+export interface NetResult {
+  net: string;
+  status: "created" | "warn";
+}
+
+export interface PinConnection {
+  pad: string;
+  net: string;
+  status: "ok" | "warn";
+}
+
+export interface PlacementResult {
+  module: string;
+  status: "success" | "warn" | "failed";
+  placed_at?: [number, number];
+  reason?: string;
+  net_connections: PinConnection[];
+}
+
 export interface AddModuleResponse {
   status: string;
   intent: string;
   resolved_sequence: string[];
-  execution_results: Array<{
-    module: string;
-    status: "success" | "failed";
-    placed_at?: [number, number];
-    reason?: string;
-  }>;
+  nets_created: NetResult[];
+  execution_results: PlacementResult[];
 }
 
 // ── API Client ─────────────────────────────────────────────────────────────
 
 /**
  * POST /api/v1/pcb/add_module
- * Sends a module intent to the backend.
- * The backend resolves dependencies and places all required components in KiCad.
+ * Resolves module dependencies, creates nets, places footprints, and connects pins.
  */
 export async function addModule(moduleName: string): Promise<AddModuleResponse> {
   const resp = await fetch(`${API_BASE}/api/v1/pcb/add_module`, {

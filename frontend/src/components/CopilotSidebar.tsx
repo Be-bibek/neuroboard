@@ -152,44 +152,64 @@ export function CopilotSidebar() {
     if (nvmeLoading) return;
     setNvmeLoading(true);
     appendLog("[Action] Adding NVMe module...");
-    addMsg({ role: "assistant", content: "Adding NVMe module... sending to backend." });
+    addMsg({ role: "assistant", content: "Adding NVMe module... Resolving dependencies and creating nets." });
 
     try {
       const result = await apiAddModule("NVME_SLOT");
 
-      // Log each resolved step in UI
+      // ── Phase 6: Log net creation results ──────────────────────────
+      if (result.nets_created?.length > 0) {
+        for (const net of result.nets_created) {
+          appendLog(`[Net] ${net.net} ${net.status === "created" ? "created" : "already exists"}`);
+        }
+      }
+
+      // ── Phase 6: Log placement + pin wiring results ─────────────────
       for (const execResult of result.execution_results) {
-        if (execResult.status === "success") {
+        if (execResult.status === "success" || execResult.status === "warn") {
           appendLog(`[OK] ${execResult.module} placed at (${execResult.placed_at?.join(", ")})`);
+          // Log each pin connection
+          for (const conn of execResult.net_connections ?? []) {
+            appendLog(`[Pin] ${execResult.module}_1.${conn.pad} -> ${conn.net}`);
+          }
         } else {
           appendLog(`[ERROR] ${execResult.module}: ${execResult.reason}`);
         }
       }
 
-      const succeeded = result.execution_results.filter((r) => r.status === "success");
-      const failed = result.execution_results.filter((r) => r.status === "failed");
+      // ── Build summary message ──────────────────────────────────────
+      const succeeded = result.execution_results.filter((r) => r.status !== "failed");
+      const totalPins = result.execution_results.reduce(
+        (sum, r) => sum + (r.net_connections?.length ?? 0), 0
+      );
+      const netsCreated = result.nets_created?.filter((n) => n.status === "created").length ?? 0;
 
       const summary = [
-        ...succeeded.map((r) => `+ ${r.module} placed`),
-        ...failed.map((r) => `x ${r.module} failed: ${r.reason}`),
+        `Resolved: ${result.resolved_sequence.join(" -> ")}`,
+        ``,
+        `Nets created: ${netsCreated}`,
+        `Components placed: ${succeeded.length}`,
+        `Pins connected: ${totalPins}`,
+        ``,
+        ...succeeded.map((r) => `+ ${r.module}: ${r.net_connections?.length ?? 0} pins wired`),
       ].join("\n");
 
       addMsg({
         role: "assistant",
         content:
           succeeded.length > 0
-            ? `NVMe module added! Resolved sequence:\n${summary}`
-            : `Module placement failed:\n${summary}`,
+            ? `NVMe module circuit generated:\n${summary}`
+            : `Module placement failed. Check that the backend is running on port 8000.`,
       });
 
       appendLog(
         succeeded.length > 0
-          ? `[OK] NVMe module added. ${succeeded.length} component(s) placed.`
-          : `[ERROR] NVMe placement failed.`
+          ? `[OK] NVMe circuit done. ${succeeded.length} components, ${totalPins} pins wired.`
+          : `[ERROR] NVMe circuit generation failed.`
       );
     } catch (err: any) {
       const errMsg = err?.message ?? "Unknown error";
-      appendLog(`[ERROR] Failed to add module: ${errMsg}`);
+      appendLog(`[ERROR] Failed: ${errMsg}`);
       addMsg({
         role: "assistant",
         content: `Failed to add NVMe module.\n\nError: ${errMsg}\n\nMake sure the backend is running on port 8000.`,
