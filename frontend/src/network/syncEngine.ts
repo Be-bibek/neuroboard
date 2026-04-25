@@ -13,7 +13,7 @@
 import { useNeuroStore } from "../store/useNeuroStore";
 import type { DeltaEvent, ValidationViolation } from "../store/useNeuroStore";
 
-const WS_URL = "ws://127.0.0.1:8000/ws/sync";
+const WS_URL = "ws://localhost:8000/ws/sync";
 
 let socket: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;

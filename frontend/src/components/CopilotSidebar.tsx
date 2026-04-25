@@ -110,6 +110,12 @@ function parseCommand(
     const m = getModuleById("eeprom-hat");
     return m ? { action: "ADD_MODULE", modules: [m] } : null;
   }
+  if (/decoupling|capacitors|caps/i.test(lower)) {
+    return { action: "INJECT_DECOUPLING", modules: [] };
+  }
+  if (/save|commit/i.test(lower)) {
+    return { action: "SAVE_BOARD", modules: [] };
+  }
   if (/show|list|what|modules?/i.test(lower)) {
     return { action: "LIST_MODULES", modules: allCompatible.slice(0, 4) };
   }
@@ -249,6 +255,26 @@ export function CopilotSidebar() {
         content: `Found ${result.modules.length} module(s). Click Add to place in KiCad via IPC:`,
         modules: result.modules,
       });
+    } else if (result.action === "INJECT_DECOUPLING") {
+      try {
+        appendLog("[Passive Agent] Locating M.2 slot and injecting decoupling capacitors...");
+        const res = await import("../api/pcbClient").then(m => m.injectDecoupling());
+        appendLog(`[OK] ${res.message}`);
+        addMsg({ role: "assistant", content: res.message });
+      } catch (e: any) {
+        appendLog(`[ERROR] Injection failed: ${e.message}`);
+        addMsg({ role: "assistant", content: `Failed to inject decoupling caps: ${e.message}` });
+      }
+    } else if (result.action === "SAVE_BOARD") {
+      try {
+        appendLog("[System] Saving board to disk...");
+        const res = await import("../api/pcbClient").then(m => m.saveBoard());
+        appendLog(`[OK] ${res.message}`);
+        addMsg({ role: "assistant", content: res.message });
+      } catch (e: any) {
+        appendLog(`[ERROR] Save failed: ${e.message}`);
+        addMsg({ role: "assistant", content: `Failed to save board: ${e.message}` });
+      }
     }
 
     setStage("idle");
@@ -280,7 +306,7 @@ export function CopilotSidebar() {
 
   const quickSuggestions =
     selectedTemplate?.id === "rpi-hat"
-      ? ["Add NVMe slot", "Add EEPROM", "Add LED indicator", "List modules"]
+      ? ["Add NVMe slot", "Add EEPROM", "Add Decoupling", "Save Board"]
       : selectedTemplate?.id === "arduino-shield"
       ? ["Add LED indicator", "Add USB-C", "List modules"]
       : ["List modules"];

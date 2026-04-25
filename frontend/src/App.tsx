@@ -12,10 +12,10 @@ import { PCBViewer2D } from "./components/PCBViewer2D";
 import { WorkflowGraph } from "./components/WorkflowGraph";
 import { ValidationPanel } from "./components/ValidationPanel";
 
-const API = "http://127.0.0.1:8000";
+const API = "http://localhost:8000";
 
 /* ── Top Header ─────────────────────────────────────────────────────────── */
-function Header({ onRunPipeline, running }: { onRunPipeline: () => void; running: boolean }) {
+function Header({ onRunPipeline, running, syncStatus }: { onRunPipeline: () => void; running: boolean; syncStatus: string }) {
   const selectedTemplate = useNeuroStore((s) => s.selectedTemplate);
   
   return (
@@ -43,8 +43,8 @@ function Header({ onRunPipeline, running }: { onRunPipeline: () => void; running
       <div className="flex items-center gap-2 text-xs font-mono">
         <span className="flex items-center gap-1.5 px-3 py-1 rounded-full
                          bg-slate-800 border border-slate-700 text-slate-300">
-          <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
-          KiCad IPC
+          <span className={`w-1.5 h-1.5 rounded-full ${syncStatus === "CONNECTED" ? "bg-teal-400" : "bg-red-500 animate-pulse"}`} />
+          {syncStatus === "CONNECTED" ? "KiCad IPC" : "IPC Disconnected"}
         </span>
         <span className="flex items-center gap-1.5 px-3 py-1 rounded-full
                          bg-slate-800 border border-slate-700 text-slate-300">
@@ -74,6 +74,7 @@ function Header({ onRunPipeline, running }: { onRunPipeline: () => void; running
 export default function App() {
   const [pipelineRunning, setPipelineRunning] = useState(false);
   const view = useNeuroStore((s) => s.view);
+  const syncStatus = useNeuroStore((s) => s.syncStatus);
 
   const handleRunPipeline = async () => {
     setPipelineRunning(true);
@@ -94,7 +95,7 @@ export default function App() {
   return (
     <div className="flex flex-col w-full h-screen bg-slate-950 text-slate-100 overflow-hidden font-sans antialiased">
       {/* Top bar */}
-      <Header onRunPipeline={handleRunPipeline} running={pipelineRunning} />
+      <Header onRunPipeline={handleRunPipeline} running={pipelineRunning} syncStatus={syncStatus} />
 
       {/* Main body: three column layout exactly as it was */}
       <div className="flex flex-1 min-h-0 overflow-hidden">

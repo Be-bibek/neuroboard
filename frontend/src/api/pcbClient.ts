@@ -3,7 +3,7 @@
  * HTTP API client for the NeuroBoard FastAPI backend.
  */
 
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "http://localhost:8000";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -53,4 +53,36 @@ export async function addModule(moduleName: string): Promise<AddModuleResponse> 
   }
 
   return resp.json() as Promise<AddModuleResponse>;
+}
+
+/**
+ * POST /api/v1/pcb/inject_decoupling
+ */
+export async function injectDecoupling(targetRef: string = "J3"): Promise<any> {
+  const resp = await fetch(`${API_BASE}/api/v1/pcb/inject_decoupling`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ target_ref: targetRef }),
+  });
+
+  if (!resp.ok) {
+    const errText = await resp.text();
+    throw new Error(`Backend error ${resp.status}: ${errText}`);
+  }
+  return resp.json();
+}
+
+/**
+ * POST /api/v1/pcb/save
+ */
+export async function saveBoard(): Promise<any> {
+  const resp = await fetch(`${API_BASE}/api/v1/pcb/save`, {
+    method: "POST",
+  });
+
+  if (!resp.ok) {
+    const errText = await resp.text();
+    throw new Error(`Backend error ${resp.status}: ${errText}`);
+  }
+  return resp.json();
 }

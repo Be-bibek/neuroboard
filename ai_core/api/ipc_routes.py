@@ -16,7 +16,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from system.intent_resolver import IntentResolver
 from system.module_registry import MODULES
 from system.ipc_kicad import KiCadIPC
-from fastapi import APIRouter
+from system.orchestrator import orchestrator
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List
 
@@ -167,9 +168,29 @@ async def add_module_direct(req: DirectModuleRequest):
     await _broadcast("EXECUTION_STATUS", "Circuit generation complete.")
 
     return {
-        "status": "completed",
-        "intent": req.module,
+        "status": "success",
         "resolved_sequence": execution_list,
         "nets_created": net_results,
-        "execution_results": placement_results,
+        "execution_results": placement_results
     }
+
+# ── Phase 8.4: Footprint Injector & Save Bridge ──────────────────────────
+
+@router.post("/api/v1/pcb/inject_decoupling")
+async def inject_decoupling(req: dict):
+    """
+    Triggers the Passive Agent to find the target and inject decoupling caps.
+    """
+    target = req.get("target_ref", "J3")
+    res = orchestrator.inject_decoupling(target)
+    if res["status"] == "error":
+        raise HTTPException(status_code=500, detail=res["reason"])
+    return res
+
+@router.post("/api/v1/pcb/save")
+async def save_board():
+    """Forces KiCad to save the board to disk."""
+    res = orchestrator.save_board()
+    if res["status"] == "error":
+        raise HTTPException(status_code=500, detail=res["reason"])
+    return res
