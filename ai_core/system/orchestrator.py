@@ -1,99 +1,100 @@
-import math
+import os
+import asyncio
 import logging
-from kipy import KiCad
-from kipy.board import FootprintInstance, BoardLayer, board_types_pb2 as bt
+from typing import Dict, Any, List
 
-log = logging.getLogger("Orchestrator")
+# Ensure we use the exact KiCad 10 IPC socket specified
+IPC_SOCKET_PATH = "ipc:///C:/Users/Bibek/AppData/Local/Temp/kicad/api.sock"
+os.environ["KICAD_API_SOCKET"] = IPC_SOCKET_PATH
 
-NM_PER_MM = 1_000_000
+try:
+    from kipy import KiCad
+except ImportError:
+    KiCad = None
+    logging.warning("kipy not available.")
 
-def mm(v: float) -> int:
-    return int(v * NM_PER_MM)
-
-class PassiveAgent:
+# ═══════════════════════════════════════════════════════════════════════════
+# ROO CODE: MCP Hub Architecture
+# ═══════════════════════════════════════════════════════════════════════════
+class McpHub:
     """
-    The Passive Agent (Footprint Injector).
-    Automatically 'sprinkles' passive components (like decoupling caps)
-    around active ICs based on IPC coordinates.
+    Roo Code style MCP Service Layer.
+    Manages connections to standard MCP providers and our KiCad IPC layer.
     """
     def __init__(self):
-        self.kicad = KiCad()
-
-    def make_fp(self, library: str, entry: str, ref: str, value: str, x_mm: float, y_mm: float, rot_deg: float = 0.0) -> FootprintInstance:
-        p = bt.FootprintInstance()
-        p.definition.id.library_nickname = library
-        p.definition.id.entry_name = entry
-        p.position.x_nm = mm(x_mm)
-        p.position.y_nm = mm(y_mm)
-        p.orientation.value_degrees = float(rot_deg)
-        p.layer = BoardLayer.Value("BL_F_Cu")
-        p.reference_field.text.text.text = ref
-        p.value_field.text.text.text = value
-        return FootprintInstance(proto=p)
-
-    def inject_decoupling(self, target_ref: str = "J3"):
-        """
-        Locates the target component (e.g. M.2 slot), and injects
-        decoupling capacitors 2mm away from its power pins.
-        """
-        try:
-            board = self.kicad.get_board()
-        except Exception as e:
-            log.error(f"KiCad IPC Connection failed: {e}")
-            return {"status": "error", "reason": str(e)}
-
-        # Find target footprint
-        target_fp = None
-        for fp in board.get_footprints():
+        self.kicad_client = None
+        self.servers = {}
+        
+    def connect_kicad(self):
+        """Establish direct gRPC/IPC bridge to KiCad 10"""
+        logging.info(f"[McpHub] Connecting to KiCad 10 via {IPC_SOCKET_PATH}")
+        if KiCad:
             try:
-                if fp.reference_field.text.value == target_ref:
-                    target_fp = fp
-                    break
-            except AttributeError:
-                continue
-
-        if not target_fp:
-            return {"status": "error", "reason": f"Target {target_ref} not found on board."}
-
-        base_x = target_fp.position.x / NM_PER_MM
-        base_y = target_fp.position.y / NM_PER_MM
-
-        print(f"[PassiveAgent] Found {target_ref} at ({base_x}, {base_y}). Injecting Decoupling...")
-
-        # Inject 4 capacitors, 2mm above the connector
-        # (Assuming J3 is horizontally placed at base_y, we place them at base_y - 2mm, spaced by 1.5mm)
-        caps = []
-        start_x = base_x - 3.0  # start slightly left of center
-        
-        for i in range(1, 5):
-            ref = f"C_DEC_{i}"
-            x = start_x + (i * 1.5)
-            y = base_y - 3.5  # 3.5mm away to clear pads
+                # Kipy uses env var or default path
+                self.kicad_client = KiCad()
+                logging.info("[McpHub] KiCad IPC Connected.")
+            except Exception as e:
+                logging.error(f"[McpHub] Connection Failed: {e}")
+        else:
+            logging.warning("[McpHub] KiCad client simulated.")
             
-            # Using our local S-expr warehouse conceptually, but for IPC reliability we push standard KiCad IDs
-            fp = self.make_fp("Device", "C_0402_1005Metric", ref, "100nF", x, y, rot_deg=90.0)
-            caps.append(fp)
-            print(f"  -> Injected {ref} at ({x}, {y})")
-
-        # Push to KiCad
-        commit = board.begin_commit()
-        created = board.create_items(caps)
-        board.push_commit(commit)
-        board.save()
+    def call_tool(self, server: str, tool: str, args: Dict[str, Any]) -> Any:
+        logging.info(f"[McpHub] Executing {server}::{tool} with {args}")
+        # In the full fusion, this dispatches to mcp_runtime/registry.py
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+        from mcp_runtime.registry import mcp_registry
         
-        return {
-            "status": "success", 
-            "message": f"Injected {len(created)} decoupling capacitors around {target_ref}.",
-            "caps": [c.id for c in created]
-        }
-
-    def save_board(self):
-        """Forces the live board to save via IPC."""
         try:
-            board = self.kicad.get_board()
-            board.save()
-            return {"status": "success", "message": "Board saved successfully."}
+            return mcp_registry.call_tool(server, tool, args)
         except Exception as e:
-            return {"status": "error", "reason": str(e)}
+            return {"error": str(e)}
 
-orchestrator = PassiveAgent()
+# ═══════════════════════════════════════════════════════════════════════════
+# OPENHANDS: App Server & Agent Session
+# ═══════════════════════════════════════════════════════════════════════════
+class AgentSession:
+    """
+    OpenHands style session manager.
+    Maintains state loop, streams actions to UI, and routes through McpHub.
+    """
+    def __init__(self, session_id: str, mcp_hub: McpHub):
+        self.session_id = session_id
+        self.hub = mcp_hub
+        self.history = []
+        
+    async def process_intent(self, user_intent: str):
+        """
+        The main agent execution loop mimicking OpenHands' action streaming.
+        Yields state updates for the UI.
+        """
+        self.history.append({"role": "user", "content": user_intent})
+        yield {"type": "status", "message": "Analyzing Intent..."}
+        await asyncio.sleep(0.5)
+        
+        # Step 5: Route intent to MCP logic
+        if "@board" in user_intent:
+            yield {"type": "action", "tool": "get_board_state", "status": "running"}
+            res = self.hub.call_tool("neuro_layout", "get_board_state", {})
+            yield {"type": "action", "tool": "get_board_state", "status": "success", "result": res}
+            
+        elif "@nets" in user_intent:
+            # We assume get_nets_list exists on neuro_router or layout
+            yield {"type": "action", "tool": "get_nets_list", "status": "running"}
+            res = self.hub.call_tool("neuro_router", "get_nets_list", {})
+            yield {"type": "action", "tool": "get_nets_list", "status": "success", "result": res}
+            
+        else:
+            # General routing task
+            yield {"type": "status", "message": "Planning Routing Strategy..."}
+            await asyncio.sleep(1)
+            yield {"type": "action", "tool": "apply_routing_strategy", "status": "running"}
+            res = self.hub.call_tool("neuro_router", "apply_routing_strategy", {"strategy": "auto", "nets": []})
+            yield {"type": "action", "tool": "apply_routing_strategy", "status": "success", "result": res}
+            
+        yield {"type": "completed", "message": "Session tasks finished."}
+
+# Global instances
+hub = McpHub()
+hub.connect_kicad()

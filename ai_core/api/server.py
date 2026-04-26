@@ -135,26 +135,36 @@ import time
 @app.get("/api/v1/agent/run")
 async def run_agent(intent: str):
     """
-    Runs the LangGraph autonomous agent loop and streams events via Server-Sent Events (SSE).
+    OpenHands Session Stream integrated with Roo Code MCP Hub
+    Runs the agent session and streams events via SSE.
     """
-    from agent.langgraph_loop import build_agent_graph
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    from system.orchestrator import AgentSession, hub
     
-    agent = build_agent_graph()
-    if not agent:
-        raise HTTPException(status_code=500, detail="LangGraph not available")
-        
     async def event_stream():
-        initial_state = {"intent": intent, "retries": 0, "drc_errors": []}
+        session = AgentSession(session_id="live_ui_session", mcp_hub=hub)
         try:
-            # invoke() is synchronous. For a real stream, we'd use stream() 
-            # But since it might block the thread, we will yield steps manually or use stream if available
-            for event in agent.stream(initial_state):
-                for node_name, state_update in event.items():
-                    data = json.dumps({"node": node_name, "state": state_update})
-                    yield f"data: {data}\n\n"
-                    await asyncio.sleep(0.5) # Slight delay for UI effect
-            yield f"data: {json.dumps({'node': 'END', 'status': 'completed'})}\n\n"
+            async for event in session.process_intent(intent):
+                if event["type"] == "status":
+                    yield f"data: {json.dumps({'node': 'status', 'message': event['message']})}\n\n"
+                elif event["type"] == "action":
+                    state_update = {
+                        "execution_results": [{
+                            "action": "executed" if event["status"] == "success" else event["status"],
+                            "plan_item": {"type": "auto", "tool": event["tool"]},
+                            "result": event.get("result")
+                        }]
+                    }
+                    yield f"data: {json.dumps({'node': 'execution', 'state': state_update})}\n\n"
+                elif event["type"] == "completed":
+                    yield f"data: {json.dumps({'node': 'END', 'status': 'completed'})}\n\n"
+                    
+                await asyncio.sleep(0.1)
+                
         except Exception as e:
+            log.error(f"Agent stream error: {e}")
             yield f"data: {json.dumps({'node': 'ERROR', 'error': str(e)})}\n\n"
             
     return StreamingResponse(event_stream(), media_type="text/event-stream")
