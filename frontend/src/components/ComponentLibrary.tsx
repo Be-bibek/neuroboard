@@ -1,4 +1,4 @@
-import { Cpu, Cable } from "lucide-react";
+import { Cpu, Cable, Layers } from "lucide-react";
 
 const mockComponents = [
   { id: "U1", name: "Hailo-8 M.2 CPU", type: "IC", status: "AI Selected" },
@@ -9,18 +9,21 @@ const mockComponents = [
 
 export function ComponentLibrary() {
   return (
-    <div className="flex flex-col h-full bg-slate-900 border-r border-slate-700 w-64 p-4 overflow-y-auto">
-      <h3 className="text-sm font-semibold text-slate-200 mb-4 uppercase tracking-wider">
-        Objects Library
+    <div className="flex flex-col h-full overflow-hidden">
+      <h3 className="text-sm font-bold text-white/90 mb-4 flex items-center gap-2 px-1 tracking-tight uppercase">
+        <Layers size={16} className="text-indigo-400" />
+        Object Library
       </h3>
       
-      <div className="space-y-2">
+      <div className="space-y-2 overflow-y-auto pr-1 scrollbar-none">
         {mockComponents.map(comp => (
-          <div key={comp.id} className="flex items-center gap-3 p-2 bg-slate-800 rounded border border-slate-700 hover:bg-slate-750 cursor-pointer transition-colors">
-            {comp.type === "IC" ? <Cpu size={16} className="text-teal-400" /> : <Cable size={16} className="text-blue-400" />}
+          <div key={comp.id} className="glass-card p-3 flex items-center gap-4 bg-white/[0.03] group">
+            <div className="bg-white/5 p-2 rounded-xl group-hover:bg-indigo-500/20 transition-colors">
+               {comp.type === "IC" ? <Cpu size={18} className="text-indigo-400" /> : <Cable size={18} className="text-blue-400" />}
+            </div>
             <div className="flex flex-col">
-              <span className="text-sm text-slate-200 font-medium">{comp.name}</span>
-              <span className="text-xs text-slate-500">{comp.id} - {comp.status}</span>
+              <span className="text-sm text-white/90 font-bold tracking-tight">{comp.name}</span>
+              <span className="text-[10px] text-white/40 font-medium uppercase tracking-wider">{comp.id} · {comp.status}</span>
             </div>
           </div>
         ))}

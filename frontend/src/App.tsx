@@ -4,7 +4,7 @@ import { CircuitBoard, Zap, Play } from "lucide-react";
 import { useNeuroStore } from "./store/useNeuroStore";
 // ── Core Views ─────────────────────────────────────────────────────────────
 import { TemplateSelector } from "./components/TemplateSelector";
-import { CopilotSidebar } from "./components/CopilotSidebar";
+import { AntigravitySidebar } from "./components/AntigravitySidebar";
 import { PlanningBoard } from "./components/PlanningBoard";
 // ── Legacy Layout Components ───────────────────────────────────────────────
 import { ComponentLibrary } from "./components/ComponentLibrary";
@@ -19,51 +19,50 @@ function Header({ onRunPipeline, running, syncStatus }: { onRunPipeline: () => v
   const selectedTemplate = useNeuroStore((s) => s.selectedTemplate);
   
   return (
-    <header className="flex items-center justify-between px-5 py-3
-                       bg-slate-950 border-b border-slate-800 flex-shrink-0">
+    <header className="flex items-center justify-between px-6 py-4
+                       backdrop-blur-xl bg-zinc-900/30 border-b border-white/10 flex-shrink-0 z-50">
       {/* Brand */}
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600
-                         flex items-center justify-center shadow-lg shadow-teal-900/40">
-          <CircuitBoard size={20} className="text-white" />
+      <div className="flex items-center gap-4">
+        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600
+                         flex items-center justify-center shadow-2xl shadow-indigo-500/20 active:scale-95 transition-transform">
+          <CircuitBoard size={22} className="text-white" />
         </div>
         <div>
-          <span className="text-lg font-bold text-slate-100 tracking-tight">NeuroBoard</span>
+          <h1 className="text-xl font-bold text-white tracking-tight">NeuroBoard</h1>
           {selectedTemplate ? (
-            <span className="text-xs text-teal-400 ml-2 font-mono">
+            <span className="text-xs text-indigo-400 font-medium">
               {selectedTemplate.icon} {selectedTemplate.name}
             </span>
           ) : (
-            <span className="text-xs text-teal-400 ml-2 font-mono">v5.0 · Copilot Edition</span>
+            <span className="text-xs text-indigo-400 font-medium">v5.0 · Autonomous Agent</span>
           )}
         </div>
       </div>
 
       {/* Status pills */}
-      <div className="flex items-center gap-2 text-xs font-mono">
-        <span className="flex items-center gap-1.5 px-3 py-1 rounded-full
-                         bg-slate-800 border border-slate-700 text-slate-300">
-          <span className={`w-1.5 h-1.5 rounded-full ${syncStatus === "CONNECTED" ? "bg-teal-400" : "bg-red-500 animate-pulse"}`} />
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 px-4 py-1.5 rounded-2xl
+                          bg-white/5 border border-white/10 text-white/80 text-xs font-semibold backdrop-blur-md">
+          <span className={`w-2 h-2 rounded-full ${syncStatus === "CONNECTED" ? "bg-emerald-400 shadow-[0_0_8px_theme('colors.emerald.400')]" : "bg-red-500 animate-pulse"}`} />
           {syncStatus === "CONNECTED" ? "KiCad IPC" : "IPC Disconnected"}
-        </span>
-        <span className="flex items-center gap-1.5 px-3 py-1 rounded-full
-                         bg-slate-800 border border-slate-700 text-slate-300">
-          <Zap size={10} className="text-amber-400" />
+        </div>
+        <div className="flex items-center gap-2 px-4 py-1.5 rounded-2xl
+                          bg-white/5 border border-white/10 text-white/80 text-xs font-semibold backdrop-blur-md">
+          <Zap size={12} className="text-amber-400" />
           Hailo-8 · 26 TOPS
-        </span>
+        </div>
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
         <button
           onClick={onRunPipeline}
           disabled={running}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold
-                     bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white transition-colors"
+          className="glass-button bg-indigo-600/80 hover:bg-indigo-500 text-white shadow-xl shadow-indigo-500/20"
         >
           {running
-            ? <span className="animate-pulse">Running…</span>
-            : <><Play size={14} /> Run Full Pipeline</>}
+            ? <span className="animate-pulse flex items-center gap-2"><Zap size={16} /> Thinking…</span>
+            : <><Play size={16} fill="currentColor" /> Execute Goal</>}
         </button>
       </div>
     </header>
@@ -79,54 +78,50 @@ export default function App() {
   const handleRunPipeline = async () => {
     setPipelineRunning(true);
     try {
-      await axios.post(`${API}/api/v1/pipeline/run`, { force_sim: false });
+      await axios.post(`${API}/api/v1/agent/execute`, {
+        goal: "Analyze board and optimize routing strategy"
+      });
     } catch (e) {
-      console.error("Pipeline error:", e);
+      console.error("Agent execute error:", e);
     } finally {
       setPipelineRunning(false);
     }
   };
 
-  // If waiting for template selection, show the new TemplateSelector as a full screen
   if (view === "TEMPLATE_SELECT") {
     return <TemplateSelector />;
   }
 
   return (
-    <div className="flex flex-col w-full h-screen bg-slate-950 text-slate-100 overflow-hidden font-sans antialiased">
+    <div className="flex flex-col w-full h-screen bg-[#0b0f1a] text-white/90 overflow-hidden font-sans antialiased">
       {/* Top bar */}
       <Header onRunPipeline={handleRunPipeline} running={pipelineRunning} syncStatus={syncStatus} />
 
-      {/* Main body: three column layout exactly as it was */}
-      <div className="flex flex-1 min-h-0 overflow-hidden">
+      {/* Main Layout */}
+      <div className="flex flex-1 min-h-0 overflow-hidden p-4 gap-4">
 
-        {/* ── Left: Copilot Chat + Component Library ──────────────── */}
-        <aside className="w-[360px] flex-shrink-0 flex flex-col border-r border-slate-800">
-          {/* Use the new intelligent CopilotSidebar instead of mock CopilotPanel */}
-          <div className="flex-1 min-h-0 border-b border-slate-800">
-            <CopilotSidebar />
-          </div>
-          {/* Component library below it */}
-          <div className="h-52 flex-shrink-0">
-            <ComponentLibrary />
-          </div>
-        </aside>
-
-        {/* ── Center: PCB Canvas + Workflow Graph ─────────────────── */}
-        <main className="flex flex-col flex-1 min-w-0 p-3 gap-3">
-          {/* If the view state toggles to PLANNING_BOARD, show the block canvas, otherwise show the 3D viewer */}
-          <div className="flex-1 min-h-0 rounded-lg overflow-hidden border border-slate-800 bg-[#0A0D14]">
+        {/* ── Center: Main Canvas Area ─────────────────────────── */}
+        <main className="flex flex-col flex-1 min-w-0 gap-4">
+          <div className="flex-1 min-h-0 glass-panel overflow-hidden relative">
             {view === "PLANNING_BOARD" ? <PlanningBoard /> : <PCBViewer2D />}
           </div>
-          {/* LangGraph execution flow below */}
-          <div className="h-52 flex-shrink-0">
-            <WorkflowGraph />
+          
+          <div className="h-64 flex-shrink-0 flex gap-4">
+             <div className="flex-1 min-w-0 glass-panel p-4 overflow-hidden">
+                <WorkflowGraph />
+             </div>
+             <div className="w-80 flex-shrink-0 glass-panel p-4 overflow-hidden">
+                <ComponentLibrary />
+             </div>
           </div>
         </main>
 
-        {/* ── Right: Validation + Inspect ─────────────────────────── */}
-        <aside className="w-72 flex-shrink-0 flex flex-col border-l border-slate-800 p-3 gap-3">
-          <div className="flex-1 min-h-0">
+        {/* ── Right Sidebar: AI Panel + Validation ──────────────── */}
+        <aside className="w-[420px] flex-shrink-0 flex flex-col gap-4">
+          <div className="flex-[3] min-h-0 glass-panel overflow-hidden">
+            <AntigravitySidebar />
+          </div>
+          <div className="flex-[1] min-h-0 glass-panel p-4 overflow-hidden">
             <ValidationPanel />
           </div>
         </aside>

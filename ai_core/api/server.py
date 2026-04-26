@@ -135,38 +135,41 @@ import time
 @app.get("/api/v1/agent/run")
 async def run_agent(intent: str):
     """
-    OpenHands Session Stream integrated with Roo Code MCP Hub
-    Runs the agent session and streams events via SSE.
+    Autonomous goal-driven agent — streams rich events via SSE.
+    Events: status | plan | tool_selected | action | completed | error
     """
-    import sys
-    from pathlib import Path
-    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
     from system.orchestrator import AgentSession, hub
-    
+
     async def event_stream():
         session = AgentSession(session_id="live_ui_session", mcp_hub=hub)
         try:
             async for event in session.process_intent(intent):
-                if event["type"] == "status":
+                evt_type = event.get("type")
+
+                if evt_type == "status":
                     yield f"data: {json.dumps({'node': 'status', 'message': event['message']})}\n\n"
-                elif event["type"] == "action":
-                    state_update = {
-                        "execution_results": [{
-                            "action": "executed" if event["status"] == "success" else event["status"],
-                            "plan_item": {"type": "auto", "tool": event["tool"]},
-                            "result": event.get("result")
-                        }]
-                    }
-                    yield f"data: {json.dumps({'node': 'execution', 'state': state_update})}\n\n"
-                elif event["type"] == "completed":
-                    yield f"data: {json.dumps({'node': 'END', 'status': 'completed'})}\n\n"
-                    
-                await asyncio.sleep(0.1)
-                
+
+                elif evt_type == "plan":
+                    yield f"data: {json.dumps({'node': 'planning', 'plan': event['plan'], 'message': event['message']})}\n\n"
+
+                elif evt_type == "tool_selected":
+                    yield f"data: {json.dumps({'node': 'tool_selection', 'tool': event['tool'], 'action': event.get('action',''), 'message': event['message']})}\n\n"
+
+                elif evt_type == "action":
+                    yield f"data: {json.dumps({'node': 'execution', 'tool': event['tool'], 'status': event['status'], 'result': event.get('result'), 'message': event.get('message','')})}\n\n"
+
+                elif evt_type == "completed":
+                    yield f"data: {json.dumps({'node': 'END', 'status': 'completed', 'message': event['message']})}\n\n"
+
+                elif evt_type == "error":
+                    yield f"data: {json.dumps({'node': 'ERROR', 'error': event['message']})}\n\n"
+
+                await asyncio.sleep(0.05)
+
         except Exception as e:
             log.error(f"Agent stream error: {e}")
             yield f"data: {json.dumps({'node': 'ERROR', 'error': str(e)})}\n\n"
-            
+
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
@@ -217,22 +220,84 @@ def get_mcp_tools(server: str):
     """List tools exposed by a specific running MCP server."""
     return {"status": "success", "server": server, "tools": mcp_registry.get_tools(server)}
 
+class MCPExecuteRequest(BaseModel):
+    server: str
+    tool: str
+    args: dict
+
+@app.post("/api/v1/mcp/execute")
+def execute_mcp_tool(req: MCPExecuteRequest):
+    """Dynamically execute a tool via MCP registry."""
+    try:
+        res = mcp_registry.call_tool(req.server, req.tool, req.args)
+        return {"status": "success", "result": res}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  SETTINGS ENDPOINTS (PHASE 3)
+# ═══════════════════════════════════════════════════════════════════════════
+from system.settings import settings_manager
+
+@app.get("/api/v1/settings")
+def get_settings():
+    return settings_manager.get()
+
+@app.post("/api/v1/settings")
+def update_settings(new_settings: dict):
+    settings_manager.update(new_settings)
+    return {"status": "success", "settings": settings_manager.get()}
+
 # ═══════════════════════════════════════════════════════════════════════════
 #  PIPELINE (Placement + Routing + Validation)
 # ═══════════════════════════════════════════════════════════════════════════
 
-@app.post("/api/v1/pipeline/run")
-async def run_full_pipeline(req: PipelineRunRequest):
+class GoalRequest(BaseModel):
+    goal: str
+
+@app.post("/api/v1/agent/execute")
+async def execute_goal(req: GoalRequest):
     """
-    Phase 2 full pipeline: Placement → Routing → SI/PDN/DRC Validation.
-    Requires a netlist to be present (run /copilot/confirm first).
+    Goal-driven execution entry point (replaces fixed pipeline).
+    Runs the full autonomous agent graph synchronously and returns results.
+    For streaming, use GET /api/v1/agent/run?intent=...
     """
     try:
-        report = _get_orchestrator().run_full_pipeline()
-        return {"status": "success", "report": report}
+        from agent.langgraph_loop import build_agent_graph
+        agent = build_agent_graph()
+        final_state = agent.invoke({
+            "goal": req.goal,
+            "board_context": {},
+            "available_tools": [],
+            "scored_tools": [],
+            "plan": [],
+            "current_step_index": 0,
+            "selected_tool": None,
+            "execution_results": [],
+            "verification_report": {},
+            "drc_errors": [],
+            "retries": 0,
+            "strategy": "shortest_path",
+            "precheck_results": {},
+            "status": "started",
+        })
+        return {
+            "status": "success",
+            "plan": final_state.get("plan", []),
+            "execution_results": final_state.get("execution_results", []),
+            "verification_report": final_state.get("verification_report", {}),
+            "drc_errors": final_state.get("drc_errors", []),
+            "retries": final_state.get("retries", 0),
+        }
     except Exception as e:
-        log.error(f"[API] /pipeline/run error: {e}")
+        log.error(f"[API] /agent/execute error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# Legacy pipeline endpoint — now delegates to goal-driven agent
+@app.post("/api/v1/pipeline/run")
+async def run_full_pipeline(req: PipelineRunRequest):
+    """Deprecated: delegates to goal-driven agent."""
+    return await execute_goal(GoalRequest(goal="Run a full PCB placement, routing and DRC verification pipeline"))
 
 @app.post("/api/v1/schematic/build")
 async def build_schematic(req: SchematicBuildRequest):

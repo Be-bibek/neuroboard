@@ -18,19 +18,22 @@ import type { PCBModule } from "../templates/registry";
 
 // ── Node Style helpers ─────────────────────────────────────────────────────
 const NODE_BASE: React.CSSProperties = {
-  background: "#1e293b",
+  background: "rgba(255, 255, 255, 0.05)",
   color: "#f8fafc",
-  border: "1px solid #334155",
-  borderRadius: "10px",
+  border: "1px solid rgba(255, 255, 255, 0.1)",
+  borderRadius: "16px",
   padding: "12px 16px",
   minWidth: 160,
   fontSize: 13,
+  backdropFilter: "blur(12px)",
+  boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5)",
+  fontWeight: "600",
 };
 
 const REQUIRED_NODE: React.CSSProperties = {
   ...NODE_BASE,
-  borderColor: "#0ea5e9",
-  background: "#0c1a2e",
+  borderColor: "rgba(99, 102, 241, 0.5)",
+  background: "rgba(99, 102, 241, 0.1)",
 };
 
 // ── Convert active modules to React Flow nodes ─────────────────────────────
@@ -62,15 +65,15 @@ function ObjectsLibrary() {
   };
 
   return (
-    <aside className="w-64 flex-shrink-0 bg-slate-900 border-r border-slate-800 flex flex-col h-full overflow-hidden">
-      <div className="p-4 border-b border-slate-800 flex-shrink-0 bg-slate-950/50">
-        <h3 className="text-sm font-semibold text-slate-200 uppercase tracking-widest">
-          Objects Library
+    <aside className="w-72 flex-shrink-0 flex flex-col h-full overflow-hidden border-r border-white/5">
+      <div className="p-6 border-b border-white/5 flex-shrink-0">
+        <h3 className="text-sm font-bold text-white/90 uppercase tracking-[0.2em]">
+          Object Catalog
         </h3>
-        <p className="text-[10px] text-slate-500 mt-1">Drag and drop to add</p>
+        <p className="text-[10px] text-white/30 mt-1.5 font-medium">Drag to instantiate on board</p>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-none">
         {compatibleModules.map((comp) => {
           const isAdded = !!activeModules.find(m => m.id === comp.id);
           return (
@@ -78,19 +81,24 @@ function ObjectsLibrary() {
               key={comp.id}
               draggable={!isAdded}
               onDragStart={(e) => onDragStart(e, comp)}
-              className={`flex items-start gap-3 p-2.5 rounded border transition-colors 
+              className={`flex items-start gap-4 p-4 rounded-2xl border transition-all duration-300
                 ${isAdded 
-                  ? "bg-slate-800/40 border-slate-700/50 opacity-50 cursor-not-allowed" 
-                  : "bg-slate-800 border-slate-700 hover:bg-slate-700 hover:border-slate-600 cursor-grab active:cursor-grabbing"
+                  ? "bg-white/[0.02] border-white/5 opacity-40 grayscale cursor-not-allowed" 
+                  : "glass-card bg-white/[0.03] border-white/10 hover:bg-white/[0.08] hover:scale-[1.02] cursor-grab active:cursor-grabbing"
                 }`}
             >
-              <div className="mt-0.5 text-lg leading-none">{comp.icon}</div>
+              <div className="mt-0.5 text-2xl leading-none drop-shadow-lg">{comp.icon}</div>
               <div className="flex flex-col min-w-0">
-                <span className="text-xs text-slate-200 font-semibold truncate leading-tight">{comp.name}</span>
-                <span className="text-[10px] text-teal-400 font-mono truncate mt-0.5" title={comp.footprint}>
+                <span className="text-xs text-white/90 font-bold truncate leading-tight tracking-tight">{comp.name}</span>
+                <span className="text-[10px] text-indigo-400 font-bold truncate mt-1 uppercase tracking-wider" title={comp.footprint}>
                   {comp.footprint.split(':')[1] || comp.footprint}
                 </span>
-                {isAdded && <span className="text-[9px] text-emerald-500 font-bold mt-1 uppercase tracking-wider">On Board</span>}
+                {isAdded && (
+                  <div className="flex items-center gap-1.5 mt-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_theme('colors.emerald.500')]"></div>
+                    <span className="text-[9px] text-emerald-500/80 font-bold uppercase tracking-widest">Active</span>
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -114,9 +122,7 @@ function BoardCanvas() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  // Sync state if activeModules changes from generic store
   useEffect(() => {
-    // Only add nodes that aren't already mapped
     const newNodes = activeModules.filter(m => !nodes.find(n => n.id === m.id));
     if (newNodes.length > 0) {
        const mapped = buildNodes(newNodes, requiredIds);
@@ -145,8 +151,6 @@ function BoardCanvas() {
 
       const module = JSON.parse(rawData) as PCBModule;
 
-      // Calculate drop position manually due to ReactFlowProvider context needs
-      // Note: Full mapping requires useReactFlow, this is a simplified drop mapping
       const position = {
          x: event.clientX - reactFlowBounds.left - 80,
          y: event.clientY - reactFlowBounds.top - 20,
@@ -161,11 +165,8 @@ function BoardCanvas() {
       };
 
       setNodes((nds) => [...nds, newNode]);
-      
-      // Update global store
       addModule(module);
       
-      // Sync to KiCad
       sendCommand({
         type: "ADD_MODULE",
         payload: {
@@ -181,7 +182,7 @@ function BoardCanvas() {
   );
 
   return (
-    <div className="flex-1 h-full bg-slate-950 relative" ref={reactFlowWrapper}>
+    <div className="flex-1 h-full bg-transparent relative" ref={reactFlowWrapper}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -193,8 +194,8 @@ function BoardCanvas() {
         onDrop={onDrop}
         minZoom={0.2}
       >
-        <Background color="#334155" gap={16} size={1} />
-        <Controls className="bg-slate-800 text-white border-slate-700 fill-white" />
+        <Background color="#ffffff" gap={20} size={1} opacity={0.05} />
+        <Controls className="!bg-white/5 !border-white/10 !fill-white/40 !shadow-none rounded-xl overflow-hidden" />
       </ReactFlow>
     </div>
   );
@@ -206,26 +207,26 @@ export function PlanningBoard() {
   const setView = useNeuroStore((s) => s.setView);
 
   return (
-    <div className="w-full h-full flex flex-col bg-slate-950">
+    <div className="w-full h-full flex flex-col bg-transparent">
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-slate-800 bg-slate-900 flex-shrink-0 shadow-md z-10">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02] flex-shrink-0 z-10 backdrop-blur-md">
         <div>
-          <h2 className="text-sm font-bold text-slate-100">
+          <h2 className="text-base font-bold text-white/90 tracking-tight">
             {selectedTemplate ? `${selectedTemplate.icon} ${selectedTemplate.name}` : "Planning Board"}
           </h2>
-          <p className="text-xs text-slate-500">
-            Drag items from the Objects Library to the board.
+          <p className="text-[10px] text-white/40 font-medium uppercase tracking-wider mt-0.5">
+            Architectural System Design & Module Mapping
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <button
             onClick={() => setView("SIDEBAR")}
-            className="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors"
+            className="glass-button text-[11px] px-4 py-2 border-white/10 text-white/60 hover:text-white"
           >
-            ← Back to Copilot
+            ← Back
           </button>
-          <button className="text-xs px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-semibold shadow-lg shadow-teal-900/30 transition-colors">
-            Synthesize to KiCad →
+          <button className="glass-button text-[11px] px-5 py-2 bg-indigo-600/80 hover:bg-indigo-500 text-white border-none shadow-xl shadow-indigo-500/20">
+            Synthesize Board →
           </button>
         </div>
       </div>

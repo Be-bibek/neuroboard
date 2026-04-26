@@ -18,6 +18,7 @@ class MCPRegistry:
         # Pre-register known servers
         self.register_server("neuro_router")
         self.register_server("neuro_layout")
+        self.register_server("neuro_schematic")
         
     def register_server(self, name: str):
         self.servers[name] = MCPServerInstance(name)
@@ -29,17 +30,28 @@ class MCPRegistry:
         server = self.servers[name]
         server.status = "running"
         
-        # In a full stdio implementation, this would spawn a subprocess.
-        # For now, we dynamically inspect and expose the tools.
         if name == "neuro_router":
             server.tools = [
-                {"name": "apply_routing_strategy", "description": "Apply semantic routing strategy (e.g. diff_pair)"},
-                {"name": "create_tracks", "description": "Batch create copper tracks"}
+                {"name": "route_trace",            "description": "Route a single copper trace between two points on a specified layer", "capabilities": ["point_to_point", "single_net"], "constraints": {"requires_layer": True, "requires_net": True}},
+                {"name": "apply_routing_strategy", "description": "Apply a semantic routing strategy (auto, diff_pair, power, respace) across multiple nets", "capabilities": ["multi_net", "strategy_based", "diff_pair", "power"], "constraints": {"strategy_enum": ["auto", "diff_pair", "power", "respace"]}},
+                {"name": "add_via",                "description": "Insert a through-hole via at a specified position on a given net", "capabilities": ["layer_change", "single_net"], "constraints": {"requires_position": True, "requires_net": True}},
+                {"name": "autoroute",              "description": "Run the Freerouting autorouter on the full board", "capabilities": ["full_board", "multi_net", "automated"], "constraints": {"requires_java": True}},
             ]
         elif name == "neuro_layout":
             server.tools = [
-                {"name": "get_board_state", "description": "Retrieve semantic board state"},
-                {"name": "add_via", "description": "Add a via at the specified coordinates"}
+                {"name": "get_board_info",         "description": "Retrieve full board metadata: dimensions, layers, component count, net count", "capabilities": ["read_only", "board_context"], "constraints": {}},
+                {"name": "get_nets_list",          "description": "Return all net names with optional track statistics", "capabilities": ["read_only", "net_analysis"], "constraints": {}},
+                {"name": "move_component",         "description": "Move a component to a new XY position with optional rotation and layer flip", "capabilities": ["placement", "single_component"], "constraints": {"requires_reference": True}},
+                {"name": "run_drc",                "description": "Execute KiCad Design Rule Check and return all violations", "capabilities": ["verification", "drc", "clearance_check"], "constraints": {}},
+                {"name": "place_component",        "description": "Place a new component footprint from a library at a given position", "capabilities": ["placement", "footprint"], "constraints": {"requires_footprint": True}},
+                {"name": "save_project",           "description": "Save the current KiCad project to disk", "capabilities": ["persistence"], "constraints": {}},
+            ]
+        elif name == "neuro_schematic":
+            server.tools = [
+                {"name": "create_schematic",           "description": "Create a new blank KiCad schematic file", "capabilities": ["schematic", "creation"], "constraints": {}},
+                {"name": "add_schematic_component",    "description": "Add a symbol to the schematic at a given position from a library", "capabilities": ["schematic", "symbol"], "constraints": {"requires_symbol": True}},
+                {"name": "add_schematic_wire",         "description": "Draw a wire between two points in the schematic", "capabilities": ["schematic", "connectivity"], "constraints": {"requires_waypoints": True}},
+                {"name": "sync_schematic_to_board",    "description": "Import netlist from schematic into the PCB board (equivalent to F8)", "capabilities": ["sync", "netlist"], "constraints": {}},
             ]
         return {"status": "started", "server": name}
         

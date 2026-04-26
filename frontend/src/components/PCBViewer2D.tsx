@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Activity } from "lucide-react";
 
 export function PCBViewer2D() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -7,8 +8,8 @@ export function PCBViewer2D() {
   useEffect(() => {
     const ws = new WebSocket("ws://127.0.0.1:8000/api/v1/live_stream");
 
-    ws.onopen = () => setStatus("Connected (Live IPC Stream)");
-    ws.onclose = () => setStatus("Disconnected");
+    ws.onopen = () => setStatus("IPC ACTIVE");
+    ws.onclose = () => setStatus("OFFLINE");
     
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -26,7 +27,6 @@ export function PCBViewer2D() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Very basic coordinate scaling for generic bounding boxes
     const SCALE = 5;
     const OFFSET_X = canvas.width / 2;
     const OFFSET_Y = canvas.height / 2;
@@ -35,47 +35,55 @@ export function PCBViewer2D() {
 
     // Draw Tracks
     if (state.tracks) {
-      ctx.strokeStyle = "#10b981"; // Emerald
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = "rgba(99, 102, 241, 0.8)";
+      ctx.lineWidth = 2;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
       state.tracks.forEach((track: any) => {
         ctx.beginPath();
-        // Assume KiCad coordinates might be centered differently, adding offset manually
         ctx.moveTo(track.start[0] * SCALE + OFFSET_X - 150, track.start[1] * SCALE + OFFSET_Y - 100);
         ctx.lineTo(track.end[0] * SCALE + OFFSET_X - 150, track.end[1] * SCALE + OFFSET_Y - 100);
         ctx.stroke();
       });
     }
 
-    // Draw Footprints (Mock bounding rects)
+    // Draw Footprints
     if (state.footprints) {
-      ctx.fillStyle = "rgba(59, 130, 246, 0.4)"; // Transparent Blue
-      ctx.strokeStyle = "#3b82f6";
-      ctx.lineWidth = 1;
-      
       state.footprints.forEach((fp: any) => {
         const x = fp.x * SCALE + OFFSET_X - 150;
         const y = fp.y * SCALE + OFFSET_Y - 100;
-        ctx.fillRect(x - 5, y - 5, 10, 10);
-        ctx.strokeRect(x - 5, y - 5, 10, 10);
         
-        ctx.fillStyle = "#e2e8f0";
-        ctx.font = "10px monospace";
-        ctx.fillText(fp.ref, x - 10, y - 10);
-        ctx.fillStyle = "rgba(59, 130, 246, 0.4)";
+        ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+        ctx.lineWidth = 1;
+        ctx.fillRect(x - 6, y - 6, 12, 12);
+        ctx.strokeRect(x - 6, y - 6, 12, 12);
+        
+        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.font = "bold 9px Inter, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(fp.ref, x, y - 10);
       });
     }
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-950 rounded-lg border border-slate-700 overflow-hidden relative">
-      <div className="absolute top-2 left-2 px-3 py-1 bg-slate-800 rounded shadow-md text-xs font-mono text-slate-300">
-        STATUS: <span className={status.includes("Connected") ? "text-emerald-400" : "text-rose-400"}>{status}</span>
+    <div className="flex flex-col h-full bg-transparent overflow-hidden relative group">
+      {/* Overlay Status */}
+      <div className="absolute top-4 left-4 z-20 flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl shadow-2xl transition-all duration-300 group-hover:bg-white/10">
+        <Activity size={12} className={status === "IPC ACTIVE" ? "text-emerald-400 animate-pulse" : "text-rose-400"} />
+        <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">{status}</span>
       </div>
+      
+      {/* Grid Pattern Overlay */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03]" 
+           style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+
       <canvas
         ref={canvasRef}
-        width={800}
-        height={600}
-        className="w-full h-full"
+        width={1000}
+        height={800}
+        className="w-full h-full cursor-crosshair"
       />
     </div>
   );

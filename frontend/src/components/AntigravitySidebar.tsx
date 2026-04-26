@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { SettingsModal } from './SettingsModal';
+import { Send, Zap, Cpu, Activity, ShieldCheck, Info } from 'lucide-react';
 
 // --- Types ---
 interface Message {
@@ -22,7 +24,6 @@ interface MCPServer {
   tool_count: number;
 }
 
-// --- Antigravity Style Sidebar ---
 export const AntigravitySidebar: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -30,9 +31,9 @@ export const AntigravitySidebar: React.FC = () => {
   const [toolsRunning, setToolsRunning] = useState<ToolExecution[]>([]);
   const [servers, setServers] = useState<MCPServer[]>([]);
   const [kicadStatus, setKicadStatus] = useState<'connected' | 'disconnected'>('disconnected');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, toolsRunning]);
@@ -56,7 +57,7 @@ export const AntigravitySidebar: React.FC = () => {
     setMessages([{
       id: 'welcome',
       role: 'system',
-      content: 'Welcome to NeuroBoard AI. MCP Runtime initialized. Type @board for context or @nets to query connections.',
+      content: 'NeuroBoard AI v5.0 · MCP Runtime initialized.',
       timestamp: new Date()
     }]);
   }, []);
@@ -75,21 +76,19 @@ export const AntigravitySidebar: React.FC = () => {
     if (!input.trim()) return;
     
     const intent = input;
-    const newMsg: Message = {
+    setMessages(prev => [...prev, {
       id: Date.now().toString(),
       role: 'user',
       content: intent,
       timestamp: new Date()
-    };
-    
-    setMessages(prev => [...prev, newMsg]);
+    }]);
     setInput('');
     
     const agentMsgId = (Date.now() + 1).toString();
     setMessages(prev => [...prev, {
       id: agentMsgId,
       role: 'agent',
-      content: 'Initializing LangGraph Agent Workflow...',
+      content: 'Initializing reasoning engine...',
       timestamp: new Date()
     }]);
 
@@ -97,188 +96,205 @@ export const AntigravitySidebar: React.FC = () => {
     
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      const nodeName = data.node;
-      
-      if (nodeName === 'END') {
-        setMessages(prev => prev.map(m => 
-          m.id === agentMsgId 
-            ? { ...m, content: m.content + '\n\n✅ Workflow Completed.' }
-            : m
+      const node = data.type;
+
+      if (node === 'completed') {
+        setMessages(prev => prev.map(m =>
+          m.id === agentMsgId ? { ...m, content: m.content + `\n\n✅ ${data.message}` } : m
         ));
+        setToolsRunning(prev => prev.map(t => t.status === 'running' ? { ...t, status: 'success' } : t));
         eventSource.close();
         return;
       }
-      
-      if (nodeName === 'ERROR') {
-         setMessages(prev => prev.map(m => 
-          m.id === agentMsgId 
-            ? { ...m, content: m.content + `\n\n❌ Error: ${data.error}` }
-            : m
+
+      if (node === 'error') {
+        setMessages(prev => prev.map(m =>
+          m.id === agentMsgId ? { ...m, content: m.content + `\n\n❌ ${data.message}` } : m
         ));
         eventSource.close();
         return;
       }
 
-      setMessages(prev => prev.map(m => 
-        m.id === agentMsgId 
-          ? { ...m, content: m.content + `\n\n[Agent Node] Executed: **${nodeName}**` }
-          : m
-      ));
+      if (node === 'status') {
+        setMessages(prev => prev.map(m =>
+          m.id === agentMsgId ? { ...m, content: m.content + `\n${data.message}` } : m
+        ));
+        return;
+      }
 
-      if (nodeName === 'execution' && data.state.execution_results) {
-        data.state.execution_results.forEach((res: any, idx: number) => {
-           const tid = `tool_${Date.now()}_${idx}`;
-           setToolsRunning(prev => [...prev, {
-             id: tid,
-             tool: res.action === 'executed' ? 'mcp.apply_routing_strategy' : 'mcp.simulate',
-             status: res.action === 'error' ? 'error' : 'success',
-             args: res.plan_item,
-             result: res.result
-           }]);
+      if (node === 'plan' && data.plan) {
+        const planText = data.plan.map((s: any, i: number) =>
+          `  ${i + 1}. ${s.action || s.tool}`
+        ).join('\n');
+        setMessages(prev => prev.map(m =>
+          m.id === agentMsgId
+            ? { ...m, content: m.content + `\n\n📋 **Plan:**\n${planText}` }
+            : m
+        ));
+        return;
+      }
+
+      if (node === 'tool_selected') {
+        const tid = `tool_${Date.now()}`;
+        setToolsRunning(prev => [...prev, {
+          id: tid,
+          tool: data.tool,
+          status: 'running',
+          args: { action: data.action },
+        }]);
+        return;
+      }
+
+      if (node === 'action') {
+        setToolsRunning(prev => {
+          const last = [...prev].reverse().find(t => t.status === 'running');
+          if (!last) return [...prev, {
+            id: `tool_${Date.now()}`,
+            tool: data.tool,
+            status: data.status === 'success' ? 'success' : 'error',
+            args: {},
+            result: data.result,
+          }];
+          return prev.map(t => t.id === last.id
+            ? { ...t, tool: data.tool, status: data.status === 'success' ? 'success' : 'error', result: data.result }
+            : t
+          );
         });
-      }
-      
-      if (nodeName === 'verification' && data.state.drc_errors?.length > 0) {
-        setMessages(prev => prev.map(m => 
-          m.id === agentMsgId 
-            ? { ...m, content: m.content + `\n\n⚠️ DRC Errors found: ${data.state.drc_errors.join(', ')}` }
-            : m
-        ));
+        if (data.message) {
+          setMessages(prev => prev.map(m =>
+            m.id === agentMsgId ? { ...m, content: m.content + `\n${data.message}` } : m
+          ));
+        }
       }
     };
-    
-    eventSource.onerror = (err) => {
-      console.error("SSE Error:", err);
-      eventSource.close();
-    };
+
+    eventSource.onerror = () => eventSource.close();
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-zinc-900/40 backdrop-blur-xl border-l border-white/10 text-gray-100 shadow-2xl font-sans rounded-l-2xl overflow-hidden transition-all duration-200 shadow-inner shadow-white/5">
+    <div className="flex flex-col h-full w-full bg-transparent text-white overflow-hidden font-sans">
       
-      {/* Header & Status (Continue.dev + LibreChat hybrid) */}
-      <div className="p-5 border-b border-white/10 flex flex-col gap-4 bg-zinc-950/30">
-        <div className="flex justify-between items-center">
-          <h2 className="text-sm font-semibold tracking-wide text-zinc-100 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.8)] animate-pulse"></span>
-            NeuroBoard Agent
-          </h2>
-          
-          {/* LibreChat Style Model Select */}
-          <div className="relative group">
-            <select 
-              value={model} 
-              onChange={(e) => setModel(e.target.value)}
-              className="appearance-none bg-zinc-800/50 hover:bg-zinc-700/60 text-xs font-medium border border-white/10 rounded-xl pl-3 pr-8 py-1.5 outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/50 transition-all duration-200 cursor-pointer shadow-inner shadow-white/5"
-            >
-              <option value="Gemini 1.5 Flash">Gemini 1.5 Flash (Fast)</option>
-              <option value="Claude 3.5 Sonnet">Claude 3.5 Sonnet (Reasoning)</option>
-            </select>
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400 group-hover:text-zinc-300">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
-              </svg>
+      {/* Header */}
+      <div className="px-6 py-5 border-b border-white/5 bg-white/5 backdrop-blur-md">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-2">
+            <div className="relative">
+               <Activity size={16} className="text-indigo-400" />
+               <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             </div>
+            <h2 className="text-sm font-bold tracking-tight text-white/90 uppercase">AI Reasoning</h2>
           </div>
+          <button onClick={() => setIsSettingsOpen(true)} className="p-2 hover:bg-white/10 rounded-xl transition-colors">
+             <Cpu size={16} className="text-white/60" />
+          </button>
         </div>
         
-        {/* MCP Server List (Roo Code Style Hub) */}
-        <div className="flex flex-col gap-2 mt-1 bg-zinc-900/60 p-3 rounded-2xl border border-white/5 shadow-inner shadow-black/20">
-          <div className="flex justify-between items-center mb-1">
-            <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest font-semibold">MCP Hub</span>
-            <div className="flex items-center gap-1.5 bg-zinc-800/50 px-2 py-0.5 rounded-full border border-white/5">
-              <span className={`w-1.5 h-1.5 rounded-full ${kicadStatus === 'connected' ? 'bg-emerald-400 shadow-[0_0_5px_rgba(52,211,153,0.8)]' : 'bg-red-500'}`}></span>
-              <span className="text-[9px] text-zinc-300 uppercase tracking-wider font-semibold">KiCad IPC</span>
-            </div>
+        {/* MCP Hub Glass Panel */}
+        <div className="bg-black/20 border border-white/5 rounded-2xl p-3 shadow-inner shadow-black/40">
+          <div className="flex items-center gap-2 mb-3 px-1">
+             <ShieldCheck size={12} className="text-indigo-400" />
+             <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Runtime Hub</span>
           </div>
-          {servers.map(s => (
-            <div key={s.name} className="flex items-center justify-between text-xs py-1">
-              <div className="flex items-center gap-2">
-                 <span className={`w-1.5 h-1.5 rounded-full ${s.status === 'running' ? 'bg-teal-400 shadow-[0_0_5px_rgba(45,212,191,0.8)]' : 'bg-rose-500'}`}></span>
-                 <span className="font-mono text-zinc-200">{s.name}</span>
-                 {s.status === 'running' && <span className="text-[9px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-1.5 py-0.5 rounded-md font-mono">{s.tool_count} tools</span>}
+          <div className="space-y-2">
+            {servers.map(s => (
+              <div key={s.name} className="flex items-center justify-between text-[11px] group">
+                <div className="flex items-center gap-2">
+                   <div className={`w-1.5 h-1.5 rounded-full ${s.status === 'running' ? 'bg-indigo-400 shadow-[0_0_8px_theme("colors.indigo.400")]' : 'bg-white/20'}`}></div>
+                   <span className="font-medium text-white/70 group-hover:text-white transition-colors">{s.name}</span>
+                </div>
+                <button 
+                  onClick={() => toggleServer(s.name, s.status)}
+                  className={`px-3 py-1 rounded-lg border text-[10px] font-bold transition-all ${s.status === 'running' ? 'border-rose-500/20 text-rose-400 hover:bg-rose-500/10' : 'border-white/10 text-white/40 hover:bg-white/5 hover:text-white/80'}`}
+                >
+                  {s.status === 'running' ? 'OFF' : 'ON'}
+                </button>
               </div>
-              <button 
-                onClick={() => toggleServer(s.name, s.status)}
-                className={`text-[9px] px-2.5 py-1 rounded-lg border font-semibold transition-all duration-200 ${s.status === 'running' ? 'border-rose-500/30 text-rose-400 hover:bg-rose-500/15' : 'border-teal-500/30 text-teal-400 hover:bg-teal-500/15'}`}
-              >
-                {s.status === 'running' ? 'STOP' : 'START'}
-              </button>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Chat Area (Continue.dev Style Streaming) */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-5 scrollbar-thin scrollbar-thumb-zinc-700/50 scrollbar-track-transparent">
+      {/* Chat History */}
+      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6 scrollbar-none">
         {messages.map(msg => (
           <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
             <div className={`
-              max-w-[85%] px-4 py-3 text-sm whitespace-pre-wrap transition-all duration-200
-              ${msg.role === 'user' ? 'bg-indigo-600/90 text-white rounded-2xl rounded-br-sm shadow-md' : ''}
-              ${msg.role === 'agent' ? 'bg-zinc-800/80 border border-white/10 text-zinc-200 rounded-2xl rounded-bl-sm font-mono text-xs shadow-md shadow-black/20' : ''}
-              ${msg.role === 'system' ? 'bg-teal-900/20 border border-teal-500/20 text-teal-200 text-xs text-center self-center w-full rounded-xl shadow-inner shadow-teal-500/10' : ''}
+              max-w-[90%] px-4 py-3 text-sm leading-relaxed shadow-2xl transition-all
+              ${msg.role === 'user' ? 'bg-indigo-600/80 text-white rounded-[20px] rounded-tr-none border border-white/10' : ''}
+              ${msg.role === 'agent' ? 'bg-white/5 backdrop-blur-xl border border-white/10 text-white/80 rounded-[20px] rounded-tl-none font-medium' : ''}
+              ${msg.role === 'system' ? 'text-[11px] text-indigo-400/80 font-bold tracking-widest uppercase self-center' : ''}
             `}>
-              {msg.content}
+              <div className="whitespace-pre-wrap">{msg.content}</div>
             </div>
           </div>
         ))}
 
-        {/* Live Tool Execution Feed */}
-        {toolsRunning.map(tool => (
-          <div key={tool.id} className="bg-zinc-800/60 border border-white/5 rounded-2xl p-3 text-xs w-[90%] self-start animate-fade-in shadow-lg shadow-black/20">
-            <div className="flex items-center gap-2 mb-2">
-              {tool.status === 'running' && (
-                <svg className="animate-spin h-3.5 w-3.5 text-teal-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                </svg>
-              )}
-              {tool.status === 'success' && <span className="text-emerald-400 text-sm font-bold">✓</span>}
-              <span className="font-mono text-zinc-300 text-[11px] bg-zinc-900/80 px-2 py-0.5 rounded-md border border-white/5">
-                {tool.tool}
-              </span>
+        {/* Tool Cards */}
+        <div className="space-y-3">
+          {toolsRunning.map(tool => (
+            <div key={tool.id} className="glass-card p-4 animate-in slide-in-from-right-4 duration-300">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  {tool.status === 'running' ? (
+                    <div className="relative flex items-center justify-center">
+                       <div className="absolute w-4 h-4 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 animate-spin"></div>
+                       <Zap size={10} className="text-indigo-400 animate-pulse" />
+                    </div>
+                  ) : tool.status === 'success' ? (
+                    <div className="bg-emerald-500/20 p-1 rounded-lg">
+                       <ShieldCheck size={12} className="text-emerald-400" />
+                    </div>
+                  ) : (
+                    <div className="bg-rose-500/20 p-1 rounded-lg">
+                       <Info size={12} className="text-rose-400" />
+                    </div>
+                  )}
+                  <span className="text-[11px] font-bold text-white/90 tracking-tight">{tool.tool}</span>
+                </div>
+                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${tool.status === 'running' ? 'bg-indigo-500/20 text-indigo-400' : tool.status === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                   {tool.status}
+                </span>
+              </div>
+              <div className="bg-black/30 rounded-xl p-3 font-mono text-[10px] text-white/40 border border-white/5 overflow-x-auto">
+                {JSON.stringify(tool.args, null, 2)}
+              </div>
             </div>
-            <div className="text-zinc-400 font-mono text-[10px] bg-black/40 p-2 rounded-xl overflow-hidden text-ellipsis whitespace-nowrap border border-black/50 shadow-inner">
-              {JSON.stringify(tool.args)}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input Area */}
-      <div className="p-5 bg-zinc-900/60 border-t border-white/10 shadow-[0_-10px_30px_rgba(0,0,0,0.2)]">
-        <div className="relative group">
-          <textarea 
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-            placeholder="Type @board to read layout, @nets to analyze..."
-            className="w-full bg-zinc-950/50 border border-white/10 hover:border-white/20 focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/50 rounded-2xl pl-4 pr-12 py-3.5 text-sm text-zinc-200 placeholder-zinc-500 resize-none outline-none transition-all duration-200 shadow-inner shadow-black/50"
-            rows={2}
-          />
-          <button 
-            onClick={handleSend}
-            disabled={!input.trim()}
-            className="absolute right-2 bottom-2 p-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 disabled:text-zinc-600 text-white rounded-xl transition-all duration-200 shadow-md disabled:shadow-none"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-              <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
-            </svg>
-          </button>
-        </div>
-        <div className="flex gap-2 mt-3">
-          <button onClick={() => setInput(prev => prev + '@board ')} className="text-[10px] px-2.5 py-1 rounded-lg border border-white/10 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-300 hover:border-white/20 transition-all duration-200 shadow-sm">@board</button>
-          <button onClick={() => setInput(prev => prev + '@nets ')} className="text-[10px] px-2.5 py-1 rounded-lg border border-white/10 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-300 hover:border-white/20 transition-all duration-200 shadow-sm">@nets</button>
+      <div className="p-6 bg-white/5 backdrop-blur-2xl border-t border-white/5 shadow-[0_-10px_40px_rgba(0,0,0,0.4)]">
+        <div className="relative flex items-end gap-3">
+          <div className="flex-1 relative">
+            <textarea 
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              placeholder="How can I optimize your PCB today?"
+              className="w-full bg-white/5 border border-white/10 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 rounded-2xl pl-4 pr-10 py-4 text-sm text-white placeholder-white/20 resize-none outline-none transition-all duration-300 min-h-[56px] max-h-[160px]"
+              rows={1}
+            />
+            <div className="absolute right-3 bottom-3 flex gap-2">
+                <button 
+                  onClick={handleSend}
+                  disabled={!input.trim()}
+                  className="p-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-30 text-white rounded-xl transition-all shadow-xl shadow-indigo-600/20 hover:scale-110 active:scale-95"
+                >
+                  <Send size={16} fill="currentColor" />
+                </button>
+            </div>
+          </div>
         </div>
       </div>
-
+      
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </div>
   );
 };

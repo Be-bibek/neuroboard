@@ -4,13 +4,13 @@
 
 @layer base {
   :root {
-    --background: 222.2 84% 4.9%;
+    --background: 230 25% 4%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 230 25% 7%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 230 25% 5%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 210 40% 98%;
@@ -22,17 +22,17 @@
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 226 70% 55%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
+    --border: 217.2 32.6% 25%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 226 70% 55%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
   }
 }
 
@@ -41,7 +41,30 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    background-color: #0b0f1a;
+    background-image: radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.15) 0px, transparent 50%),
+                      radial-gradient(at 100% 100%, rgba(88, 28, 135, 0.15) 0px, transparent 50%);
+    @apply text-foreground antialiased selection:bg-accent/30;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
+
+@layer components {
+  .glass-panel {
+    @apply backdrop-blur-2xl bg-zinc-900/30 border border-white/10 shadow-2xl shadow-black/40 rounded-3xl;
+  }
+  
+  .glass-card {
+    @apply backdrop-blur-xl bg-white/5 border border-white/10 shadow-xl rounded-2xl transition-all duration-200 hover:bg-white/10 hover:scale-[1.02];
+  }
+
+  .glass-button {
+    @apply backdrop-blur-md bg-white/10 border border-white/20 px-4 py-2 rounded-xl transition-all duration-200 hover:bg-white/20 active:scale-95 flex items-center justify-center gap-2 font-medium;
+  }
+
+  .accent-glow {
+    box-shadow: 0 0 20px -5px theme('colors.blue.500');
+  }
+}
+

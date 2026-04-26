@@ -1,32 +1,40 @@
 import ReactFlow, { Background, Controls } from 'reactflow';
 import 'reactflow/dist/style.css';
+import { Activity } from 'lucide-react';
 
 const initialNodes = [
-  { id: '1', position: { x: 50, y: 50 }, data: { label: 'LangGraph LLM Parser' }, type: 'input' },
-  { id: '2', position: { x: 50, y: 150 }, data: { label: 'SKiDL Schematic Generation' } },
-  { id: '3', position: { x: 50, y: 250 }, data: { label: 'KiCad Semantic Placement' } },
-  { id: '4', position: { x: 50, y: 350 }, data: { label: 'Rust Native Router' } },
-  { id: '5', position: { x: 50, y: 450 }, data: { label: 'Physics Validation (SI / PDN)' }, type: 'output' },
+  { id: '1', position: { x: 50, y: 0 }, data: { label: 'LLM Reasoning' }, type: 'input', style: { background: 'rgba(99, 102, 241, 0.2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: 'white', fontSize: '10px', fontWeight: 'bold' } },
+  { id: '2', position: { x: 50, y: 80 }, data: { label: 'Schematic Logic' }, style: { background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: 'white', fontSize: '10px', fontWeight: 'bold' } },
+  { id: '3', position: { x: 50, y: 160 }, data: { label: 'Semantic Placement' }, style: { background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: 'white', fontSize: '10px', fontWeight: 'bold' } },
+  { id: '4', position: { x: 50, y: 240 }, data: { label: 'Adaptive Router' }, style: { background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: 'white', fontSize: '10px', fontWeight: 'bold' } },
+  { id: '5', position: { x: 50, y: 320 }, data: { label: 'Physics Validation' }, type: 'output', style: { background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: 'white', fontSize: '10px', fontWeight: 'bold' } },
 ];
 
 const initialEdges = [
-  { id: 'e1-2', source: '1', target: '2', animated: true },
-  { id: 'e2-3', source: '2', target: '3', animated: true },
-  { id: 'e3-4', source: '3', target: '4', animated: true },
-  { id: 'e4-5', source: '4', target: '5', animated: true },
+  { id: 'e1-2', source: '1', target: '2', animated: true, style: { stroke: 'rgba(99, 102, 241, 0.5)' } },
+  { id: 'e2-3', source: '2', target: '3', animated: true, style: { stroke: 'rgba(255,255,255,0.2)' } },
+  { id: 'e3-4', source: '3', target: '4', animated: true, style: { stroke: 'rgba(255,255,255,0.2)' } },
+  { id: 'e4-5', source: '4', target: '5', animated: true, style: { stroke: 'rgba(16, 185, 129, 0.5)' } },
 ];
 
 export function WorkflowGraph() {
   return (
-    <div style={{ height: '300px', width: '100%' }} className="rounded-lg border border-slate-700 bg-slate-900 overflow-hidden">
-      <ReactFlow 
-        nodes={initialNodes} 
-        edges={initialEdges} 
-        fitView
-      >
-        <Background color="#334155" gap={16} />
-        <Controls className="bg-slate-800 border-none fill-slate-300" />
-      </ReactFlow>
+    <div className="h-full w-full flex flex-col">
+       <div className="flex items-center gap-2 mb-4 px-1">
+          <Activity size={16} className="text-indigo-400" />
+          <h3 className="text-sm font-bold text-white/90 tracking-tight uppercase">Agent Workflow</h3>
+       </div>
+       <div className="flex-1 min-h-0 relative">
+          <ReactFlow 
+            nodes={initialNodes} 
+            edges={initialEdges} 
+            fitView
+            style={{ background: 'transparent' }}
+          >
+            <Background color="#ffffff" gap={20} size={1} opacity={0.05} />
+            <Controls className="!bg-white/5 !border-white/10 !fill-white/40 !shadow-none rounded-xl overflow-hidden" />
+          </ReactFlow>
+       </div>
     </div>
   );
 }

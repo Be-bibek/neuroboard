@@ -66,35 +66,126 @@ class AgentSession:
         
     async def process_intent(self, user_intent: str):
         """
-        The main agent execution loop mimicking OpenHands' action streaming.
-        Yields state updates for the UI.
+        Autonomous goal-driven loop.
+        Streams rich events: plan reveal → per-step tool selection → execution → verification.
         """
         self.history.append({"role": "user", "content": user_intent})
-        yield {"type": "status", "message": "Analyzing Intent..."}
-        await asyncio.sleep(0.5)
-        
-        # Step 5: Route intent to MCP logic
-        if "@board" in user_intent:
-            yield {"type": "action", "tool": "get_board_state", "status": "running"}
-            res = self.hub.call_tool("neuro_layout", "get_board_state", {})
-            yield {"type": "action", "tool": "get_board_state", "status": "success", "result": res}
-            
-        elif "@nets" in user_intent:
-            # We assume get_nets_list exists on neuro_router or layout
-            yield {"type": "action", "tool": "get_nets_list", "status": "running"}
-            res = self.hub.call_tool("neuro_router", "get_nets_list", {})
-            yield {"type": "action", "tool": "get_nets_list", "status": "success", "result": res}
-            
-        else:
-            # General routing task
-            yield {"type": "status", "message": "Planning Routing Strategy..."}
-            await asyncio.sleep(1)
-            yield {"type": "action", "tool": "apply_routing_strategy", "status": "running"}
-            res = self.hub.call_tool("neuro_router", "apply_routing_strategy", {"strategy": "auto", "nets": []})
-            yield {"type": "action", "tool": "apply_routing_strategy", "status": "success", "result": res}
-            
-        yield {"type": "completed", "message": "Session tasks finished."}
+        yield {"type": "status", "message": "🔍 Discovering MCP tools..."}
+
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+        from agent.langgraph_loop import build_agent_graph
+
+        agent = build_agent_graph()
+        initial_state = {
+            "goal": user_intent,
+            "board_context": {},
+            "available_tools": [],
+            "scored_tools": [],
+            "plan": [],
+            "current_step_index": 0,
+            "selected_tool": None,
+            "execution_results": [],
+            "verification_report": {},
+            "drc_errors": [],
+            "retries": 0,
+            "strategy": "shortest_path",
+            "precheck_results": {},
+            "status": "started",
+        }
+
+        try:
+            for event in agent.stream(initial_state):
+                for node_name, state_update in event.items():
+                    if node_name == "research":
+                        tc = len(state_update.get("available_tools", []))
+                        yield {"type": "status", "message": f"🛠️ {tc} MCP tools discovered across 3 servers"}
+
+                    elif node_name == "strategy_selection":
+                        strat = state_update.get("strategy", "unknown")
+                        yield {"type": "status", "message": f"🧠 Strategy selected: {strat}"}
+
+                    elif node_name == "tool_scoring":
+                        top = (state_update.get("scored_tools") or [{}])[0]
+                        yield {"type": "status", "message": f"🏆 Top tool: {top.get('name','?')} (score {top.get('score','?')}/10)"}
+
+                    elif node_name == "planning":
+                        plan = state_update.get("plan", [])
+                        yield {"type": "plan", "plan": plan, "message": f"📋 Plan generated: {len(plan)} steps"}
+
+                    elif node_name == "tool_selection":
+                        tool = state_update.get("selected_tool") or {}
+                        yield {
+                            "type": "tool_selected",
+                            "tool": f"{tool.get('server','?')}::{tool.get('tool','?')}",
+                            "action": tool.get("action", ""),
+                            "score": tool.get("score", "?"),
+                            "message": f"🎯 Step {tool.get('step','?')}: {tool.get('tool','?')} (score {tool.get('score','?')})"
+                        }
+
+                    elif node_name == "precheck":
+                        res = state_update.get("precheck_results", {})
+                        risk = res.get("risk_level", "low")
+                        if risk in ["high", "medium"]:
+                            yield {"type": "status", "message": f"⚠️ Precheck risk ({risk}): {', '.join(res.get('issues', []))} — adjusting args"}
+                        else:
+                            yield {"type": "status", "message": f"✅ Precheck passed (risk: {risk})"}
+
+                    elif node_name == "execution":
+                        results = state_update.get("execution_results", [])
+                        last = results[-1] if results else {}
+                        has_err = "error" in str(last.get("result", ""))
+                        yield {
+                            "type": "action",
+                            "status": "error" if has_err else "success",
+                            "tool": f"{last.get('server','')}::{last.get('tool','')}",
+                            "result": last.get("result"),
+                            "message": f"⚡ {last.get('action', last.get('tool',''))}"
+                        }
+
+                    elif node_name == "step_validation":
+                        yield {"type": "status", "message": "✅ Step validated"}
+
+                    elif node_name == "verification":
+                        rpt = state_update.get("verification_report", {})
+                        errs = state_update.get("drc_errors", [])
+                        if errs:
+                            summary = f"DRC={len(rpt.get('drc',[]))} Impedance={len(rpt.get('impedance',[]))} Power={len(rpt.get('power',[]))} Complete={len(rpt.get('completeness',[]))}"
+                            yield {"type": "status", "message": f"⚠️ {len(errs)} issue(s) — {summary}"}
+                        else:
+                            yield {"type": "status", "message": "✅ All checks passed: DRC, Impedance, Power Integrity, Routing Completeness"}
+
+                    elif node_name == "self_correction":
+                        retries = state_update.get("retries", 0)
+                        new_plan = state_update.get("plan", [])
+                        yield {"type": "status", "message": f"🔄 Targeted fix (attempt {retries}): {len(new_plan)} corrective step(s)"}
+
+                    await asyncio.sleep(0.05)
+
+            yield {"type": "completed", "message": "✅ Goal achieved. Agent workflow complete."}
+
+        except Exception as e:
+            logging.error(f"Agent Execution Failed: {e}")
+            yield {"type": "error", "message": f"Agent loop failed: {e}"}
+
+
+class OrchestratorBridge:
+    """
+    Backward compatibility bridge for legacy endpoints.
+    """
+    def __init__(self, mcp_hub: McpHub):
+        self.hub = mcp_hub
+
+    def inject_decoupling(self, target_ref: str):
+        # Dispatch to neuro_layout MCP server (conceptual tool)
+        return self.hub.call_tool("neuro_layout", "inject_decoupling", {"target_ref": target_ref})
+
+    def save_board(self):
+        # Dispatch to neuro_layout save_project tool
+        return self.hub.call_tool("neuro_layout", "save_project", {})
 
 # Global instances
 hub = McpHub()
 hub.connect_kicad()
+orchestrator = OrchestratorBridge(hub)
