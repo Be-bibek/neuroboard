@@ -70,20 +70,28 @@ def planning_node(state: AgentState) -> AgentState:
     }
 
 def execution_node(state: AgentState) -> AgentState:
-    """Calls MCP tools to execute the routing plan."""
+    """Calls MCP tools via the dynamic registry to execute the routing plan."""
     import sys
     from pathlib import Path
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-    from mcp_server.server import apply_routing_strategy, get_board_state
+    from mcp_runtime.registry import mcp_registry
+    
+    # Ensure servers are started for execution
+    mcp_registry.start_server("neuro_router")
+    mcp_registry.start_server("neuro_layout")
     
     plan = state.get("routing_plan", [])
     results = []
     
-    # Actually call the MCP tools for execution
+    # Actually call the MCP tools via registry
     for item in plan:
         try:
             if item.get("type") == "diff_pair":
-                res = apply_routing_strategy(strategy="diff_pair", nets=item.get("net_pair", []), constraints=item)
+                res = mcp_registry.call_tool(
+                    server_name="neuro_router", 
+                    tool_name="apply_routing_strategy", 
+                    args={"strategy": "diff_pair", "nets": item.get("net_pair", []), "constraints": item}
+                )
                 results.append({"action": "executed", "plan_item": item, "result": res})
             else:
                 results.append({"action": "simulated", "plan_item": item})
@@ -92,7 +100,7 @@ def execution_node(state: AgentState) -> AgentState:
             
     # Also fetch the real board state to ensure connection
     try:
-        board_state = get_board_state()
+        board_state = mcp_registry.call_tool("neuro_layout", "get_board_state", {})
         results.append({"action": "fetched_board_state", "result": board_state})
     except Exception as e:
         pass

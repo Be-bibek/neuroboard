@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { invoke } from '@tauri-apps/api/core';
 
 // --- Types ---
 interface Message {
@@ -17,13 +16,19 @@ interface ToolExecution {
   result?: any;
 }
 
+interface MCPServer {
+  name: string;
+  status: string;
+  tool_count: number;
+}
+
 // --- Antigravity Style Sidebar ---
 export const AntigravitySidebar: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [model, setModel] = useState('Gemini 1.5 Pro');
+  const [model, setModel] = useState('Gemini 1.5 Flash');
   const [toolsRunning, setToolsRunning] = useState<ToolExecution[]>([]);
-  const [mcpStatus, setMcpStatus] = useState<'connected' | 'disconnected'>('disconnected');
+  const [servers, setServers] = useState<MCPServer[]>([]);
   const [kicadStatus, setKicadStatus] = useState<'connected' | 'disconnected'>('disconnected');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -32,19 +37,39 @@ export const AntigravitySidebar: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, toolsRunning]);
 
-  // Mock status updates
+  const fetchServers = async () => {
+    try {
+      const res = await fetch('http://localhost:8000/api/v1/mcp/servers');
+      const data = await res.json();
+      if (data.status === 'success') {
+        setServers(data.servers);
+      }
+    } catch (e) {
+      console.error("Failed to fetch MCP servers");
+    }
+  };
+
   useEffect(() => {
-    setMcpStatus('connected');
     setKicadStatus('connected');
+    fetchServers();
     
-    // Welcome message
     setMessages([{
       id: 'welcome',
       role: 'system',
-      content: 'Welcome to NeuroBoard AI (Antigravity mode). I am connected to your KiCad IPC. Mention @board for context or @nets to query connections.',
+      content: 'Welcome to NeuroBoard AI. MCP Runtime initialized. Type @board for context or @nets to query connections.',
       timestamp: new Date()
     }]);
   }, []);
+
+  const toggleServer = async (server: string, currentStatus: string) => {
+    const action = currentStatus === 'running' ? 'stop' : 'start';
+    try {
+      await fetch(`http://localhost:8000/api/v1/mcp/servers/${server}/${action}`, { method: 'POST' });
+      fetchServers();
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -68,7 +93,6 @@ export const AntigravitySidebar: React.FC = () => {
       timestamp: new Date()
     }]);
 
-    // Connect to real SSE LangGraph stream
     const eventSource = new EventSource(`http://localhost:8000/api/v1/agent/run?intent=${encodeURIComponent(intent)}`);
     
     eventSource.onmessage = (event) => {
@@ -95,14 +119,12 @@ export const AntigravitySidebar: React.FC = () => {
         return;
       }
 
-      // Update chat log with node progress
       setMessages(prev => prev.map(m => 
         m.id === agentMsgId 
           ? { ...m, content: m.content + `\n\n[Agent Node] Executed: **${nodeName}**` }
           : m
       ));
 
-      // Display Tool Execution logs
       if (nodeName === 'execution' && data.state.execution_results) {
         data.state.execution_results.forEach((res: any, idx: number) => {
            const tid = `tool_${Date.now()}_${idx}`;
@@ -135,7 +157,7 @@ export const AntigravitySidebar: React.FC = () => {
     <div className="flex flex-col h-full w-96 bg-gray-900/80 backdrop-blur-xl border-l border-white/10 text-gray-100 shadow-2xl font-sans">
       
       {/* Header & Status */}
-      <div className="p-4 border-b border-white/10 flex flex-col gap-2 bg-gray-900/50">
+      <div className="p-4 border-b border-white/10 flex flex-col gap-3 bg-gray-900/50">
         <div className="flex justify-between items-center">
           <h2 className="text-sm font-semibold tracking-wide text-gray-200">NeuroBoard AI</h2>
           <select 
@@ -143,21 +165,35 @@ export const AntigravitySidebar: React.FC = () => {
             onChange={(e) => setModel(e.target.value)}
             className="bg-gray-800 text-xs border border-gray-700 rounded-md px-2 py-1 outline-none focus:border-blue-500"
           >
-            <option>Gemini 1.5 Pro</option>
+            <option>Gemini 1.5 Flash</option>
             <option>Claude 3.5 Sonnet</option>
-            <option>Local Llama 3</option>
           </select>
         </div>
         
-        <div className="flex gap-4 text-xs">
-          <div className="flex items-center gap-1.5">
-            <span className={`w-2 h-2 rounded-full ${mcpStatus === 'connected' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-red-500'}`}></span>
-            <span className="text-gray-400">MCP Host</span>
+        {/* MCP Server List */}
+        <div className="flex flex-col gap-1.5 mt-1 bg-gray-950/50 p-2 rounded-lg border border-gray-800">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">MCP Servers</span>
+            <div className="flex items-center gap-1.5">
+              <span className={`w-1.5 h-1.5 rounded-full ${kicadStatus === 'connected' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
+              <span className="text-[9px] text-gray-500 uppercase tracking-wider">KiCad IPC</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className={`w-2 h-2 rounded-full ${kicadStatus === 'connected' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-red-500'}`}></span>
-            <span className="text-gray-400">KiCad IPC</span>
-          </div>
+          {servers.map(s => (
+            <div key={s.name} className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                 <span className={`w-1.5 h-1.5 rounded-full ${s.status === 'running' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
+                 <span className="font-mono text-gray-300">{s.name}</span>
+                 {s.status === 'running' && <span className="text-[9px] bg-blue-900/50 text-blue-300 px-1.5 rounded">tools: {s.tool_count}</span>}
+              </div>
+              <button 
+                onClick={() => toggleServer(s.name, s.status)}
+                className={`text-[9px] px-2 py-0.5 rounded border ${s.status === 'running' ? 'border-red-500/50 text-red-400 hover:bg-red-500/10' : 'border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10'}`}
+              >
+                {s.status === 'running' ? 'STOP' : 'START'}
+              </button>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -166,9 +202,9 @@ export const AntigravitySidebar: React.FC = () => {
         {messages.map(msg => (
           <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
             <div className={`
-              max-w-[85%] rounded-2xl px-4 py-2.5 text-sm
+              max-w-[85%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap
               ${msg.role === 'user' ? 'bg-blue-600/90 text-white rounded-br-none' : ''}
-              ${msg.role === 'agent' ? 'bg-gray-800/90 border border-gray-700 text-gray-200 rounded-bl-none' : ''}
+              ${msg.role === 'agent' ? 'bg-gray-800/90 border border-gray-700 text-gray-200 rounded-bl-none font-mono text-xs' : ''}
               ${msg.role === 'system' ? 'bg-indigo-900/40 border border-indigo-500/30 text-indigo-200 text-xs text-center self-center w-full' : ''}
             `}>
               {msg.content}

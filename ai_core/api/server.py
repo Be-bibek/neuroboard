@@ -180,6 +180,34 @@ async def copilot_confirm(req: CopilotConfirmRequest, background_tasks: Backgrou
 
 
 # ═══════════════════════════════════════════════════════════════════════════
+#  MCP RUNTIME ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════════
+from mcp_runtime.registry import mcp_registry
+
+@app.get("/api/v1/mcp/servers")
+def get_mcp_servers():
+    """List all registered MCP servers and their status."""
+    return {"status": "success", "servers": mcp_registry.get_servers()}
+
+@app.post("/api/v1/mcp/servers/{server_name}/start")
+def start_mcp_server(server_name: str):
+    """Start an MCP server."""
+    try:
+        return mcp_registry.start_server(server_name)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/api/v1/mcp/servers/{server_name}/stop")
+def stop_mcp_server(server_name: str):
+    """Stop an MCP server."""
+    return mcp_registry.stop_server(server_name)
+
+@app.get("/api/v1/mcp/tools")
+def get_mcp_tools(server: str):
+    """List tools exposed by a specific running MCP server."""
+    return {"status": "success", "server": server, "tools": mcp_registry.get_tools(server)}
+
+# ═══════════════════════════════════════════════════════════════════════════
 #  PIPELINE (Placement + Routing + Validation)
 # ═══════════════════════════════════════════════════════════════════════════
 
