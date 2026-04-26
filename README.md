@@ -32,12 +32,18 @@ NeuroBoard is built with a singular goal: **to transform high-level natural lang
 
 ## 🌐 Live Experience & Downloads
 
-### 🚀 [Live Demo Component (Digital Twin)](https://Be-bibek.github.io/neuroboard/)
-Experience the NeuroBoard interface in your browser. Monitor real-time synthesis, manual edit detection, and electrical health checks.
+### 🚀 [Live Experience (Digital Twin)](https://Be-bibek.github.io/neuroboard/)
+The interface is now fully responsive. You can interact with the **AI Reasoning** panel on the right to start autonomous PCB routing or open the **Settings** (gear icon) to configure model parameters.
 
 👉 **[CLICK HERE FOR LIVE DEMO](https://Be-bibek.github.io/neuroboard/)**
 
-[![NeuroBoard UI Preview](https://raw.githubusercontent.com/Be-bibek/neuroboard/main/docs/ui_preview.webp)](https://Be-bibek.github.io/neuroboard/)
+<p align="center">
+  <img src="docs/glass_dashboard.png" width="800" alt="NeuroBoard Glassmorphic Dashboard" />
+</p>
+
+<p align="center">
+  <img src="docs/glass_settings.png" width="800" alt="NeuroBoard Glassmorphic Settings" />
+</p>
 
 ### 📥 [Download Desktop Copilot](https://github.com/Be-bibek/neuroboard/releases/latest)
 Get the production-ready Tauri application for full KiCad 10 IPC integration.
