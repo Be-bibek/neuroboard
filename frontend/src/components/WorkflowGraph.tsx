@@ -31,7 +31,7 @@ export function WorkflowGraph() {
             fitView
             style={{ background: 'transparent' }}
           >
-            <Background color="#ffffff" gap={20} size={1} opacity={0.05} />
+            <Background variant={'dots' as any} gap={20} size={1} style={{ opacity: 0.05 }} />
             <Controls className="!bg-white/5 !border-white/10 !fill-white/40 !shadow-none rounded-xl overflow-hidden" />
           </ReactFlow>
        </div>

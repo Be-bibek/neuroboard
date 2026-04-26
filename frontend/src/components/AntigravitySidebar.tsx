@@ -27,10 +27,8 @@ interface MCPServer {
 export const AntigravitySidebar: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [model, setModel] = useState('Gemini 1.5 Flash');
   const [toolsRunning, setToolsRunning] = useState<ToolExecution[]>([]);
   const [servers, setServers] = useState<MCPServer[]>([]);
-  const [kicadStatus, setKicadStatus] = useState<'connected' | 'disconnected'>('disconnected');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -51,7 +49,6 @@ export const AntigravitySidebar: React.FC = () => {
   };
 
   useEffect(() => {
-    setKicadStatus('connected');
     fetchServers();
     
     setMessages([{
