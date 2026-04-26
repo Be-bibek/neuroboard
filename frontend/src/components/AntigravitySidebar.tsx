@@ -49,52 +49,86 @@ export const AntigravitySidebar: React.FC = () => {
   const handleSend = async () => {
     if (!input.trim()) return;
     
+    const intent = input;
     const newMsg: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: input,
+      content: intent,
       timestamp: new Date()
     };
     
     setMessages(prev => [...prev, newMsg]);
     setInput('');
     
-    // Simulate Agent execution
     const agentMsgId = (Date.now() + 1).toString();
     setMessages(prev => [...prev, {
       id: agentMsgId,
       role: 'agent',
-      content: 'Thinking...',
+      content: 'Initializing LangGraph Agent Workflow...',
       timestamp: new Date()
     }]);
 
-    // Parse specific intents
-    if (input.includes('@board')) {
-      simulateToolCall('get_board_state', {}, 'Analyzing current board state...');
-    } else if (input.includes('@nets')) {
-      simulateToolCall('get_nets', {}, 'Fetching defined nets...');
-    } else if (input.toLowerCase().includes('route')) {
-      simulateToolCall('apply_routing_strategy', { strategy: 'auto' }, 'Executing LangGraph routing workflow...');
-    }
+    // Connect to real SSE LangGraph stream
+    const eventSource = new EventSource(`http://localhost:8000/api/v1/agent/run?intent=${encodeURIComponent(intent)}`);
+    
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      const nodeName = data.node;
+      
+      if (nodeName === 'END') {
+        setMessages(prev => prev.map(m => 
+          m.id === agentMsgId 
+            ? { ...m, content: m.content + '\n\n✅ Workflow Completed.' }
+            : m
+        ));
+        eventSource.close();
+        return;
+      }
+      
+      if (nodeName === 'ERROR') {
+         setMessages(prev => prev.map(m => 
+          m.id === agentMsgId 
+            ? { ...m, content: m.content + `\n\n❌ Error: ${data.error}` }
+            : m
+        ));
+        eventSource.close();
+        return;
+      }
 
-    setTimeout(() => {
+      // Update chat log with node progress
       setMessages(prev => prev.map(m => 
         m.id === agentMsgId 
-          ? { ...m, content: 'I have completed the requested operation via the MCP server.' }
+          ? { ...m, content: m.content + `\n\n[Agent Node] Executed: **${nodeName}**` }
           : m
       ));
-    }, 3000);
-  };
 
-  const simulateToolCall = (toolName: string, args: any, message: string) => {
-    const tid = Date.now().toString();
-    setToolsRunning(prev => [...prev, { id: tid, tool: toolName, status: 'running', args }]);
+      // Display Tool Execution logs
+      if (nodeName === 'execution' && data.state.execution_results) {
+        data.state.execution_results.forEach((res: any, idx: number) => {
+           const tid = `tool_${Date.now()}_${idx}`;
+           setToolsRunning(prev => [...prev, {
+             id: tid,
+             tool: res.action === 'executed' ? 'mcp.apply_routing_strategy' : 'mcp.simulate',
+             status: res.action === 'error' ? 'error' : 'success',
+             args: res.plan_item,
+             result: res.result
+           }]);
+        });
+      }
+      
+      if (nodeName === 'verification' && data.state.drc_errors?.length > 0) {
+        setMessages(prev => prev.map(m => 
+          m.id === agentMsgId 
+            ? { ...m, content: m.content + `\n\n⚠️ DRC Errors found: ${data.state.drc_errors.join(', ')}` }
+            : m
+        ));
+      }
+    };
     
-    setTimeout(() => {
-      setToolsRunning(prev => prev.map(t => 
-        t.id === tid ? { ...t, status: 'success', result: { msg: 'Completed' } } : t
-      ));
-    }, 2000);
+    eventSource.onerror = (err) => {
+      console.error("SSE Error:", err);
+      eventSource.close();
+    };
   };
 
   return (

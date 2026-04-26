@@ -129,6 +129,36 @@ async def copilot_prompt(req: CopilotPromptRequest):
         log.error(f"[API] /copilot/prompt error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+from fastapi.responses import StreamingResponse
+import time
+
+@app.get("/api/v1/agent/run")
+async def run_agent(intent: str):
+    """
+    Runs the LangGraph autonomous agent loop and streams events via Server-Sent Events (SSE).
+    """
+    from agent.langgraph_loop import build_agent_graph
+    
+    agent = build_agent_graph()
+    if not agent:
+        raise HTTPException(status_code=500, detail="LangGraph not available")
+        
+    async def event_stream():
+        initial_state = {"intent": intent, "retries": 0, "drc_errors": []}
+        try:
+            # invoke() is synchronous. For a real stream, we'd use stream() 
+            # But since it might block the thread, we will yield steps manually or use stream if available
+            for event in agent.stream(initial_state):
+                for node_name, state_update in event.items():
+                    data = json.dumps({"node": node_name, "state": state_update})
+                    yield f"data: {data}\n\n"
+                    await asyncio.sleep(0.5) # Slight delay for UI effect
+            yield f"data: {json.dumps({'node': 'END', 'status': 'completed'})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'node': 'ERROR', 'error': str(e)})}\n\n"
+            
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
+
 
 @app.post("/api/v1/copilot/confirm")
 async def copilot_confirm(req: CopilotConfirmRequest, background_tasks: BackgroundTasks):

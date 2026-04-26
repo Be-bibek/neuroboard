@@ -71,9 +71,31 @@ def planning_node(state: AgentState) -> AgentState:
 
 def execution_node(state: AgentState) -> AgentState:
     """Calls MCP tools to execute the routing plan."""
-    # In production, this uses MCP `create_tracks` or `apply_routing_strategy`
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    from mcp_server.server import apply_routing_strategy, get_board_state
+    
     plan = state.get("routing_plan", [])
-    results = [{"action": "executed", "plan_item": item} for item in plan]
+    results = []
+    
+    # Actually call the MCP tools for execution
+    for item in plan:
+        try:
+            if item.get("type") == "diff_pair":
+                res = apply_routing_strategy(strategy="diff_pair", nets=item.get("net_pair", []), constraints=item)
+                results.append({"action": "executed", "plan_item": item, "result": res})
+            else:
+                results.append({"action": "simulated", "plan_item": item})
+        except Exception as e:
+            results.append({"action": "error", "error": str(e), "plan_item": item})
+            
+    # Also fetch the real board state to ensure connection
+    try:
+        board_state = get_board_state()
+        results.append({"action": "fetched_board_state", "result": board_state})
+    except Exception as e:
+        pass
     
     return {
         **state,
