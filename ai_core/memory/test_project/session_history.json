@@ -1,0 +1,8 @@
+[
+  {
+    "intent": "Move J1 right",
+    "script": "...script...",
+    "success": true,
+    "result": "Moved J1 from 100 to 100.5mm"
+  }
+]

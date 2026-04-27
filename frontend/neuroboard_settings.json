@@ -1,0 +1,27 @@
+{
+  "agent": {
+    "strict_mode": true,
+    "review_policy": "auto",
+    "max_iterations": 6,
+    "tool_execution_mode": "auto"
+  },
+  "models": {
+    "default_model": "Gemini 1.5 Flash",
+    "fast_model": "Gemini 1.5 Flash",
+    "reasoning_model": "Claude 3.5 Sonnet",
+    "temperature": 0.2,
+    "max_tokens": 4096
+  },
+  "pcb": {
+    "default_trace_width": 0.25,
+    "impedance_target": "90ohm",
+    "power_trace_min_width": 0.5,
+    "via_stitch_density": "medium",
+    "signal_types": [
+      "power",
+      "diff_pair",
+      "control"
+    ],
+    "constraint_mode": "strict_physics"
+  }
+}

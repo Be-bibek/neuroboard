@@ -1,0 +1,188 @@
+{
+  "footprints": [
+    {
+      "ref": "MH2",
+      "x": 161.5,
+      "y": 47.5,
+      "rot": 0.0
+    },
+    {
+      "ref": "MH6",
+      "x": 157.0,
+      "y": 70.0,
+      "rot": 0.0
+    },
+    {
+      "ref": "C_DEC_2",
+      "x": 116.5,
+      "y": 66.5,
+      "rot": 90.0
+    },
+    {
+      "ref": "J2",
+      "x": 105.0,
+      "y": 80.0,
+      "rot": 90.0
+    },
+    {
+      "ref": "J_SSD",
+      "x": 124.0,
+      "y": 71.5,
+      "rot": -90.0
+    },
+    {
+      "ref": "C_DEC_1",
+      "x": 115.0,
+      "y": 66.5,
+      "rot": 90.0
+    },
+    {
+      "ref": "C_DEC_4",
+      "x": 119.5,
+      "y": 66.5,
+      "rot": 90.0
+    },
+    {
+      "ref": "L1",
+      "x": 123.85,
+      "y": 54.0,
+      "rot": 90.0
+    },
+    {
+      "ref": "U1",
+      "x": 149.85,
+      "y": 53.5,
+      "rot": 0.0
+    },
+    {
+      "ref": "MH3",
+      "x": 103.5,
+      "y": 96.5,
+      "rot": 0.0
+    },
+    {
+      "ref": "MH1",
+      "x": 103.5,
+      "y": 47.5,
+      "rot": 0.0
+    },
+    {
+      "ref": "U2",
+      "x": 142.0,
+      "y": 62.5,
+      "rot": 0.0
+    },
+    {
+      "ref": "D2",
+      "x": 110.0,
+      "y": 70.0,
+      "rot": 0.0
+    },
+    {
+      "ref": "C_DEC_3",
+      "x": 118.0,
+      "y": 66.5,
+      "rot": 90.0
+    },
+    {
+      "ref": "D1",
+      "x": 110.0,
+      "y": 65.0,
+      "rot": 0.0
+    },
+    {
+      "ref": "MH4",
+      "x": 161.5,
+      "y": 96.5,
+      "rot": 0.0
+    },
+    {
+      "ref": "C3",
+      "x": 119.0,
+      "y": 54.0,
+      "rot": 0.0
+    },
+    {
+      "ref": "C4",
+      "x": 113.85,
+      "y": 54.0,
+      "rot": 0.0
+    },
+    {
+      "ref": "J_PCIE",
+      "x": 109.0,
+      "y": 72.0,
+      "rot": -90.0
+    },
+    {
+      "ref": "R2",
+      "x": 110.0,
+      "y": 75.0,
+      "rot": 0.0
+    },
+    {
+      "ref": "R1",
+      "x": 110.0,
+      "y": 60.0,
+      "rot": 0.0
+    },
+    {
+      "ref": "MH5",
+      "x": 145.0,
+      "y": 70.0,
+      "rot": 0.0
+    },
+    {
+      "ref": "J1",
+      "x": 108.37,
+      "y": 48.77,
+      "rot": -90.0
+    }
+  ],
+  "nets": [
+    "+3V3",
+    "+5V",
+    "/GPIO10{slash}SPI0.MOSI",
+    "/GPIO11{slash}SPI0.SCLK",
+    "/GPIO12{slash}PWM0",
+    "/GPIO13{slash}PWM1",
+    "/GPIO14{slash}TXD0",
+    "/GPIO15{slash}RXD0",
+    "/GPIO16",
+    "/GPIO17",
+    "/GPIO18{slash}PCM.CLK",
+    "/GPIO19{slash}PCM.FS",
+    "/GPIO20{slash}PCM.DIN",
+    "/GPIO21{slash}PCM.DOUT",
+    "/GPIO22",
+    "/GPIO23",
+    "/GPIO24",
+    "/GPIO25",
+    "/GPIO26",
+    "/GPIO27",
+    "/GPIO2{slash}SDA1",
+    "/GPIO3{slash}SCL1",
+    "/GPIO4{slash}GPCLK0",
+    "/GPIO5",
+    "/GPIO6",
+    "/GPIO7{slash}SPI0.CE1",
+    "/GPIO8{slash}SPI0.CE0",
+    "/GPIO9{slash}SPI0.MISO",
+    "/ID_SCL",
+    "/ID_SDA",
+    "GND",
+    "LED_ACT",
+    "LED_PWR",
+    "PCIE_CLKREQ",
+    "PCIE_PERST",
+    "PCIE_REFCLK_N",
+    "PCIE_REFCLK_P",
+    "PCIE_RX_N",
+    "PCIE_RX_P",
+    "PCIE_TX_N",
+    "PCIE_TX_P",
+    "PCIE_WAKE",
+    "VCC"
+  ],
+  "layer_count": 2
+}

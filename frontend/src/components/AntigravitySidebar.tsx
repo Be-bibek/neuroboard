@@ -492,6 +492,7 @@ export const AntigravitySidebar: React.FC = () => {
           </div>
         </div>
       </div>
+      )}
 
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </div>

@@ -18,7 +18,6 @@ log = logging.getLogger("AutonomousAgent")
 # LLM Helper
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _llm(messages: List[Dict], model: Optional[str] = None) -> str:
 def _llm(messages: List[Dict], retries: int = 3, backoff: float = 2.0) -> str:
     """Standard LLM call with exponential backoff for rate limiting."""
     import time

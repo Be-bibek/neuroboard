@@ -1,0 +1,7 @@
+[
+  {
+    "keyword": "move_connector",
+    "script": "fp.position = Vector2.from_xy(mm(100), mm(200))",
+    "description": "Move connector to XY"
+  }
+]
