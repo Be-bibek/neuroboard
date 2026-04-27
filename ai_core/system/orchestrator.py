@@ -138,7 +138,19 @@ class AgentSession:
 
                     elif node_name == "planning":
                         plan = state_update.get("plan", [])
-                        yield {"type": "plan", "plan": plan, "message": f"📋 Plan generated: {len(plan)} steps", "model": model_name}
+                        thought = state_update.get("thought", "")
+
+                        # PILLAR 2: Stream the THOUGHT block first
+                        if thought:
+                            yield {
+                                "type": "thought",
+                                "content": thought,
+                                "message": "Engineering reasoning complete.",
+                                "model": model_name,
+                            }
+                            await asyncio.sleep(0.1)
+
+                        yield {"type": "plan", "plan": plan, "message": f"Plan generated: {len(plan)} steps", "model": model_name}
 
                     elif node_name == "tool_selection":
                         tool = state_update.get("selected_tool") or {}
@@ -162,14 +174,48 @@ class AgentSession:
                     elif node_name == "execution":
                         results = state_update.get("execution_results", [])
                         last = results[-1] if results else {}
-                        has_err = "error" in str(last.get("result", ""))
+                        result = last.get("result", {})
+                        has_err = isinstance(result, dict) and result.get("status") == "failed"
+                        tool_name = f"{last.get('server','')}::{last.get('tool','')}"
+
+                        # PILLAR 2: If this was a scratchpad call, stream the script
+                        if last.get("tool") == "execute_engineering_script":
+                            script_code = last.get("args", {}).get("script_code", "")
+                            if script_code:
+                                yield {
+                                    "type": "script",
+                                    "script_code": script_code,
+                                    "stdout": result.get("stdout", "") if isinstance(result, dict) else "",
+                                    "stderr": result.get("stderr", "") if isinstance(result, dict) else "",
+                                    "status": "failed" if has_err else "success",
+                                    "message": f"Script {'failed' if has_err else 'executed'}: {last.get('action', '')}",
+                                    "model": model_name,
+                                }
+                                await asyncio.sleep(0.05)
+                                continue
+
                         yield {
                             "type": "action",
                             "status": "error" if has_err else "success",
-                            "tool": f"{last.get('server','')}::{last.get('tool','')}",
-                            "result": last.get("result"),
+                            "tool": tool_name,
+                            "result": result,
                             "message": f"⚡ {last.get('action', last.get('tool',''))}",
-                            "model": model_name
+                            "model": model_name,
+                        }
+
+                    elif node_name == "reflect":
+                        # PILLAR 2+3: Stream the reflection event
+                        reflect_n = state_update.get("reflect_retries", 1)
+                        plan = state_update.get("plan", [])
+                        # The last plan step contains the corrected script
+                        corrected_step = plan[state_update.get("current_step_index", 0)] if plan else {}
+                        corrected_script = corrected_step.get("args", {}).get("script_code", "")
+                        yield {
+                            "type": "reflect",
+                            "attempt": reflect_n,
+                            "corrected_script": corrected_script,
+                            "message": f"Self-correcting script (attempt {reflect_n}/3)...",
+                            "model": model_name,
                         }
 
                     elif node_name == "step_validation":

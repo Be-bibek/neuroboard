@@ -36,8 +36,8 @@ def _fast_llm(messages: List[Dict]) -> str:
         import google.generativeai as genai
         import os
         genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-        # Using Flash for reliable performance
-        m = genai.GenerativeModel(model_name="gemini-1.5-flash")
+        # Using Flash-Lite for higher volume tasks
+        m = genai.GenerativeModel(model_name="models/gemini-3.1-flash-lite-preview")
         prompt = "\n".join([m.get("content", "") for m in messages])
         return m.generate_content(prompt).text.strip()
     except Exception as e:
@@ -75,7 +75,11 @@ class AgentState(TypedDict):
     precheck_results: Dict[str, Any]
     status: str
     last_model_used: Optional[str]     # TRACKING: Flash vs Flash-Lite
-    active_project: Optional[str]      # NEW: Ensure multi-project support
+    active_project: Optional[str]      # Multi-project support
+    thought: Optional[str]             # PILLAR 2: Agent reasoning text streamed to UI
+    last_script_error: Optional[str]   # PILLAR 3: Last scratchpad stderr for reflection
+    reflect_retries: int               # PILLAR 3: How many times reflect_node has run
+    memory_context: Optional[str]      # PILLAR 4: Injected from agent_memory
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -83,7 +87,13 @@ class AgentState(TypedDict):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _fetch_board_context() -> Dict[str, Any]:
-    """Fetch real board state from neuro_layout via MCP."""
+    """Fetch real board state — tries scratchpad first, falls back to MCP."""
+    try:
+        ctx = mcp_registry.call_tool("neuro_scratchpad", "read_board_state", {})
+        if isinstance(ctx, dict) and not ctx.get("error"):
+            return ctx
+    except Exception:
+        pass
     try:
         ctx = mcp_registry.call_tool("neuro_layout", "get_board_info", {})
         return ctx if isinstance(ctx, dict) else {}
@@ -92,20 +102,39 @@ def _fetch_board_context() -> Dict[str, Any]:
         return {}
 
 
+def _extract_thought(raw_llm_response: str) -> tuple[str, str]:
+    """
+    Parse a Hardware Coder response into (thought_text, plan_text).
+    The LLM is prompted to output ### THOUGHT ... then ```json ... ```
+    """
+    thought = ""
+    plan_text = raw_llm_response
+    if "### THOUGHT" in raw_llm_response:
+        parts = raw_llm_response.split("### THOUGHT", 1)
+        if len(parts) > 1:
+            remainder = parts[1]
+            # Thought ends at ### PLAN or ```json
+            for delimiter in ["### PLAN", "```json", "```"]:
+                if delimiter in remainder:
+                    thought = remainder.split(delimiter)[0].strip()
+                    plan_text = delimiter + remainder.split(delimiter, 1)[1]
+                    break
+    return thought.strip(), plan_text.strip()
+
+
 # ─────────────────────────────────────────────────────────────────────────────
-# NODE 1 — Research: discover tools + fetch board context
+# NODE 1 — Research: discover tools + fetch board context + load memory
 # ─────────────────────────────────────────────────────────────────────────────
 
 def research_node(state: AgentState) -> AgentState:
-    """Start MCP servers, discover all tools, and fetch live board context."""
+    """Start MCP servers, discover all tools, fetch live board context, load memory."""
     if not state.get("active_project"):
         log.error("[research] No active project selected.")
         return {**state, "status": "failed", "drc_errors": ["No active project selected. Please select a project first."]}
 
     log.info("[research] Starting MCP servers and fetching board context...")
 
-
-    for srv in ["neuro_layout", "neuro_router", "neuro_schematic"]:
+    for srv in ["neuro_layout", "neuro_router", "neuro_schematic", "neuro_scratchpad"]:
         try:
             mcp_registry.start_server(srv)
         except Exception as e:
@@ -123,9 +152,47 @@ def research_node(state: AgentState) -> AgentState:
                     "constraints": tool.get("constraints", {}),
                 })
 
+    # Always add execute_engineering_script manually if scratchpad didn't register
+    has_scratchpad = any(t["name"] == "execute_engineering_script" for t in all_tools)
+    if not has_scratchpad:
+        all_tools.append({
+            "server": "neuro_scratchpad",
+            "name": "execute_engineering_script",
+            "description": "Write and execute custom Python scripts against the live KiCad board using kipy bindings. Use for any geometric calculation, component moves, or trace routing.",
+            "capabilities": ["write", "execute", "kipy"],
+            "constraints": {},
+        })
+
     board_ctx = _fetch_board_context()
+
+    # PILLAR 4: Load memory for this project
+    from pathlib import Path
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    try:
+        from system.agent_memory import get_memory
+        from system.project_manager import project_manager
+        proj = project_manager.get_active_project()
+        proj_name = proj["name"] if proj else "global"
+        memory = get_memory(proj_name)
+        memory.update_board_facts(board_ctx)
+        memory_ctx = memory.build_context_block(state["goal"])
+        log.info(f"[research] Memory loaded for project '{proj_name}'")
+    except Exception as e:
+        memory_ctx = ""
+        log.warning(f"[research] Memory unavailable: {e}")
+
     log.info(f"[research] {len(all_tools)} tools discovered. Board: {list(board_ctx.keys())}")
-    return {**state, "available_tools": all_tools, "board_context": board_ctx, "status": "research_done"}
+    return {
+        **state,
+        "available_tools": all_tools,
+        "board_context": board_ctx,
+        "memory_context": memory_ctx,
+        "reflect_retries": 0,
+        "last_script_error": None,
+        "thought": None,
+        "status": "research_done",
+    }
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -224,24 +291,36 @@ def planning_node(state: AgentState) -> AgentState:
     top_tools = [t for t in scored_tools[:10]]
 
     factory = LLMFactory()
-    
+
     raw = factory.run(
         context=board_ctx,
         tools=top_tools,
         goal=goal,
-        strategy=strategy
+        strategy=strategy,
+        memory_context=state.get("memory_context", ""),
     )
-    
-    plan = _parse_json(raw)
+
+    # PILLAR 2: Extract THOUGHT block before parsing JSON plan
+    thought_text, plan_raw = _extract_thought(raw)
+    if thought_text:
+        log.info(f"[planning] THOUGHT: {thought_text[:120]}...")
+
+    plan = _parse_json(plan_raw)
 
     if not plan or not isinstance(plan, list):
         log.warning("[planning] LLM plan failed. Using heuristic.")
         plan = _heuristic_plan(goal, scored_tools, s)
 
-    # Sort by dependency order
     plan.sort(key=lambda x: x.get("step", 0))
     log.info(f"[planning] Plan generated: {len(plan)} steps")
-    return {**state, "plan": plan, "current_step_index": 0, "status": "plan_ready", "last_model_used": "Gemini 3.1 Flash"}
+    return {
+        **state,
+        "plan": plan,
+        "current_step_index": 0,
+        "thought": thought_text,
+        "status": "plan_ready",
+        "last_model_used": "Gemini 3 Flash",
+    }
 
 
 def _heuristic_plan(goal: str, scored_tools: List[Dict], settings: Dict) -> List[Dict]:
@@ -414,11 +493,42 @@ def execution_node(state: AgentState) -> AgentState:
         "rationale": selected.get("rationale", ""),
     }
 
+    # PILLAR 3: Capture script error for reflection loop
+    script_error = None
+    if selected.get("tool") == "execute_engineering_script":
+        if isinstance(result, dict) and result.get("status") == "failed":
+            script_error = result.get("stderr", "Unknown script error")
+            log.warning(f"[execution] Script failed — reflection triggered: {script_error[:150]}")
+        elif isinstance(result, dict) and result.get("status") == "success":
+            # PILLAR 4: Save successful script to memory
+            try:
+                from system.agent_memory import get_memory
+                from system.project_manager import project_manager
+                proj = project_manager.get_active_project()
+                proj_name = proj["name"] if proj else "global"
+                memory = get_memory(proj_name)
+                keyword = selected.get("action", state["goal"])[:40]
+                memory.save_pattern(
+                    keyword=keyword,
+                    script=args.get("script_code", ""),
+                    description=selected.get("description", selected.get("rationale", "")),
+                )
+                memory.record_session(
+                    intent=state["goal"],
+                    script=args.get("script_code"),
+                    success=True,
+                    result=str(result.get("stdout", ""))[:200],
+                )
+                log.info("[execution] Pattern saved to memory.")
+            except Exception as mem_e:
+                log.warning(f"[execution] Memory save failed: {mem_e}")
+
     return {
         **state,
         "board_context": live_ctx,
         "execution_results": state.get("execution_results", []) + [entry],
         "current_step_index": state["current_step_index"] + 1,
+        "last_script_error": script_error,
         "status": "step_done",
     }
 
@@ -428,17 +538,97 @@ def execution_node(state: AgentState) -> AgentState:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def step_validation_node(state: AgentState) -> AgentState:
-    """After each step, validate and adjust next step."""
+    """After each step, validate result. Route to reflect_node if script failed."""
     results = state.get("execution_results", [])
     if not results:
         return state
-        
+
     last_result = results[-1].get("result", {})
-    if "error" in str(last_result):
-        log.warning("[step_validation] Error in last step execution. May need adjustment.")
-        
-    # We can perform mid-step validation here and modify future plan if needed
+    has_error = "error" in str(last_result) or state.get("last_script_error")
+    if has_error:
+        log.warning("[step_validation] Error in last step execution — checking reflection eligibility.")
+
     return {**state, "status": "step_validated"}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# NODE 5.7 — PILLAR 3: Reflection Loop (Self-Correction)
+# ─────────────────────────────────────────────────────────────────────────────
+
+MAX_REFLECT = 3
+
+def reflect_node(state: AgentState) -> AgentState:
+    """
+    PILLAR 3 — Self-Correction.
+
+    When execute_engineering_script returns a Traceback, this node:
+    1. Reads the exact error from last_script_error
+    2. Asks the LLM to produce a corrected script
+    3. Replaces the last failing step in the plan with a corrective step
+    4. Rewinds current_step_index to re-execute
+    Hard-capped at MAX_REFLECT=3 retries to avoid infinite loops.
+    """
+    error = state.get("last_script_error", "")
+    reflect_retries = state.get("reflect_retries", 0)
+    goal = state["goal"]
+    results = state.get("execution_results", [])
+    last = results[-1] if results else {}
+    failed_script = last.get("args", {}).get("script_code", "")
+
+    log.info(f"[reflect] Retry {reflect_retries + 1}/{MAX_REFLECT} — error: {error[:100]}")
+
+    prompt = f"""You are a Senior Hardware Agent fixing a failed KiCad Python script.
+
+## ORIGINAL GOAL
+{goal}
+
+## FAILED SCRIPT
+```python
+{failed_script[:1000]}
+```
+
+## EXACT ERROR
+{error[:500]}
+
+## YOUR TASK
+Analyze the error. Fix ONLY the broken line(s).
+Common fixes:
+- Vector2(x,y) → Vector2.from_xy(x, y)
+- via.drill → via.drill_diameter
+- Wrong attribute name → check kipy API
+- Missing board.begin_commit() / board.push_commit()
+
+Output ONLY the corrected Python script (no markdown, no explanation).
+The script already has board, get_footprint(), get_net(), mm(), NM pre-defined.
+"""
+
+    corrected_script = _llm([{"role": "user", "content": prompt}])
+    corrected_script = corrected_script.strip().replace("```python", "").replace("```", "").strip()
+
+    if not corrected_script or corrected_script == failed_script:
+        log.warning("[reflect] LLM produced no fix — aborting reflection.")
+        return {**state, "last_script_error": None, "status": "step_validated"}
+
+    # Replace last plan step with the corrected version
+    plan = list(state.get("plan", []))
+    current_idx = state["current_step_index"] - 1  # go back one
+    if 0 <= current_idx < len(plan):
+        plan[current_idx] = {
+            **plan[current_idx],
+            "args": {"script_code": corrected_script, "description": f"[REFLECT-FIX] {plan[current_idx].get('action', '')}"},
+            "action": f"[Reflection fix] {plan[current_idx].get('action', '')}",
+        }
+
+    log.info("[reflect] Corrected script injected into plan.")
+    return {
+        **state,
+        "plan": plan,
+        "current_step_index": max(0, current_idx),  # rewind
+        "last_script_error": None,
+        "reflect_retries": reflect_retries + 1,
+        "status": "reflect_done",
+        "last_model_used": "Gemini 3 Flash",
+    }
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -590,7 +780,14 @@ def after_tool_selection(state: AgentState) -> str:
     return "verification" if state.get("status") == "plan_exhausted" else "precheck"
 
 def after_step_validation(state: AgentState) -> str:
+    # PILLAR 3: Route to reflect if a script error occurred and retries remain
+    if state.get("last_script_error") and state.get("reflect_retries", 0) < MAX_REFLECT:
+        return "reflect"
     return "tool_selection" if state["current_step_index"] < len(state.get("plan", [])) else "verification"
+
+def after_reflect(state: AgentState) -> str:
+    """After reflection: re-execute the fixed script."""
+    return "precheck"
 
 def after_verification(state: AgentState) -> str:
     return "self_correction" if state.get("drc_errors") else "end"
@@ -606,36 +803,44 @@ def after_correction(state: AgentState) -> str:
 def build_agent_graph():
     wf = StateGraph(AgentState)
 
-    wf.add_node("research",        research_node)
+    wf.add_node("research",          research_node)
     wf.add_node("strategy_selection", strategy_selection_node)
-    wf.add_node("tool_scoring",    tool_scoring_node)
-    wf.add_node("planning",        planning_node)
-    wf.add_node("tool_selection",  tool_selection_node)
-    wf.add_node("precheck",        precheck_node)
-    wf.add_node("execution",       execution_node)
-    wf.add_node("step_validation", step_validation_node)
-    wf.add_node("verification",    verification_node)
-    wf.add_node("self_correction", self_correction_node)
+    wf.add_node("tool_scoring",      tool_scoring_node)
+    wf.add_node("planning",          planning_node)
+    wf.add_node("tool_selection",    tool_selection_node)
+    wf.add_node("precheck",          precheck_node)
+    wf.add_node("execution",         execution_node)
+    wf.add_node("step_validation",   step_validation_node)
+    wf.add_node("reflect",           reflect_node)          # PILLAR 3
+    wf.add_node("verification",      verification_node)
+    wf.add_node("self_correction",   self_correction_node)
 
     wf.set_entry_point("research")
-    wf.add_edge("research",     "strategy_selection")
+    wf.add_edge("research",           "strategy_selection")
     wf.add_edge("strategy_selection", "tool_scoring")
-    wf.add_edge("tool_scoring", "planning")
-    wf.add_edge("planning",     "tool_selection")
+    wf.add_edge("tool_scoring",       "planning")
+    wf.add_edge("planning",           "tool_selection")
 
     wf.add_conditional_edges("tool_selection", after_tool_selection, {
-        "precheck":    "precheck",
+        "precheck":     "precheck",
         "verification": "verification",
     })
-    
-    wf.add_edge("precheck", "execution")
+
+    wf.add_edge("precheck",  "execution")
     wf.add_edge("execution", "step_validation")
-    
+
+    # PILLAR 3: Conditional routing from step_validation
     wf.add_conditional_edges("step_validation", after_step_validation, {
-        "tool_selection": "tool_selection",
-        "verification":   "verification",
+        "reflect":       "reflect",       # script error → self-correct
+        "tool_selection": "tool_selection", # next step
+        "verification":  "verification",   # plan exhausted
     })
-    
+
+    # After reflection: re-run the fixed step
+    wf.add_conditional_edges("reflect", after_reflect, {
+        "precheck": "precheck",
+    })
+
     wf.add_conditional_edges("verification", after_verification, {
         "self_correction": "self_correction",
         "end": END,

@@ -191,10 +191,13 @@ async def run_agent(intent: str):
                 evt_type = event.get("type")
 
                 if evt_type == "status":
-                    yield f"data: {json.dumps({'node': 'status', 'message': event['message']})}\n\n"
+                    yield f"data: {json.dumps({'node': 'status', 'message': event['message'], 'model': event.get('model')})}\n\n"
+
+                elif evt_type == "thought":
+                    yield f"data: {json.dumps({'node': 'thought', 'content': event['content'], 'model': event.get('model')})}\n\n"
 
                 elif evt_type == "plan":
-                    yield f"data: {json.dumps({'node': 'planning', 'plan': event['plan'], 'message': event['message']})}\n\n"
+                    yield f"data: {json.dumps({'node': 'planning', 'plan': event['plan'], 'message': event['message'], 'model': event.get('model')})}\n\n"
 
                 elif evt_type == "tool_selected":
                     yield f"data: {json.dumps({'node': 'tool_selection', 'tool': event['tool'], 'action': event.get('action',''), 'message': event['message']})}\n\n"

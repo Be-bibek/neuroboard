@@ -19,6 +19,7 @@ class MCPRegistry:
         self.register_server("neuro_router")
         self.register_server("neuro_layout")
         self.register_server("neuro_schematic")
+        self.register_server("neuro_scratchpad")   # PILLAR 1
         
     def register_server(self, name: str):
         self.servers[name] = MCPServerInstance(name)
@@ -53,6 +54,21 @@ class MCPRegistry:
                 {"name": "add_schematic_wire",         "description": "Draw a wire between two points in the schematic", "capabilities": ["schematic", "connectivity"], "constraints": {"requires_waypoints": True}},
                 {"name": "sync_schematic_to_board",    "description": "Import netlist from schematic into the PCB board (equivalent to F8)", "capabilities": ["sync", "netlist"], "constraints": {}},
             ]
+        elif name == "neuro_scratchpad":
+            server.tools = [
+                {
+                    "name": "execute_engineering_script",
+                    "description": "Write and execute a custom Python script against the live KiCad 10 board using kipy bindings. Pre-initialized: board, get_footprint(ref), get_net(name), mm(v), NM. Use for moves, traces, measurements, or any complex geometry.",
+                    "capabilities": ["dynamic_code", "kipy", "move", "route", "measure"],
+                    "constraints": {"timeout_sec": 30},
+                },
+                {
+                    "name": "read_board_state",
+                    "description": "Read-only board state: footprints with XY positions, net names, layer count.",
+                    "capabilities": ["read_only", "board_context"],
+                    "constraints": {},
+                },
+            ]
         return {"status": "started", "server": name}
         
     def stop_server(self, name: str):
@@ -83,21 +99,26 @@ class MCPRegistry:
         if tool_name not in valid_tools:
             raise ValueError(f"Tool {tool_name} not found on server {server_name}")
             
-        # Dynamically import and execute to prove real dynamic dispatch
-        # rather than hardcoded static imports.
+        # Dispatch to the correct backend module
         import sys
         from pathlib import Path
         sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+        if server_name == "neuro_scratchpad":
+            import mcp_server.scratchpad as scratchpad_server
+            if hasattr(scratchpad_server, tool_name):
+                try:
+                    return getattr(scratchpad_server, tool_name)(**args)
+                except TypeError:
+                    return getattr(scratchpad_server, tool_name)()
+            raise NotImplementedError(f"Scratchpad tool {tool_name} not implemented")
+
         import mcp_server.server as backend_server
-        
-        # Use reflection to find and call the function
         if hasattr(backend_server, tool_name):
             func = getattr(backend_server, tool_name)
-            # Handle different arg signatures dynamically
             try:
                 return func(**args)
             except TypeError:
-                # Fallback if args don't unpack cleanly
                 return func(args) if args else func()
         else:
             raise NotImplementedError(f"Backend implementation for {tool_name} missing")
