@@ -82,6 +82,15 @@ def execute_engineering_script(script_code: str, description: str = "") -> Dict[
     if description:
         log.info(f"[Scratchpad] Running: {description}")
 
+    # PILLAR 1.5 — Minimal Guardrail (Partial Trust)
+    # Reject dangerous imports and built-ins to protect the local environment
+    forbidden = ["import os", "import subprocess", "open(", "eval(", "exec("]
+    for bad in forbidden:
+        if bad in script_code:
+            err_msg = f"Security Violation: '{bad}' is not allowed in engineering scripts."
+            log.warning(f"[Scratchpad] {err_msg}")
+            return {"status": "failed", "stderr": err_msg, "stdout": "", "exit_code": -1}
+
     full_script = SCRIPT_HEADER + "\n# ── USER SCRIPT ──────────────────────────────\n" + script_code
 
     try:
