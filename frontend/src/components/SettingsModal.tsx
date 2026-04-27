@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Shield, Cpu, Activity, Layout, Terminal } from 'lucide-react';
+import { X, Shield, Cpu, Activity, Layout, Terminal, Zap } from 'lucide-react';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -10,11 +10,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   const [activeTab, setActiveTab] = useState('Agent');
   const [settings, setSettings] = useState<any>(null);
   const [servers, setServers] = useState<any[]>([]);
+  const [llmStatus, setLlmStatus] = useState<any>(null);
+  const [llmChecking, setLlmChecking] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       fetchSettings();
       fetchServers();
+      fetchLlmStatus();
     }
   }, [isOpen]);
 
@@ -35,6 +38,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
       setServers(data.servers);
     } catch (e) {
       console.error("Failed to fetch servers:", e);
+    }
+  };
+
+  const fetchLlmStatus = async () => {
+    setLlmChecking(true);
+    try {
+      const res = await fetch('http://localhost:8000/api/v1/llm/status');
+      const data = await res.json();
+      setLlmStatus(data);
+    } catch (e) {
+      setLlmStatus({ status: 'error', connected: false, provider: 'Google Gemini', message: 'Backend unreachable' });
+    } finally {
+      setLlmChecking(false);
     }
   };
 
@@ -228,6 +244,64 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
             </button>
           </div>
         );
+      case 'AI Engine':
+        return (
+          <div className="space-y-4">
+            {/* Connection status card */}
+            <div className="p-4 rounded-xl border border-white/10 bg-black/30 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`relative flex h-3 w-3`}>
+                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                    llmStatus?.connected ? 'bg-emerald-400' : 'bg-rose-400'
+                  }`} />
+                  <span className={`relative inline-flex rounded-full h-3 w-3 ${
+                    llmStatus?.connected ? 'bg-emerald-500' : 'bg-rose-500'
+                  }`} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-white/90">{llmStatus?.provider ?? 'Google Gemini'}</p>
+                  <p className={`text-[10px] mt-0.5 ${
+                    llmStatus?.connected ? 'text-emerald-400' : 'text-rose-400'
+                  }`}>
+                    {llmChecking ? 'Checking…' : (llmStatus?.connected ? '● Active — Connection Verified' : `✗ ${llmStatus?.message ?? 'Offline'}`)}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={fetchLlmStatus}
+                disabled={llmChecking}
+                className="text-[10px] px-3 py-1.5 rounded border border-white/10 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors disabled:opacity-40"
+              >
+                {llmChecking ? 'Testing…' : 'Re-check'}
+              </button>
+            </div>
+
+            {/* Model info */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-3 rounded-lg border border-white/5 bg-black/20">
+                <div>
+                  <h4 className="text-xs font-semibold text-white/90">Planning Engine</h4>
+                  <p className="text-[10px] text-white/40 mt-0.5">Gemini 1.5 Flash — 1M token context</p>
+                </div>
+                <span className="text-[9px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 font-semibold">PRIMARY</span>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg border border-white/5 bg-black/20">
+                <div>
+                  <h4 className="text-xs font-semibold text-white/90">Rate Limits (Free Tier)</h4>
+                  <p className="text-[10px] text-white/40 mt-0.5">15 RPM · 1,500 RPD · 1M TPM</p>
+                </div>
+                <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold">UNLIMITED</span>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg border border-white/5 bg-black/20">
+                <div>
+                  <h4 className="text-xs font-semibold text-white/90">System Instruction</h4>
+                  <p className="text-[10px] text-white/40 mt-0.5 leading-relaxed">Expert ECE Hardware Engineer → JSON plans for KiCad 10</p>
+                </div>
+                <span className="text-[9px] px-2 py-0.5 rounded-full bg-white/10 text-white/50 border border-white/10 font-semibold">LOCKED</span>
+              </div>
+            </div>
+          </div>
+        );
       default:
         return null;
     }
@@ -238,6 +312,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
     { name: 'Models', icon: <Cpu size={16} /> },
     { name: 'MCP', icon: <Shield size={16} /> },
     { name: 'PCB', icon: <Layout size={16} /> },
+    { name: 'AI Engine', icon: <Zap size={16} /> },
     { name: 'System', icon: <Terminal size={16} /> },
   ];
 

@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from system.settings import settings_manager
 from mcp_runtime.registry import mcp_registry
+from .llm_factory import LLMFactory
 
 log = logging.getLogger("AutonomousAgent")
 
@@ -200,62 +201,25 @@ Respond ONLY with JSON array:
 
 def planning_node(state: AgentState) -> AgentState:
     """
-    Generate a deep, dependency-aware multi-step plan using:
-    - User goal
-    - Live board context
-    - Scored tool list (most relevant first)
-    - All active PCB constraints
+    Generate a deep, dependency-aware multi-step plan using the Gemini-powered LLMFactory.
     """
     goal = state["goal"]
     board_ctx = state["board_context"]
     scored_tools = state["scored_tools"]
     s = settings_manager.get()
-
-    top_tools = "\n".join(
-        f"  [{t['score']}/10] server={t['server']}, tool={t['name']}: {t['description']} — {t.get('score_reason','')}"
-        for t in scored_tools[:10]
-    )
-
     strategy = state.get("strategy", "shortest_path")
 
-    prompt = f"""You are a Senior PCB Architect AI creating an intelligent execution plan.
+    top_tools = [t for t in scored_tools[:10]]
 
-USER GOAL: {goal}
-OVERARCHING STRATEGY: {strategy}
-
-LIVE BOARD STATE:
-{json.dumps(board_ctx, indent=2)[:800]}
-
-PCB CONSTRAINTS:
-- trace_width: {s['pcb'].get('default_trace_width', 0.25)}mm
-- power_trace: {s['pcb'].get('power_trace_min_width', 0.5)}mm
-- impedance_target: {s['pcb'].get('impedance_target', '90ohm')}
-- constraint_mode: {s['pcb'].get('constraint_mode', 'strict_physics')}
-
-AVAILABLE TOOLS (ranked by relevance):
-{top_tools}
-
-Generate a DEEP, multi-step structured plan as a JSON array.
-Each step MUST have:
-  - "step": integer (1-based)
-  - "action": what this step does
-  - "server": which MCP server
-  - "tool": exact tool name from the list
-  - "args": dict of arguments (use real values from board context where possible)
-  - "depends_on": list of step numbers this depends on (empty if first)
-  - "rationale": why this tool was chosen for this step
-
-Respond ONLY with a JSON code block.
-
-Example:
-```json
-[
-  {{"step": 1, "action": "Capture current board state", "server": "neuro_layout", "tool": "get_board_info", "args": {{}}, "depends_on": [], "rationale": "Need board context before routing"}},
-  {{"step": 2, "action": "Route USB D+ differential trace", "server": "neuro_router", "tool": "route_trace", "args": {{"net": "/USB_DP", "width": 0.2, "layer": "F.Cu"}}, "depends_on": [1], "rationale": "USB requires controlled impedance 90ohm differential pair"}}
-]
-```"""
-
-    raw = _llm([{"role": "user", "content": prompt}])
+    factory = LLMFactory()
+    
+    raw = factory.run(
+        context=board_ctx,
+        tools=top_tools,
+        goal=goal,
+        strategy=strategy
+    )
+    
     plan = _parse_json(raw)
 
     if not plan or not isinstance(plan, list):

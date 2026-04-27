@@ -26,6 +26,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Any, Dict, List, Optional
 
+# ── Load environment variables from .env (must run before importing any ai modules)
+from dotenv import load_dotenv
+load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent.parent / ".env")
+
 # ── Resolve imports regardless of CWD ─────────────────────────────────────
 _AI_CORE = Path(__file__).resolve().parent.parent
 if str(_AI_CORE) not in sys.path:
@@ -247,6 +251,23 @@ def get_settings():
 def update_settings(new_settings: dict):
     settings_manager.update(new_settings)
     return {"status": "success", "settings": settings_manager.get()}
+
+@app.get("/api/v1/llm/status")
+def get_llm_status():
+    """Verify Gemini API connection status."""
+    import os
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        return {"status": "error", "provider": "Google Gemini", "message": "GOOGLE_API_KEY not configured", "connected": False}
+    try:
+        import google.generativeai as genai
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel(model_name="gemini-1.5-flash")
+        resp = model.generate_content("Reply ONLY with the word PONG.")
+        connected = "PONG" in (resp.text or "").upper()
+        return {"status": "active" if connected else "error", "provider": "Google Gemini 1.5 Flash", "model": "gemini-1.5-flash", "connected": connected, "message": "Connection verified" if connected else "Unexpected response"}
+    except Exception as e:
+        return {"status": "error", "provider": "Google Gemini", "connected": False, "message": str(e)}
 
 # ═══════════════════════════════════════════════════════════════════════════
 #  PIPELINE (Placement + Routing + Validation)
