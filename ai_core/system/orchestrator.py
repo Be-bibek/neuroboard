@@ -1,6 +1,8 @@
 import os
 import asyncio
 import logging
+import json
+import re
 from typing import Dict, Any, List
 
 # Ensure we use the exact KiCad 10 IPC socket specified
@@ -12,6 +14,29 @@ try:
 except ImportError:
     KiCad = None
     logging.warning("kipy not available.")
+
+def humanize_action(tool_name: str, args: dict) -> str:
+    """Task 5: Convert technical tool logs into human-readable engineering actions."""
+    goal = args.get("action", "").lower()
+    
+    if "route_trace" in tool_name:
+        if "widen" in goal or "power" in goal: return "Widening power traces for stability"
+        return "Optimizing trace geometry"
+    
+    if "move_component" in tool_name:
+        ref = args.get("reference", "component")
+        return f"Adjusting placement of {ref}"
+    
+    if "place_component" in tool_name:
+        return f"Placing new {args.get('value', 'component')} on board"
+        
+    if "run_drc" in tool_name:
+        return "Running Design Rule Check"
+        
+    if "execute_engineering_script" in tool_name:
+        return args.get("description", "Executing complex engineering task")
+        
+    return goal or f"Executing {tool_name}"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ROO CODE: MCP Hub Architecture
@@ -160,13 +185,28 @@ class AgentSession:
 
                     elif node_name == "tool_selection":
                         tool = state_update.get("selected_tool") or {}
+                        tool_name = f"{tool.get('server','?')}::{tool.get('tool','?')}"
+                        args = tool.get("args", {})
+                        
+                        # Task 2 & 5: Humanized labels and coordinate metadata for Presence Overlay
+                        human_label = humanize_action(tool_name, args)
+                        coords = None
+                        if "position" in args:
+                            coords = args["position"]
+                        elif "start" in args:
+                            coords = args["start"]
+                            
                         yield {
                             "type": "tool_selected",
-                            "tool": f"{tool.get('server','?')}::{tool.get('tool','?')}",
-                            "action": tool.get("action", ""),
-                            "score": tool.get("score", "?"),
-                            "message": f"🎯 Step {tool.get('step','?')}: {tool.get('tool','?')} (score {tool.get('score','?')})",
-                            "model": model_name
+                            "tool": tool_name,
+                            "action": human_label,
+                            "presence": {
+                                "label": human_label,
+                                "coords": coords,
+                                "type": "action_indicator"
+                            },
+                            "message": f"AI Activity: {human_label}",
+                            "model": model_name,
                         }
 
                     elif node_name == "precheck":

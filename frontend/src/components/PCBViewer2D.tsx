@@ -5,6 +5,9 @@ export function PCBViewer2D() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [status, setStatus] = useState("Disconnected");
   const [hasData, setHasData] = useState(false);
+  const [presence, setPresence] = useState<{label: string, x: number, y: number} | null>(null);
+  const [boardState, setBoardState] = useState<any>(null);
+  const [lastModifiedId, setLastModifiedId] = useState<string | null>(null);
 
   useEffect(() => {
     const ws = new WebSocket("ws://127.0.0.1:8000/api/v1/live_stream");
@@ -16,12 +19,34 @@ export function PCBViewer2D() {
       const data = JSON.parse(event.data);
       if (data.type === "board_update" && data.state) {
         setHasData(true);
-        drawBoard(data.state);
+        setBoardState(data.state);
+        if (data.modified_ref) setLastModifiedId(data.modified_ref);
       }
     };
 
-    return () => ws.close();
+    // Task 2: Listen for presence updates from the Sidebar/Orchestrator
+    const handlePresence = (e: any) => {
+      setPresence(e.detail);
+      setTimeout(() => setPresence(null), 3000);
+    };
+    window.addEventListener('ai_presence_update', handlePresence);
+
+    return () => {
+      ws.close();
+      window.removeEventListener('ai_presence_update', handlePresence);
+    };
   }, []);
+
+  // Task 3: Continuous render loop for animations/glows
+  useEffect(() => {
+    let frame: number;
+    const render = () => {
+      if (boardState) drawBoard(boardState);
+      frame = requestAnimationFrame(render);
+    };
+    render();
+    return () => cancelAnimationFrame(frame);
+  }, [boardState, presence, lastModifiedId]);
 
   const drawBoard = (state: any) => {
     const canvas = canvasRef.current;
@@ -55,26 +80,74 @@ export function PCBViewer2D() {
         const x = fp.x * SCALE + OFFSET_X - 150;
         const y = fp.y * SCALE + OFFSET_Y - 100;
         
-        ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+        const isModified = lastModifiedId === fp.ref;
+        
+        // Task 3: Modified component glow
+        if (isModified) {
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = "rgba(167, 139, 250, 0.6)";
+        }
+        
+        ctx.fillStyle = isModified ? "rgba(167, 139, 250, 0.2)" : "rgba(255, 255, 255, 0.1)";
+        ctx.strokeStyle = isModified ? "rgba(167, 139, 250, 0.5)" : "rgba(255, 255, 255, 0.2)";
         ctx.lineWidth = 1;
         ctx.fillRect(x - 6, y - 6, 12, 12);
         ctx.strokeRect(x - 6, y - 6, 12, 12);
         
-        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.shadowBlur = 0; // Reset
+        
+        ctx.fillStyle = isModified ? "#a78bfa" : "rgba(255, 255, 255, 0.9)";
         ctx.font = "bold 9px Inter, sans-serif";
         ctx.textAlign = "center";
         ctx.fillText(fp.ref, x, y - 10);
       });
     }
+
+    // Task 2: AI Presence Overlay Rendering
+    if (presence) {
+      const px = presence.x * SCALE + OFFSET_X - 150;
+      const py = presence.y * SCALE + OFFSET_Y - 100;
+
+      // Glowing cursor
+      ctx.beginPath();
+      ctx.arc(px, py, 15 + Math.sin(Date.now() / 200) * 5, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(167, 139, 250, 0.15)";
+      ctx.fill();
+      
+      ctx.strokeStyle = "rgba(167, 139, 250, 0.4)";
+      ctx.setLineDash([5, 5]);
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Floating Label
+      ctx.fillStyle = "rgba(10, 10, 12, 0.85)";
+      ctx.roundRect?.(px + 20, py - 12, ctx.measureText(presence.label).width + 24, 24, 8);
+      ctx.fill();
+      
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 10px Inter, sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText(presence.label, px + 32, py + 4);
+      
+      // Draw a line from cursor to label
+      ctx.beginPath();
+      ctx.moveTo(px + 10, py);
+      ctx.lineTo(px + 20, py);
+      ctx.strokeStyle = "rgba(167, 139, 250, 0.5)";
+      ctx.stroke();
+    }
   };
 
   return (
     <div className="flex flex-col h-full bg-transparent overflow-hidden relative group">
-      {/* Overlay Status */}
-      <div className="absolute top-4 left-4 z-20 flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl shadow-2xl transition-all duration-300 group-hover:bg-white/10">
-        <Activity size={12} className={status === "IPC ACTIVE" ? "text-emerald-400 animate-pulse" : "text-rose-400"} />
-        <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">{status}</span>
+      {/* Overlay Status: Task 4 Enhancement */}
+      <div className="absolute top-4 left-4 z-20 flex items-center gap-2 px-4 py-2 rounded-full bg-black/40 border border-white/10 backdrop-blur-2xl shadow-[0_0_20px_rgba(0,0,0,0.5)] group-hover:border-emerald-500/30 transition-all duration-500">
+        <div className={`relative flex items-center justify-center w-2.5 h-2.5`}>
+          <div className={`absolute inset-0 rounded-full ${status === "IPC ACTIVE" ? "bg-emerald-400" : "bg-rose-400"} ${status === "IPC ACTIVE" ? "animate-ping opacity-75" : ""}`} />
+          <div className={`relative w-1.5 h-1.5 rounded-full ${status === "IPC ACTIVE" ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" : "bg-rose-400"}`} />
+        </div>
+        <span className="text-[10px] font-bold text-white/80 uppercase tracking-widest">{status}</span>
       </div>
       
       {/* Grid Pattern Overlay with animation */}

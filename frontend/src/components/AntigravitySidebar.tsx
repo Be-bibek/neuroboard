@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { SettingsModal } from '../SettingsModal';
+import { SettingsModal } from './SettingsModal';
 import {
   Send, Settings, Activity, Cpu, BookOpen,
   Zap, ChevronDown, ChevronRight, GripVertical,
@@ -7,7 +7,7 @@ import {
 import {
   ChatItem, MCPServer, Message, ThoughtEvent, ScriptEvent, ReflectEvent, ToolExecution,
   ModelBadge, ContextChip, ThoughtBubble, ScriptCard, ReflectCard, ActionLogItem,
-} from './SidebarComponents';
+} from './sidebar/SidebarComponents';
 
 const API = 'http://localhost:8000';
 
@@ -31,7 +31,7 @@ function useResizable(initial: number, min = 280, max = 680) {
     return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
   }, [min, max]);
 
-  return { width, onMouseDown };
+  return { width: dragging.current ? width : (initial === 0 ? 0 : width), onMouseDown, setWidth };
 }
 
 // ── MCP Server Status Row ─────────────────────────────────────────────────────
@@ -75,6 +75,7 @@ export const AntigravitySidebar: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [showServers, setShowServers] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const esRef = useRef<EventSource | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const { width, onMouseDown } = useResizable(360);
@@ -139,6 +140,11 @@ export const AntigravitySidebar: React.FC = () => {
     es.onmessage = (e) => {
       const data = JSON.parse(e.data);
       const node = data.node;
+
+      // Task 2: Broadcast AI Presence to the PCB Canvas
+      if (data.presence) {
+        window.dispatchEvent(new CustomEvent('ai_presence_update', { detail: data.presence }));
+      }
 
       // ── OpenHands-style Action Log ────────────────────────────────────────
       if (node === 'status') {
@@ -246,43 +252,70 @@ export const AntigravitySidebar: React.FC = () => {
 
   return (
     <div
-      className="relative flex h-full"
-      style={{ width }}
+      className={`relative flex h-full transition-all duration-500 ease-in-out ${isCollapsed ? 'w-[64px]!' : ''}`}
+      style={{ width: isCollapsed ? 64 : width }}
     >
       {/* Resize grip */}
-      <div
-        onMouseDown={onMouseDown}
-        className="absolute left-0 top-0 h-full w-1.5 cursor-col-resize flex items-center justify-center group z-50"
-      >
-        <GripVertical size={12} className="text-white/10 group-hover:text-white/40 transition-colors" />
-      </div>
+      {!isCollapsed && (
+        <div
+          onMouseDown={onMouseDown}
+          className="absolute left-0 top-0 h-full w-1.5 cursor-col-resize flex items-center justify-center group z-50"
+        >
+          <GripVertical size={12} className="text-white/10 group-hover:text-white/40 transition-colors" />
+        </div>
+      )}
 
-      {/* Main panel */}
-      <div className="flex-1 flex flex-col bg-[#09090c]/95 backdrop-blur-2xl border-l border-white/5 overflow-hidden ml-1.5">
-
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-white/[0.02]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-violet-600/80 to-indigo-700/80 flex items-center justify-center shadow-lg shadow-violet-600/20">
-              <Zap size={13} className="text-white" fill="currentColor" />
-            </div>
-            <div>
-              <h2 className="text-[13px] font-bold text-white/90 leading-tight">Hardware Coder</h2>
-              <p className="text-[9px] text-white/30 font-medium tracking-wider">Gemini 3 Flash · IPC Live</p>
-            </div>
+      {/* Focus Mode / Collapsed Sidebar */}
+      {isCollapsed && (
+        <div className="flex-1 flex flex-col items-center py-6 bg-[#09090c]/95 backdrop-blur-2xl border-l border-white/5 gap-6 shadow-2xl">
+          <button 
+            onClick={() => setIsCollapsed(false)}
+            className="w-10 h-10 rounded-xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center text-violet-400 hover:bg-violet-600/40 transition-all"
+          >
+            <ChevronLeft size={20} className="rotate-180" />
+          </button>
+          
+          <div className="flex flex-col gap-4 items-center">
+             <div className={`w-3 h-3 rounded-full border-2 ${isStreaming ? 'border-violet-500 animate-spin border-t-transparent' : 'border-white/10'}`} />
+             <Activity size={18} className={isStreaming ? "text-violet-400 animate-pulse" : "text-white/20"} />
           </div>
-          <div className="flex items-center gap-2">
-            {isStreaming && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-violet-600/15 border border-violet-500/20 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
-                <span className="text-[9px] font-bold text-violet-300">Thinking</span>
-              </div>
-            )}
-            <button onClick={() => setIsSettingsOpen(true)} className="p-1.5 rounded-lg hover:bg-white/8 transition-colors text-white/30 hover:text-white/70">
-              <Settings size={14} />
+          
+          <div className="mt-auto pb-4">
+            <button onClick={() => setIsSettingsOpen(true)} className="p-2 text-white/20 hover:text-white/60">
+              <Settings size={18} />
             </button>
           </div>
         </div>
+      )}
+
+      {/* Main panel */}
+      {!isCollapsed && (
+        <div className="flex-1 flex flex-col bg-[#09090c]/95 backdrop-blur-2xl border-l border-white/5 overflow-hidden ml-1.5 shadow-2xl">
+
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-white/[0.02]">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-violet-600/80 to-indigo-700/80 flex items-center justify-center shadow-lg shadow-violet-600/20">
+                <Zap size={13} className="text-white" fill="currentColor" />
+              </div>
+              <div>
+                <h2 className="text-[13px] font-bold text-white/90 leading-tight">Hardware Coder</h2>
+                <p className="text-[9px] text-white/30 font-medium tracking-wider">Gemini 3 Flash · IPC Live</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setIsCollapsed(true)}
+                className="p-1.5 rounded-lg hover:bg-white/8 transition-colors text-white/30 hover:text-white/70"
+                title="Focus Mode"
+              >
+                <ChevronRight size={14} />
+              </button>
+              <button onClick={() => setIsSettingsOpen(true)} className="p-1.5 rounded-lg hover:bg-white/8 transition-colors text-white/30 hover:text-white/70">
+                <Settings size={14} />
+              </button>
+            </div>
+          </div>
 
         {/* MCP Servers (Roo-Code Green Dots) */}
         <div className="border-b border-white/5">
