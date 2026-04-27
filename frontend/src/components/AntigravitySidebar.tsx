@@ -78,6 +78,16 @@ const ModelBadge: React.FC<{ model?: string }> = ({ model }) => {
   );
 };
 
+const ContextChip: React.FC<{ name: string; onRemove: () => void }> = ({ name, onRemove }) => (
+  <div className="flex items-center gap-1.5 px-2 py-1 bg-violet-600/20 border border-violet-500/30 rounded-lg animate-in fade-in scale-in-95 duration-200">
+    <div className="w-2 h-2 rounded-full bg-violet-400 shadow-[0_0_8px_rgba(167,139,250,0.6)]" />
+    <span className="text-[10px] font-bold text-violet-300 font-mono">@{name}</span>
+    <button onClick={onRemove} className="text-violet-400/60 hover:text-white transition-colors">
+      <Send size={8} className="rotate-45" />
+    </button>
+  </div>
+);
+
 const ThoughtBubble: React.FC<{ event: ThoughtEvent }> = ({ event }) => {
   const [expanded, setExpanded] = useState(false);
   const preview = event.content.slice(0, 120) + (event.content.length > 120 ? '...' : '');
@@ -228,6 +238,8 @@ const MemoryBadge: React.FC = () => (
 export const AntigravitySidebar: React.FC = () => {
   const [items, setItems] = useState<ChatItem[]>([]);
   const [input, setInput] = useState('');
+  const [selectedContexts, setSelectedContexts] = useState<string[]>([]);
+  const [showContextSelector, setShowContextSelector] = useState(false);
   const [servers, setServers] = useState<MCPServer[]>([]);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -296,8 +308,11 @@ export const AntigravitySidebar: React.FC = () => {
     };
 
     if (esRef.current) esRef.current.close();
-    const es = new EventSource(`http://localhost:8000/api/v1/agent/run?intent=${encodeURIComponent(intent)}`);
+    const contextQuery = selectedContexts.length > 0 ? `&contexts=${encodeURIComponent(selectedContexts.join(','))}` : '';
+    const es = new EventSource(`http://localhost:8000/api/v1/agent/run?intent=${encodeURIComponent(intent)}${contextQuery}`);
     esRef.current = es;
+
+    setSelectedContexts([]);
 
     es.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -548,16 +563,66 @@ export const AntigravitySidebar: React.FC = () => {
 
       {/* Input */}
       <div className="p-5 bg-white/5 backdrop-blur-2xl border-t border-white/5 shadow-[0_-10px_40px_rgba(0,0,0,0.4)]">
+        
+        {/* Context Chips */}
+        {selectedContexts.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {selectedContexts.map(ctx => (
+              <ContextChip 
+                key={ctx} 
+                name={ctx} 
+                onRemove={() => setSelectedContexts(prev => prev.filter(c => c !== ctx))} 
+              />
+            ))}
+          </div>
+        )}
+
         <div className="relative flex items-end gap-3">
           <div className="flex-1 relative">
             <textarea
               value={input}
-              onChange={e => setInput(e.target.value)}
+              onChange={e => {
+                const val = e.target.value;
+                setInput(val);
+                if (val.endsWith('@')) {
+                  setShowContextSelector(true);
+                } else if (showContextSelector && !val.includes('@')) {
+                  setShowContextSelector(false);
+                }
+              }}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
               placeholder="Describe your PCB engineering goal..."
               className="w-full bg-white/5 border border-white/10 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 rounded-2xl pl-4 pr-12 py-4 text-sm text-white placeholder-white/20 resize-none outline-none transition-all duration-200 min-h-[56px] max-h-[160px]"
               rows={1}
             />
+
+            {/* Context Selector Menu (Continue-style) */}
+            {showContextSelector && (
+              <div className="absolute left-0 bottom-full mb-2 w-48 bg-[#0a0a0c] border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-2 duration-200 z-50">
+                <div className="px-3 py-2 text-[9px] font-bold text-white/30 uppercase tracking-widest border-b border-white/5">Context Providers</div>
+                <button 
+                  onClick={() => { setSelectedContexts(p => Array.from(new Set([...p, 'board']))); setShowContextSelector(false); setInput(i => i.replace(/@$/, '')); }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-violet-600/20 text-white/70 hover:text-white transition-all text-left"
+                >
+                  <Cpu size={14} className="text-violet-400" />
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold">@board</span>
+                    <span className="text-[9px] opacity-40">Live KiCad State</span>
+                  </div>
+                </button>
+                <button 
+                  onClick={() => { setSelectedContexts(p => Array.from(new Set([...p, 'mem']))); setShowContextSelector(false); setInput(i => i.replace(/@$/, '')); }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-violet-600/20 text-white/70 hover:text-white transition-all text-left"
+                >
+                  <BookOpen size={14} className="text-teal-400" />
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold">@mem</span>
+                    <span className="text-[9px] opacity-40">Project Memory</span>
+                  </div>
+                </button>
+              </div>
+            )}
+
             <button
               onClick={handleSend}
               disabled={!input.trim() || isStreaming}
@@ -567,9 +632,18 @@ export const AntigravitySidebar: React.FC = () => {
             </button>
           </div>
         </div>
-        <div className="mt-2 flex items-center gap-2 px-1">
-          <div className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
-          <span className="text-[9px] text-white/30 font-medium">Pillar memory active · 5 pillars live</span>
+        <div className="mt-2 flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
+            <span className="text-[9px] text-white/30 font-medium">Context active · {selectedContexts.length > 0 ? selectedContexts.join(', ') : 'None'}</span>
+          </div>
+          <button 
+            onClick={() => setShowContextSelector(!showContextSelector)}
+            className="text-[9px] font-bold text-violet-400/60 hover:text-violet-400 uppercase tracking-widest flex items-center gap-1"
+          >
+            <Zap size={10} />
+            Add Context
+          </button>
         </div>
       </div>
 

@@ -177,7 +177,7 @@ from fastapi.responses import StreamingResponse
 import time
 
 @app.get("/api/v1/agent/run")
-async def run_agent(intent: str):
+async def run_agent(intent: str, contexts: str = ""):
     """
     Autonomous goal-driven agent — streams rich events via SSE.
     Events: status | plan | tool_selected | action | completed | error
@@ -187,7 +187,8 @@ async def run_agent(intent: str):
     async def event_stream():
         session = AgentSession(session_id="live_ui_session", mcp_hub=hub)
         try:
-            async for event in session.process_intent(intent):
+            # Process with optional context tags from the UI (@board, @mem)
+            async for event in session.process_intent(intent, contexts=contexts):
                 evt_type = event.get("type")
 
                 if evt_type == "status":

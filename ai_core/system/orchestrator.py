@@ -80,11 +80,17 @@ class AgentSession:
         self.hub = mcp_hub
         self.history = []
         
-    async def process_intent(self, user_intent: str):
+    async def process_intent(self, user_intent: str, contexts: str = ""):
         """
         Autonomous goal-driven loop.
         Streams rich events: plan reveal → per-step tool selection → execution → verification.
         """
+        # Append context tags if provided
+        if contexts:
+            tags = [f"@{c.strip()}" for c in contexts.split(",") if c.strip()]
+            user_intent = f"{user_intent} {' '.join(tags)}"
+            logging.info(f"[orchestrator] Injected contexts: {tags}")
+
         self.history.append({"role": "user", "content": user_intent})
         yield {"type": "status", "message": "🔍 Discovering MCP tools..."}
 
