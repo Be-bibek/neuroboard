@@ -4,6 +4,7 @@ import { Activity } from "lucide-react";
 export function PCBViewer2D() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [status, setStatus] = useState("Disconnected");
+  const [hasData, setHasData] = useState(false);
 
   useEffect(() => {
     const ws = new WebSocket("ws://127.0.0.1:8000/api/v1/live_stream");
@@ -14,6 +15,7 @@ export function PCBViewer2D() {
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.type === "board_update" && data.state) {
+        setHasData(true);
         drawBoard(data.state);
       }
     };
@@ -75,15 +77,33 @@ export function PCBViewer2D() {
         <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">{status}</span>
       </div>
       
-      {/* Grid Pattern Overlay */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03]" 
+      {/* Grid Pattern Overlay with animation */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03] animate-[pulse_4s_ease-in-out_infinite]" 
            style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+
+      {/* Empty State / Hints */}
+      {!hasData && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <div className="w-24 h-24 mb-6 rounded-full bg-indigo-500/5 flex items-center justify-center border border-indigo-500/10 shadow-[0_0_40px_rgba(99,102,241,0.1)]">
+            <Activity size={32} className="text-indigo-400/50" />
+          </div>
+          <h2 className="text-xl font-bold text-white/50 tracking-tight mb-2">Awaiting AI Synthesis</h2>
+          <p className="text-xs text-white/30 max-w-sm text-center leading-relaxed">
+            Describe your hardware intent in the AI panel to begin autonomous routing and component placement.
+          </p>
+          <div className="mt-8 flex gap-4">
+            <div className="px-4 py-2 rounded-lg bg-white/[0.02] border border-white/5 text-[10px] text-white/40 font-mono">
+              try: "Route the ESP32 differential pairs"
+            </div>
+          </div>
+        </div>
+      )}
 
       <canvas
         ref={canvasRef}
         width={1000}
         height={800}
-        className="w-full h-full cursor-crosshair"
+        className="w-full h-full cursor-crosshair relative z-10"
       />
     </div>
   );

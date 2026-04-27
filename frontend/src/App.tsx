@@ -11,6 +11,8 @@ import { ComponentLibrary } from "./components/ComponentLibrary";
 import { PCBViewer2D } from "./components/PCBViewer2D";
 import { WorkflowGraph } from "./components/WorkflowGraph";
 import { ValidationPanel } from "./components/ValidationPanel";
+import { ResizablePanel } from "./components/ResizablePanel";
+import { ListTree, Box, Activity as ActivityIcon, ChevronDown } from "lucide-react";
 
 const API = "http://localhost:8000";
 
@@ -74,6 +76,10 @@ export default function App() {
   const [pipelineRunning, setPipelineRunning] = useState(false);
   const view = useNeuroStore((s) => s.view);
   const syncStatus = useNeuroStore((s) => s.syncStatus);
+  
+  // IDE Panel State
+  const [bottomTab, setBottomTab] = useState<'workflow' | 'library' | 'validation' | null>(null);
+  const isRightPanelOpen = true;
 
   const handleRunPipeline = async () => {
     setPipelineRunning(true);
@@ -94,37 +100,66 @@ export default function App() {
 
   return (
     <div className="flex flex-col w-full h-screen bg-[#0b0f1a] text-white/90 overflow-hidden font-sans antialiased">
-      {/* Top bar */}
       <Header onRunPipeline={handleRunPipeline} running={pipelineRunning} syncStatus={syncStatus} />
 
-      {/* Main Layout */}
-      <div className="flex flex-1 min-h-0 overflow-hidden p-4 gap-4">
-
-        {/* ── Center: Main Canvas Area ─────────────────────────── */}
-        <main className="flex flex-col flex-1 min-w-0 gap-4">
-          <div className="flex-1 min-h-0 glass-panel overflow-hidden relative">
+      {/* Main IDE Workspace */}
+      <div className="flex flex-1 min-h-0 overflow-hidden relative">
+        
+        {/* Center: Main Canvas Area & Bottom Dock */}
+        <main className="flex flex-col flex-1 min-w-0 bg-[#0b0f1a] relative z-0">
+          <div className="flex-1 min-h-0 relative">
             {view === "PLANNING_BOARD" ? <PlanningBoard /> : <PCBViewer2D />}
           </div>
           
-          <div className="h-64 flex-shrink-0 flex gap-4">
-             <div className="flex-1 min-w-0 glass-panel p-4 overflow-hidden">
-                <WorkflowGraph />
-             </div>
-             <div className="w-80 flex-shrink-0 glass-panel p-4 overflow-hidden">
-                <ComponentLibrary />
-             </div>
-          </div>
+          {/* Bottom Dock */}
+          {bottomTab && (
+            <ResizablePanel side="bottom" initialWidth={0} initialHeight={300} minHeight={150} maxHeight={600} className="border-t border-white/10 bg-zinc-900/40 backdrop-blur-3xl shadow-[0_-20px_40px_rgba(0,0,0,0.5)] z-20">
+              <div className="flex items-center justify-between px-4 py-2 border-b border-white/5 bg-black/20">
+                 <div className="flex items-center gap-4">
+                    <button onClick={() => setBottomTab('workflow')} className={`text-[11px] font-bold uppercase tracking-widest px-2 py-1 rounded transition-colors ${bottomTab === 'workflow' ? 'text-indigo-400 bg-white/5' : 'text-white/40 hover:text-white'}`}>
+                      Workflow
+                    </button>
+                    <button onClick={() => setBottomTab('library')} className={`text-[11px] font-bold uppercase tracking-widest px-2 py-1 rounded transition-colors ${bottomTab === 'library' ? 'text-indigo-400 bg-white/5' : 'text-white/40 hover:text-white'}`}>
+                      Library
+                    </button>
+                    <button onClick={() => setBottomTab('validation')} className={`text-[11px] font-bold uppercase tracking-widest px-2 py-1 rounded transition-colors ${bottomTab === 'validation' ? 'text-indigo-400 bg-white/5' : 'text-white/40 hover:text-white'}`}>
+                      Validation
+                    </button>
+                 </div>
+                 <button onClick={() => setBottomTab(null)} className="p-1 text-white/40 hover:text-white rounded hover:bg-white/10">
+                    <ChevronDown size={14} />
+                 </button>
+              </div>
+              <div className="flex-1 min-h-0 overflow-hidden relative">
+                {bottomTab === 'workflow' && <WorkflowGraph />}
+                {bottomTab === 'library' && <div className="p-4 h-full"><ComponentLibrary /></div>}
+                {bottomTab === 'validation' && <div className="p-4 h-full"><ValidationPanel /></div>}
+              </div>
+            </ResizablePanel>
+          )}
+
+          {/* Bottom Dock Bar (when collapsed) */}
+          {!bottomTab && (
+            <div className="h-8 border-t border-white/10 bg-zinc-900/60 backdrop-blur-xl flex items-center px-4 gap-4 z-20">
+              <button onClick={() => setBottomTab('workflow')} className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/50 hover:text-white transition-colors">
+                <ListTree size={12} /> Workflow
+              </button>
+              <button onClick={() => setBottomTab('library')} className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/50 hover:text-white transition-colors">
+                <Box size={12} /> Object Library
+              </button>
+              <button onClick={() => setBottomTab('validation')} className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/50 hover:text-white transition-colors">
+                <ActivityIcon size={12} /> Telemetry
+              </button>
+            </div>
+          )}
         </main>
 
-        {/* ── Right Sidebar: AI Panel + Validation ──────────────── */}
-        <aside className="w-[420px] flex-shrink-0 flex flex-col gap-4">
-          <div className="flex-[3] min-h-0 glass-panel overflow-hidden">
+        {/* Right Sidebar: AI Panel */}
+        {isRightPanelOpen && (
+          <ResizablePanel side="right" initialWidth={420} minWidth={320} maxWidth={800} className="border-l border-white/10 bg-zinc-900/30 backdrop-blur-2xl shadow-[-20px_0_40px_rgba(0,0,0,0.5)] z-10">
             <AntigravitySidebar />
-          </div>
-          <div className="flex-[1] min-h-0 glass-panel p-4 overflow-hidden">
-            <ValidationPanel />
-          </div>
-        </aside>
+          </ResizablePanel>
+        )}
 
       </div>
     </div>

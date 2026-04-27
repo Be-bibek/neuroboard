@@ -222,6 +222,13 @@ export const AntigravitySidebar: React.FC = () => {
               ${msg.role === 'system' ? 'text-[11px] text-indigo-400/80 font-bold tracking-widest uppercase self-center' : ''}
             `}>
               <div className="whitespace-pre-wrap">{msg.content}</div>
+              {msg.role === 'agent' && msg.content.includes('Initializing reasoning engine...') && (
+                <div className="flex gap-1 mt-3 opacity-50">
+                   <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                   <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                   <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce"></div>
+                </div>
+              )}
             </div>
           </div>
         ))}
