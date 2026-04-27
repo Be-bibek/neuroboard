@@ -8,6 +8,7 @@ interface Message {
   role: 'user' | 'agent' | 'system';
   content: string;
   timestamp: Date;
+  model?: string;
 }
 
 interface ToolExecution {
@@ -57,6 +58,19 @@ export const AntigravitySidebar: React.FC = () => {
       content: 'NeuroBoard AI v5.0 · MCP Runtime initialized.',
       timestamp: new Date()
     }]);
+
+    const handleProjectChange = () => {
+      setMessages([{
+        id: 'welcome',
+        role: 'system',
+        content: 'NeuroBoard AI v5.0 · Switched to new project context.',
+        timestamp: new Date()
+      }]);
+      setToolsRunning([]);
+    };
+
+    window.addEventListener('projectChanged', handleProjectChange);
+    return () => window.removeEventListener('projectChanged', handleProjectChange);
   }, []);
 
   const toggleServer = async (server: string, currentStatus: string) => {
@@ -97,7 +111,7 @@ export const AntigravitySidebar: React.FC = () => {
 
       if (node === 'completed') {
         setMessages(prev => prev.map(m =>
-          m.id === agentMsgId ? { ...m, content: m.content + `\n\n✅ ${data.message}` } : m
+          m.id === agentMsgId ? { ...m, content: m.content + `\n\n✅ ${data.message}`, model: data.model || m.model } : m
         ));
         setToolsRunning(prev => prev.map(t => t.status === 'running' ? { ...t, status: 'success' } : t));
         eventSource.close();
@@ -106,7 +120,7 @@ export const AntigravitySidebar: React.FC = () => {
 
       if (node === 'error') {
         setMessages(prev => prev.map(m =>
-          m.id === agentMsgId ? { ...m, content: m.content + `\n\n❌ ${data.message}` } : m
+          m.id === agentMsgId ? { ...m, content: m.content + `\n\n❌ ${data.message}`, model: data.model || m.model } : m
         ));
         eventSource.close();
         return;
@@ -114,7 +128,7 @@ export const AntigravitySidebar: React.FC = () => {
 
       if (node === 'status') {
         setMessages(prev => prev.map(m =>
-          m.id === agentMsgId ? { ...m, content: m.content + `\n${data.message}` } : m
+          m.id === agentMsgId ? { ...m, content: m.content + `\n${data.message}`, model: data.model || m.model } : m
         ));
         return;
       }
@@ -125,7 +139,7 @@ export const AntigravitySidebar: React.FC = () => {
         ).join('\n');
         setMessages(prev => prev.map(m =>
           m.id === agentMsgId
-            ? { ...m, content: m.content + `\n\n📋 **Plan:**\n${planText}` }
+            ? { ...m, content: m.content + `\n\n📋 **Plan:**\n${planText}`, model: data.model || m.model }
             : m
         ));
         return;
@@ -139,6 +153,9 @@ export const AntigravitySidebar: React.FC = () => {
           status: 'running',
           args: { action: data.action },
         }]);
+        setMessages(prev => prev.map(m =>
+          m.id === agentMsgId ? { ...m, model: data.model || m.model } : m
+        ));
         return;
       }
 
@@ -159,7 +176,7 @@ export const AntigravitySidebar: React.FC = () => {
         });
         if (data.message) {
           setMessages(prev => prev.map(m =>
-            m.id === agentMsgId ? { ...m, content: m.content + `\n${data.message}` } : m
+            m.id === agentMsgId ? { ...m, content: m.content + `\n${data.message}`, model: data.model || m.model } : m
           ));
         }
       }
@@ -222,6 +239,21 @@ export const AntigravitySidebar: React.FC = () => {
               ${msg.role === 'system' ? 'text-[11px] text-indigo-400/80 font-bold tracking-widest uppercase self-center' : ''}
             `}>
               <div className="whitespace-pre-wrap">{msg.content}</div>
+              
+              {/* Model Badge */}
+              {msg.role === 'agent' && msg.model && (
+                <div className="mt-3 flex items-center gap-1.5">
+                  <div className={`
+                    px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider
+                    ${msg.model.includes('Lite') 
+                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/20' 
+                      : 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/20'}
+                  `}>
+                    {msg.model.includes('Lite') ? 'Flash-Lite ⚡' : 'Flash 🧠'}
+                  </div>
+                </div>
+              )}
+
               {msg.role === 'agent' && msg.content.includes('Initializing reasoning engine...') && (
                 <div className="flex gap-1 mt-3 opacity-50">
                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:-0.3s]"></div>

@@ -136,6 +136,11 @@ class IPCClient:
 
     @property
     def _base_dir(self) -> Path:
+        from system.project_manager import project_manager
+        active = project_manager.get_active_project()
+        if active:
+            return Path(active["path"])
+            
         return Path(self.config.get("project", {}).get(
             "base_dir",
             r"C:\Users\Bibek\Documents\pi-hat\PiHAT-KiCAD-Pro-Legacy"
@@ -143,6 +148,11 @@ class IPCClient:
 
     @property
     def _pcb_path(self) -> Path:
+        from system.project_manager import project_manager
+        active = project_manager.get_active_project()
+        if active and active.get("pcb_file"):
+            return Path(active["pcb_file"])
+            
         return self._base_dir / self.config["project"].get(
             "pcb_file", "PiHAT-KiCAD-Pro-Legacy.kicad_pcb"
         )
@@ -153,10 +163,20 @@ class IPCClient:
 
     @property
     def _project_name(self) -> str:
+        from system.project_manager import project_manager
+        active = project_manager.get_active_project()
+        if active:
+            return active["name"]
+            
         return self.config.get("project", {}).get("name", "PiHAT-KiCAD-Pro-Legacy")
 
     @property
     def _project_path(self) -> Path:
+        from system.project_manager import project_manager
+        active = project_manager.get_active_project()
+        if active and active.get("pro_file"):
+            return Path(active["pro_file"])
+            
         return self._base_dir / f"{self._project_name}.kicad_pro"
 
     # ------------------------------------------------------------------
@@ -421,7 +441,7 @@ class IPCClient:
                 state["vias"].append({
                     "x":     round(via.position.x / 1e6, 4),
                     "y":     round(via.position.y / 1e6, 4),
-                    "drill": round(via.drill / 1e6, 4),
+                    "drill": round(via.drill_diameter / 1e6, 4),
                 })
         except Exception as e:
             log.error(f"[IPC] get_board_state failed: {e}")

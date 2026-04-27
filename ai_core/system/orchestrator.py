@@ -37,6 +37,22 @@ class McpHub:
                 logging.error(f"[McpHub] Connection Failed: {e}")
         else:
             logging.warning("[McpHub] KiCad client simulated.")
+
+    def reconnect_kicad(self):
+        """Force a reconnection to the active project context."""
+        logging.info("[McpHub] Re-binding KiCad context for new project...")
+        self.kicad_client = None
+        self.connect_kicad()
+        # Also signal the local mcp server if necessary
+        # We can re-import and trigger a re-init
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+        try:
+            import mcp_server.server as backend_server
+            backend_server.bridge.reconnect()
+        except Exception as e:
+            logging.error(f"[McpHub] Failed to re-bind local MCP bridge: {e}")
             
     def call_tool(self, server: str, tool: str, args: Dict[str, Any]) -> Any:
         logging.info(f"[McpHub] Executing {server}::{tool} with {args}")
@@ -76,6 +92,14 @@ class AgentSession:
         from pathlib import Path
         sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
         from agent.langgraph_loop import build_agent_graph
+        from system.project_manager import project_manager
+
+        active_proj = project_manager.get_active_project()
+        active_path = active_proj["path"] if active_proj else None
+
+        if not active_path:
+            yield {"type": "error", "message": "No active project selected. Please select a project first."}
+            return
 
         agent = build_agent_graph()
         initial_state = {
@@ -93,26 +117,28 @@ class AgentSession:
             "strategy": "shortest_path",
             "precheck_results": {},
             "status": "started",
+            "active_project": active_path,
         }
 
         try:
             for event in agent.stream(initial_state):
                 for node_name, state_update in event.items():
+                    model_name = state_update.get("last_model_used")
                     if node_name == "research":
                         tc = len(state_update.get("available_tools", []))
-                        yield {"type": "status", "message": f"🛠️ {tc} MCP tools discovered across 3 servers"}
+                        yield {"type": "status", "message": f"🛠️ {tc} MCP tools discovered across 3 servers", "model": model_name}
 
                     elif node_name == "strategy_selection":
                         strat = state_update.get("strategy", "unknown")
-                        yield {"type": "status", "message": f"🧠 Strategy selected: {strat}"}
+                        yield {"type": "status", "message": f"🧠 Strategy selected: {strat}", "model": model_name}
 
                     elif node_name == "tool_scoring":
                         top = (state_update.get("scored_tools") or [{}])[0]
-                        yield {"type": "status", "message": f"🏆 Top tool: {top.get('name','?')} (score {top.get('score','?')}/10)"}
+                        yield {"type": "status", "message": f"🏆 Top tool: {top.get('name','?')} (score {top.get('score','?')}/10)", "model": model_name}
 
                     elif node_name == "planning":
                         plan = state_update.get("plan", [])
-                        yield {"type": "plan", "plan": plan, "message": f"📋 Plan generated: {len(plan)} steps"}
+                        yield {"type": "plan", "plan": plan, "message": f"📋 Plan generated: {len(plan)} steps", "model": model_name}
 
                     elif node_name == "tool_selection":
                         tool = state_update.get("selected_tool") or {}
@@ -121,16 +147,17 @@ class AgentSession:
                             "tool": f"{tool.get('server','?')}::{tool.get('tool','?')}",
                             "action": tool.get("action", ""),
                             "score": tool.get("score", "?"),
-                            "message": f"🎯 Step {tool.get('step','?')}: {tool.get('tool','?')} (score {tool.get('score','?')})"
+                            "message": f"🎯 Step {tool.get('step','?')}: {tool.get('tool','?')} (score {tool.get('score','?')})",
+                            "model": model_name
                         }
 
                     elif node_name == "precheck":
                         res = state_update.get("precheck_results", {})
                         risk = res.get("risk_level", "low")
                         if risk in ["high", "medium"]:
-                            yield {"type": "status", "message": f"⚠️ Precheck risk ({risk}): {', '.join(res.get('issues', []))} — adjusting args"}
+                            yield {"type": "status", "message": f"⚠️ Precheck risk ({risk}): {', '.join(res.get('issues', []))} — adjusting args", "model": model_name}
                         else:
-                            yield {"type": "status", "message": f"✅ Precheck passed (risk: {risk})"}
+                            yield {"type": "status", "message": f"✅ Precheck passed (risk: {risk})", "model": model_name}
 
                     elif node_name == "execution":
                         results = state_update.get("execution_results", [])
@@ -141,25 +168,26 @@ class AgentSession:
                             "status": "error" if has_err else "success",
                             "tool": f"{last.get('server','')}::{last.get('tool','')}",
                             "result": last.get("result"),
-                            "message": f"⚡ {last.get('action', last.get('tool',''))}"
+                            "message": f"⚡ {last.get('action', last.get('tool',''))}",
+                            "model": model_name
                         }
 
                     elif node_name == "step_validation":
-                        yield {"type": "status", "message": "✅ Step validated"}
+                        yield {"type": "status", "message": "✅ Step validated", "model": model_name}
 
                     elif node_name == "verification":
                         rpt = state_update.get("verification_report", {})
                         errs = state_update.get("drc_errors", [])
                         if errs:
                             summary = f"DRC={len(rpt.get('drc',[]))} Impedance={len(rpt.get('impedance',[]))} Power={len(rpt.get('power',[]))} Complete={len(rpt.get('completeness',[]))}"
-                            yield {"type": "status", "message": f"⚠️ {len(errs)} issue(s) — {summary}"}
+                            yield {"type": "status", "message": f"⚠️ {len(errs)} issue(s) — {summary}", "model": model_name}
                         else:
-                            yield {"type": "status", "message": "✅ All checks passed: DRC, Impedance, Power Integrity, Routing Completeness"}
+                            yield {"type": "status", "message": "✅ All checks passed: DRC, Impedance, Power Integrity, Routing Completeness", "model": model_name}
 
                     elif node_name == "self_correction":
                         retries = state_update.get("retries", 0)
                         new_plan = state_update.get("plan", [])
-                        yield {"type": "status", "message": f"🔄 Targeted fix (attempt {retries}): {len(new_plan)} corrective step(s)"}
+                        yield {"type": "status", "message": f"🔄 Targeted fix (attempt {retries}): {len(new_plan)} corrective step(s)", "model": model_name}
 
                     await asyncio.sleep(0.05)
 

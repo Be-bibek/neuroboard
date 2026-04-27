@@ -6,6 +6,7 @@ import { useNeuroStore } from "./store/useNeuroStore";
 import { TemplateSelector } from "./components/TemplateSelector";
 import { AntigravitySidebar } from "./components/AntigravitySidebar";
 import { PlanningBoard } from "./components/PlanningBoard";
+import { ProjectSelector } from "./components/ProjectSelector";
 // ── Legacy Layout Components ───────────────────────────────────────────────
 import { ComponentLibrary } from "./components/ComponentLibrary";
 import { PCBViewer2D } from "./components/PCBViewer2D";
@@ -23,22 +24,28 @@ function Header({ onRunPipeline, running, syncStatus }: { onRunPipeline: () => v
   return (
     <header className="flex items-center justify-between px-6 py-4
                        backdrop-blur-xl bg-zinc-900/30 border-b border-white/10 flex-shrink-0 z-50">
-      {/* Brand */}
-      <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600
-                         flex items-center justify-center shadow-2xl shadow-indigo-500/20 active:scale-95 transition-transform">
-          <CircuitBoard size={22} className="text-white" />
+      {/* Brand & Project Selector */}
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600
+                           flex items-center justify-center shadow-2xl shadow-indigo-500/20 active:scale-95 transition-transform">
+            <CircuitBoard size={22} className="text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-white tracking-tight">NeuroBoard</h1>
+            {selectedTemplate ? (
+              <span className="text-xs text-indigo-400 font-medium">
+                {selectedTemplate.icon} {selectedTemplate.name}
+              </span>
+            ) : (
+              <span className="text-xs text-indigo-400 font-medium">v5.0 · Autonomous Agent</span>
+            )}
+          </div>
         </div>
-        <div>
-          <h1 className="text-xl font-bold text-white tracking-tight">NeuroBoard</h1>
-          {selectedTemplate ? (
-            <span className="text-xs text-indigo-400 font-medium">
-              {selectedTemplate.icon} {selectedTemplate.name}
-            </span>
-          ) : (
-            <span className="text-xs text-indigo-400 font-medium">v5.0 · Autonomous Agent</span>
-          )}
-        </div>
+        
+        <div className="h-6 w-px bg-white/10 mx-2"></div>
+        
+        <ProjectSelector />
       </div>
 
       {/* Status pills */}

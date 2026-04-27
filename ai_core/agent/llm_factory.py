@@ -18,7 +18,6 @@ class LLMFactory:
             raise ValueError("GOOGLE_API_KEY not found in environment variables.")
 
         # Configure the model
-        # Using gemini-1.5-flash as the primary reasoning engine per the instructions
         self.model = genai.GenerativeModel(
             model_name="gemini-1.5-flash",
             system_instruction="You are an Expert ECE Hardware Engineer. Your goal is to generate precise, valid JSON plans for KiCad 10 using the available MCP tools."

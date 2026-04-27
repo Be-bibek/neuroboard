@@ -20,10 +20,12 @@ log = logging.getLogger("AutonomousAgent")
 
 def _llm(messages: List[Dict], model: Optional[str] = None) -> str:
     try:
-        from litellm import completion
-        s = settings_manager.get()
-        m = model or s["models"].get("reasoning_model", "claude-3-5-sonnet-20240620")
-        return completion(model=m, messages=messages).choices[0].message.content.strip()
+        import google.generativeai as genai
+        import os
+        genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+        m = genai.GenerativeModel(model_name="gemini-flash-latest")
+        prompt = "\n".join([m.get("content", "") for m in messages])
+        return m.generate_content(prompt).text.strip()
     except Exception as e:
         log.warning(f"LLM unavailable ({e}). Using heuristics.")
         return ""
@@ -31,10 +33,13 @@ def _llm(messages: List[Dict], model: Optional[str] = None) -> str:
 def _fast_llm(messages: List[Dict]) -> str:
     """Use the fast model for lightweight decisions like tool scoring."""
     try:
-        from litellm import completion
-        s = settings_manager.get()
-        m = s["models"].get("fast_model", "gemini/gemini-1.5-flash")
-        return completion(model=m, messages=messages).choices[0].message.content.strip()
+        import google.generativeai as genai
+        import os
+        genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+        # Using Flash for reliable performance
+        m = genai.GenerativeModel(model_name="gemini-1.5-flash")
+        prompt = "\n".join([m.get("content", "") for m in messages])
+        return m.generate_content(prompt).text.strip()
     except Exception as e:
         log.warning(f"Fast LLM unavailable ({e}).")
         return ""
@@ -69,6 +74,8 @@ class AgentState(TypedDict):
     strategy: str
     precheck_results: Dict[str, Any]
     status: str
+    last_model_used: Optional[str]     # TRACKING: Flash vs Flash-Lite
+    active_project: Optional[str]      # NEW: Ensure multi-project support
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -91,7 +98,12 @@ def _fetch_board_context() -> Dict[str, Any]:
 
 def research_node(state: AgentState) -> AgentState:
     """Start MCP servers, discover all tools, and fetch live board context."""
+    if not state.get("active_project"):
+        log.error("[research] No active project selected.")
+        return {**state, "status": "failed", "drc_errors": ["No active project selected. Please select a project first."]}
+
     log.info("[research] Starting MCP servers and fetching board context...")
+
 
     for srv in ["neuro_layout", "neuro_router", "neuro_schematic"]:
         try:
@@ -133,7 +145,7 @@ Respond ONLY with a JSON object: {{"strategy": "..."}}"""
     raw = _fast_llm([{"role": "user", "content": prompt}])
     res = _parse_json(raw) or {"strategy": "shortest_path"}
     log.info(f"[strategy] Selected strategy: {res.get('strategy')}")
-    return {**state, "strategy": res.get("strategy", "shortest_path"), "status": "strategy_selected"}
+    return {**state, "strategy": res.get("strategy", "shortest_path"), "status": "strategy_selected", "last_model_used": "Gemini 3.1 Flash-Lite"}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -192,7 +204,7 @@ Respond ONLY with JSON array:
         # Fallback: all tools equal score
         scored = [{**t, "score": 5, "score_reason": "heuristic fallback"} for t in tools]
 
-    return {**state, "scored_tools": scored, "status": "tools_scored"}
+    return {**state, "scored_tools": scored, "status": "tools_scored", "last_model_used": "Gemini 3.1 Flash-Lite"}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -229,7 +241,7 @@ def planning_node(state: AgentState) -> AgentState:
     # Sort by dependency order
     plan.sort(key=lambda x: x.get("step", 0))
     log.info(f"[planning] Plan generated: {len(plan)} steps")
-    return {**state, "plan": plan, "current_step_index": 0, "status": "plan_ready"}
+    return {**state, "plan": plan, "current_step_index": 0, "status": "plan_ready", "last_model_used": "Gemini 3.1 Flash"}
 
 
 def _heuristic_plan(goal: str, scored_tools: List[Dict], settings: Dict) -> List[Dict]:
@@ -306,7 +318,7 @@ Pick BEST tool. JSON only: {{"server":"...","tool":"...","args":{{}}}}"""}])
         else:
             selected = step
 
-    return {**state, "selected_tool": selected, "status": "tool_selected"}
+    return {**state, "selected_tool": selected, "status": "tool_selected", "last_model_used": "Gemini 3.1 Flash-Lite"}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -345,7 +357,7 @@ Respond with JSON: {{"risk_level": "high|medium|low", "issues": ["..."], "sugges
         selected["args"].update(res["suggested_args"])
         log.warning(f"[precheck] Risk detected: {res.get('issues')}. Adjusted args.")
         
-    return {**state, "selected_tool": selected, "precheck_results": res, "status": "precheck_done"}
+    return {**state, "selected_tool": selected, "precheck_results": res, "status": "precheck_done", "last_model_used": "Gemini 3.1 Flash-Lite"}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -356,6 +368,9 @@ def execution_node(state: AgentState) -> AgentState:
     """
     Before each step, refresh board context and dynamically adjust tool arguments.
     """
+    if not state.get("active_project"):
+        return {**state, "status": "failed", "verification_report": {"passed": False}, "drc_errors": ["No active project selected."]}
+
     selected = state.get("selected_tool")
     if not selected:
         return {**state, "status": "skipped_no_tool"}
@@ -563,6 +578,7 @@ JSON array: [{{"step":1,"action":"...","server":"...","tool":"...","args":{{}},"
         "drc_errors": [],
         "verification_report": {},
         "status": "targeted_fix_ready",
+        "last_model_used": "Gemini 3.1 Flash",
     }
 
 

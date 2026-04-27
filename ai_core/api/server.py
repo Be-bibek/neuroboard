@@ -117,6 +117,46 @@ class AddModuleRequest(BaseModel):
     config: Optional[Dict[str, Any]] = None
 
 # ═══════════════════════════════════════════════════════════════════════════
+#  PROJECT MANAGEMENT ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════════
+
+from system.project_manager import project_manager
+from system.orchestrator import hub
+
+class LoadProjectRequest(BaseModel):
+    path: str
+
+@app.get("/api/v1/projects")
+def get_projects():
+    """List all detected KiCad projects in the workspace."""
+    return {"status": "success", "projects": project_manager.list_projects()}
+
+@app.get("/api/v1/projects/active")
+def get_active_project():
+    """Return the currently loaded project."""
+    active = project_manager.get_active_project()
+    if active:
+        return {"status": "success", "project": active}
+    return {"status": "error", "message": "No active project"}
+
+@app.post("/api/v1/projects/load")
+def load_project(req: LoadProjectRequest):
+    """Load a specific project and rebind KiCad IPC."""
+    try:
+        project_manager.load_project(req.path)
+        # Re-bind IPC to the new active project
+        hub.reconnect_kicad()
+        return {"status": "success", "project": project_manager.get_active_project()}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/api/v1/projects/close")
+def close_project():
+    """Close the current project."""
+    project_manager.close_project()
+    return {"status": "success"}
+
+# ═══════════════════════════════════════════════════════════════════════════
 #  COPILOT ENDPOINTS
 # ═══════════════════════════════════════════════════════════════════════════
 
@@ -262,10 +302,10 @@ def get_llm_status():
     try:
         import google.generativeai as genai
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel(model_name="gemini-1.5-flash")
+        model = genai.GenerativeModel(model_name="gemini-3.1-flash-lite-preview")
         resp = model.generate_content("Reply ONLY with the word PONG.")
         connected = "PONG" in (resp.text or "").upper()
-        return {"status": "active" if connected else "error", "provider": "Google Gemini 1.5 Flash", "model": "gemini-1.5-flash", "connected": connected, "message": "Connection verified" if connected else "Unexpected response"}
+        return {"status": "active" if connected else "error", "provider": "Google Gemini Flash-Lite", "model": "gemini-3.1-flash-lite-preview", "connected": connected, "message": "Connection verified" if connected else "Unexpected response"}
     except Exception as e:
         return {"status": "error", "provider": "Google Gemini", "connected": False, "message": str(e)}
 
