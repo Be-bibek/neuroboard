@@ -19,30 +19,45 @@ log = logging.getLogger("AutonomousAgent")
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _llm(messages: List[Dict], model: Optional[str] = None) -> str:
-    try:
-        import google.generativeai as genai
-        import os
-        genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-        m = genai.GenerativeModel(model_name="gemini-flash-latest")
-        prompt = "\n".join([m.get("content", "") for m in messages])
-        return m.generate_content(prompt).text.strip()
-    except Exception as e:
-        log.warning(f"LLM unavailable ({e}). Using heuristics.")
-        return ""
+def _llm(messages: List[Dict], retries: int = 3, backoff: float = 2.0) -> str:
+    """Standard LLM call with exponential backoff for rate limiting."""
+    import time
+    for i in range(retries):
+        try:
+            import google.generativeai as genai
+            import os
+            genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+            m = genai.GenerativeModel(model_name="gemini-flash-latest")
+            prompt = "\n".join([msg.get("content", "") for msg in messages])
+            return m.generate_content(prompt).text.strip()
+        except Exception as e:
+            if "429" in str(e) and i < retries - 1:
+                wait = backoff * (2 ** i)
+                log.warning(f"Rate limited (429). Retrying in {wait}s...")
+                time.sleep(wait)
+                continue
+            log.warning(f"LLM unavailable ({e}). Using heuristics.")
+            return ""
+    return ""
 
-def _fast_llm(messages: List[Dict]) -> str:
-    """Use the fast model for lightweight decisions like tool scoring."""
-    try:
-        import google.generativeai as genai
-        import os
-        genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-        # Using Flash-Lite for higher volume tasks
-        m = genai.GenerativeModel(model_name="models/gemini-3.1-flash-lite-preview")
-        prompt = "\n".join([m.get("content", "") for m in messages])
-        return m.generate_content(prompt).text.strip()
-    except Exception as e:
-        log.warning(f"Fast LLM unavailable ({e}).")
-        return ""
+def _fast_llm(messages: List[Dict], retries: int = 2) -> str:
+    """Fast model call with basic retry."""
+    import time
+    for i in range(retries):
+        try:
+            import google.generativeai as genai
+            import os
+            genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+            m = genai.GenerativeModel(model_name="models/gemini-3.1-flash-lite-preview")
+            prompt = "\n".join([msg.get("content", "") for msg in messages])
+            return m.generate_content(prompt).text.strip()
+        except Exception as e:
+            if "429" in str(e) and i < retries - 1:
+                time.sleep(2)
+                continue
+            log.warning(f"Fast LLM unavailable ({e}).")
+            return ""
+    return ""
 
 def _parse_json(text: str) -> Any:
     try:
@@ -193,6 +208,89 @@ def research_node(state: AgentState) -> AgentState:
         "thought": None,
         "status": "research_done",
     }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# NODE 1.5 — Intent Router (Deterministic Layer)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def intent_router_node(state: AgentState) -> AgentState:
+    """
+    Phase 2 Optimization: Bypass LLM for simple deterministic commands.
+    Regex-based matching for move/rotate/DRC.
+    """
+    import re
+    goal = state["goal"].lower().strip()
+    
+    # 1. MOVE: "move J1 5mm left", "move R5 10, 20"
+    move_match = re.search(r"move\s+([a-z0-9_]+)\s+([-0-9.]+)\s*[, ]\s*([-0-9.]+)", goal)
+    if move_match:
+        ref, x, y = move_match.groups()
+        log.info(f"[router] MATCH: move {ref} to ({x}, {y})")
+        script = f"""
+        fp = get_footprint("{ref.upper()}")
+        if fp:
+            board.begin_commit()
+            fp.position = Vector2.from_xy(mm({x}), mm({y}))
+            board.push_commit(board.get_commit(), "Move {ref} via deterministic router")
+            board.save()
+            print("Successfully moved {ref} to {x}, {y}")
+        else:
+            print("Footprint {ref} not found")
+        """
+        plan = [{
+            "step": 1,
+            "action": f"Deterministic move {ref}",
+            "server": "neuro_scratchpad",
+            "tool": "execute_engineering_script",
+            "args": {"script_code": textwrap.dedent(script), "description": f"Moving {ref}"},
+            "depends_on": [],
+            "rationale": "Regex match for simple move command"
+        }]
+        return {**state, "plan": plan, "current_step_index": 0, "status": "plan_ready", "thought": "Deterministic router matched simple move intent."}
+
+    # 2. ROTATE: "rotate R5 90"
+    rotate_match = re.search(r"rotate\s+([a-z0-9_]+)\s+([-0-9.]+)", goal)
+    if rotate_match:
+        ref, angle = rotate_match.groups()
+        log.info(f"[router] MATCH: rotate {ref} by {angle}")
+        script = f"""
+        fp = get_footprint("{ref.upper()}")
+        if fp:
+            board.begin_commit()
+            fp.orientation.degrees = {angle}
+            board.push_commit(board.get_commit(), "Rotate {ref} via deterministic router")
+            board.save()
+            print("Successfully rotated {ref} to {angle} degrees")
+        else:
+            print("Footprint {ref} not found")
+        """
+        plan = [{
+            "step": 1,
+            "action": f"Deterministic rotate {ref}",
+            "server": "neuro_scratchpad",
+            "tool": "execute_engineering_script",
+            "args": {"script_code": textwrap.dedent(script), "description": f"Rotating {ref}"},
+            "depends_on": [],
+            "rationale": "Regex match for simple rotate command"
+        }]
+        return {**state, "plan": plan, "current_step_index": 0, "status": "plan_ready", "thought": "Deterministic router matched simple rotate intent."}
+
+    # 3. DRC: "run drc", "check design"
+    if any(k in goal for k in ["run drc", "check design", "drc check"]):
+        log.info("[router] MATCH: DRC check")
+        plan = [{
+            "step": 1,
+            "action": "Run DRC",
+            "server": "neuro_layout",
+            "tool": "run_drc",
+            "args": {},
+            "depends_on": [],
+            "rationale": "Regex match for DRC intent"
+        }]
+        return {**state, "plan": plan, "current_step_index": 0, "status": "plan_ready", "thought": "Deterministic router matched DRC intent."}
+
+    return {**state, "status": "router_no_match"}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -555,7 +653,7 @@ def step_validation_node(state: AgentState) -> AgentState:
 # NODE 5.7 — PILLAR 3: Reflection Loop (Self-Correction)
 # ─────────────────────────────────────────────────────────────────────────────
 
-MAX_REFLECT = 3
+MAX_REFLECT = 2
 
 def reflect_node(state: AgentState) -> AgentState:
     """
@@ -804,6 +902,7 @@ def build_agent_graph():
     wf = StateGraph(AgentState)
 
     wf.add_node("research",          research_node)
+    wf.add_node("intent_router",     intent_router_node)    # PILLAR 2 Optimization
     wf.add_node("strategy_selection", strategy_selection_node)
     wf.add_node("tool_scoring",      tool_scoring_node)
     wf.add_node("planning",          planning_node)
@@ -816,7 +915,13 @@ def build_agent_graph():
     wf.add_node("self_correction",   self_correction_node)
 
     wf.set_entry_point("research")
-    wf.add_edge("research",           "strategy_selection")
+    wf.add_edge("research",           "intent_router")
+    
+    wf.add_conditional_edges("intent_router", lambda s: "planning" if s["status"] == "router_no_match" else "tool_selection", {
+        "planning": "strategy_selection",
+        "tool_selection": "tool_selection"
+    })
+
     wf.add_edge("strategy_selection", "tool_scoring")
     wf.add_edge("tool_scoring",       "planning")
     wf.add_edge("planning",           "tool_selection")
