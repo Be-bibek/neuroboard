@@ -290,6 +290,32 @@ def intent_router_node(state: AgentState) -> AgentState:
         }]
         return {**state, "plan": plan, "current_step_index": 0, "status": "plan_ready", "thought": "Deterministic router matched DRC intent."}
 
+    # 4. PILLAR 4: Memory Matcher (Priority 2)
+    try:
+        from system.agent_memory import get_memory
+        from system.project_manager import project_manager
+        proj = project_manager.get_active_project()
+        proj_name = proj["name"] if proj else "global"
+        memory = get_memory(proj_name)
+        
+        # Search for exact or highly similar intents in history
+        patterns = memory.search_patterns(goal)
+        if patterns:
+            best = patterns[0]
+            log.info(f"[router] MEMORY MATCH: {best['keyword']}")
+            plan = [{
+                "step": 1,
+                "action": f"Reusing pattern: {best['keyword']}",
+                "server": "neuro_scratchpad",
+                "tool": "execute_engineering_script",
+                "args": {"script_code": best["script"], "description": best["description"]},
+                "depends_on": [],
+                "rationale": f"Found matching pattern in project memory for '{goal}'"
+            }]
+            return {**state, "plan": plan, "current_step_index": 0, "status": "plan_ready", "thought": f"Memory router found a saved pattern for: {best['keyword']}"}
+    except Exception as e:
+        log.warning(f"[router] Memory search failed: {e}")
+
     return {**state, "status": "router_no_match"}
 
 
@@ -400,14 +426,17 @@ def planning_node(state: AgentState) -> AgentState:
 
     # PILLAR 2: Extract THOUGHT block before parsing JSON plan
     thought_text, plan_raw = _extract_thought(raw)
-    if thought_text:
-        log.info(f"[planning] THOUGHT: {thought_text[:120]}...")
-
-    plan = _parse_json(plan_raw)
-
-    if not plan or not isinstance(plan, list):
-        log.warning("[planning] LLM plan failed. Using heuristic.")
+    
+    # QUOTA FALLBACK: If LLM failed (empty raw) or 429 happened (already handled in _llm but returned empty)
+    if not plan_raw or "heuristics" in plan_raw.lower():
+        log.warning("[planning] LLM quota or failure. Using heuristic fallback.")
         plan = _heuristic_plan(goal, scored_tools, s)
+        thought_text = "API quota reached or LLM unavailable. Switching to heuristic fallback mode."
+    else:
+        plan = _parse_json(plan_raw)
+        if not plan or not isinstance(plan, list):
+            log.warning("[planning] JSON parse failed. Using heuristic.")
+            plan = _heuristic_plan(goal, scored_tools, s)
 
     plan.sort(key=lambda x: x.get("step", 0))
     log.info(f"[planning] Plan generated: {len(plan)} steps")
