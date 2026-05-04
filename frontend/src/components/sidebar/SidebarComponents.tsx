@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Brain, ChevronDown, ChevronRight, Terminal,
-  ShieldCheck, Info, RefreshCw, Cpu, BookOpen, Zap,
+  ShieldCheck, Info, RefreshCw, Cpu, BookOpen, Zap, Activity
 } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────

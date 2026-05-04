@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SettingsModal } from './SettingsModal';
 import {
   Send, Settings, Activity, Cpu, BookOpen,
-  Zap, ChevronDown, ChevronRight, ChevronLeft, GripVertical,
+  Zap, ChevronDown, ChevronRight, ChevronLeft,
 } from 'lucide-react';
 import {
-  ChatItem, MCPServer, Message, ThoughtEvent, ScriptEvent, ReflectEvent, ToolExecution,
+  ChatItem, MCPServer, Message, ToolExecution,
   ModelBadge, ContextChip, ThoughtBubble, ScriptCard, ReflectCard, ActionLogItem,
 } from './sidebar/SidebarComponents';
 
