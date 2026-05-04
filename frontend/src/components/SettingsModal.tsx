@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Shield, Cpu, Activity, Layout, Terminal, Zap } from 'lucide-react';
 
 interface SettingsModalProps {
@@ -316,50 +317,51 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
     { name: 'System', icon: <Terminal size={16} /> },
   ];
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-[700px] h-[450px] flex glass-panel overflow-hidden border-white/10 shadow-2xl rounded-xl">
-        
-        {/* Sidebar */}
-        <div className="w-[160px] bg-black/40 border-r border-white/5 flex flex-col">
-          <div className="flex items-center gap-2 p-4 border-b border-white/5">
-             <div className="w-6 h-6 rounded flex items-center justify-center bg-indigo-500/20 text-indigo-400">
-                <Shield size={14} />
-             </div>
-             <h3 className="text-xs font-bold text-white/80 tracking-wide uppercase">Settings</h3>
-          </div>
-          <div className="flex-1 p-2 space-y-0.5">
-            {tabs.map(tab => (
-              <button
-                key={tab.name}
-                onClick={() => setActiveTab(tab.name)}
-                className={`w-full flex items-center gap-2 px-3 py-2 rounded text-[11px] transition-colors ${activeTab === tab.name ? 'bg-indigo-500/10 text-indigo-400 font-semibold' : 'text-white/50 hover:bg-white/5 hover:text-white/90'}`}
-              >
-                {tab.icon}
-                {tab.name}
+  return createPortal(
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="w-[700px] h-[450px] flex glass-panel overflow-hidden border-white/10 shadow-2xl rounded-xl bg-[#09090c]/90">
+          
+          {/* Sidebar */}
+          <div className="w-[160px] bg-black/40 border-r border-white/5 flex flex-col">
+            <div className="flex items-center gap-2 p-4 border-b border-white/5">
+               <div className="w-6 h-6 rounded flex items-center justify-center bg-indigo-500/20 text-indigo-400">
+                  <Shield size={14} />
+               </div>
+               <h3 className="text-xs font-bold text-white/80 tracking-wide uppercase">Settings</h3>
+            </div>
+            <div className="flex-1 p-2 space-y-0.5">
+              {tabs.map(tab => (
+                <button
+                  key={tab.name}
+                  onClick={() => setActiveTab(tab.name)}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded text-[11px] transition-colors ${activeTab === tab.name ? 'bg-indigo-500/10 text-indigo-400 font-semibold' : 'text-white/50 hover:bg-white/5 hover:text-white/90'}`}
+                >
+                  {tab.icon}
+                  {tab.name}
+                </button>
+              ))}
+            </div>
+            <div className="p-2 border-t border-white/5">
+              <button onClick={onClose} className="w-full text-[10px] py-2 rounded hover:bg-white/5 text-white/40 hover:text-white transition-colors">
+                 Close
               </button>
-            ))}
+            </div>
           </div>
-          <div className="p-2 border-t border-white/5">
-            <button onClick={onClose} className="w-full text-[10px] py-2 rounded hover:bg-white/5 text-white/40 hover:text-white transition-colors">
-               Close
-            </button>
-          </div>
-        </div>
 
-        {/* Content Area */}
-        <div className="flex-1 flex flex-col bg-black/20">
-          <div className="px-6 py-3 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
-            <h2 className="text-sm font-semibold text-white/90">{activeTab} Parameters</h2>
-            <button onClick={onClose} className="p-1 rounded hover:bg-white/10 text-white/40 hover:text-white transition-colors">
-              <X size={14} />
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto p-6 scrollbar-none">
-            {renderTabContent()}
+          {/* Content Area */}
+          <div className="flex-1 flex flex-col bg-black/20">
+            <div className="px-6 py-3 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
+              <h2 className="text-sm font-semibold text-white/90">{activeTab} Parameters</h2>
+              <button onClick={onClose} className="p-1 rounded hover:bg-white/10 text-white/40 hover:text-white transition-colors">
+                <X size={14} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6 scrollbar-none">
+              {renderTabContent()}
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </div>,
+      document.body
   );
 };

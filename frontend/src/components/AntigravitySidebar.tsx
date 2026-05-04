@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SettingsModal } from './SettingsModal';
 import {
   Send, Settings, Activity, Cpu, BookOpen,
-  Zap, ChevronDown, ChevronRight, GripVertical,
+  Zap, ChevronDown, ChevronRight, ChevronLeft, GripVertical,
 } from 'lucide-react';
 import {
   ChatItem, MCPServer, Message, ThoughtEvent, ScriptEvent, ReflectEvent, ToolExecution,
@@ -78,7 +78,7 @@ export const AntigravitySidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const esRef = useRef<EventSource | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const { width, onMouseDown } = useResizable(360);
+  const { width, onMouseDown } = useResizable(380, 320, 700);
 
   // Scroll to bottom on new items
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [items]);
@@ -252,16 +252,16 @@ export const AntigravitySidebar: React.FC = () => {
 
   return (
     <div
-      className={`relative flex h-full transition-all duration-500 ease-in-out ${isCollapsed ? 'w-[64px]!' : ''}`}
+      className={`relative flex h-full overflow-hidden shrink-0 border-l border-white/10 bg-zinc-900/30 backdrop-blur-2xl shadow-[-20px_0_40px_rgba(0,0,0,0.5)] z-10 ${isCollapsed ? 'transition-all duration-300' : ''}`}
       style={{ width: isCollapsed ? 64 : width }}
     >
       {/* Resize grip */}
       {!isCollapsed && (
         <div
           onMouseDown={onMouseDown}
-          className="absolute left-0 top-0 h-full w-1.5 cursor-col-resize flex items-center justify-center group z-50"
+          className="absolute left-0 top-0 bottom-0 w-2 cursor-col-resize hover:bg-indigo-500/50 z-[100] transition-colors -translate-x-1/2 flex items-center justify-center group"
         >
-          <GripVertical size={12} className="text-white/10 group-hover:text-white/40 transition-colors" />
+          <div className="w-0.5 h-8 bg-white/20 group-hover:bg-white/60 rounded-full" />
         </div>
       )}
 
@@ -290,10 +290,10 @@ export const AntigravitySidebar: React.FC = () => {
 
       {/* Main panel */}
       {!isCollapsed && (
-        <div className="flex-1 flex flex-col bg-[#09090c]/95 backdrop-blur-2xl border-l border-white/5 overflow-hidden ml-1.5 shadow-2xl">
+        <div className="flex-1 flex flex-col bg-[#09090c]/95 backdrop-blur-2xl border-l border-white/5 overflow-hidden shadow-2xl">
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-white/[0.02]">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-white/[0.02] shrink-0">
             <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-violet-600/80 to-indigo-700/80 flex items-center justify-center shadow-lg shadow-violet-600/20">
                 <Zap size={13} className="text-white" fill="currentColor" />
@@ -318,7 +318,7 @@ export const AntigravitySidebar: React.FC = () => {
           </div>
 
         {/* MCP Servers (Roo-Code Green Dots) */}
-        <div className="border-b border-white/5">
+        <div className="border-b border-white/5 shrink-0">
           <button
             onClick={() => setShowServers(s => !s)}
             className="w-full flex items-center justify-between px-5 py-2.5 hover:bg-white/3 transition-colors"
@@ -350,11 +350,11 @@ export const AntigravitySidebar: React.FC = () => {
         </div>
 
         {/* Chat Feed */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scrollbar-none">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 space-y-6 scrollbar-none min-h-0">
           {items.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full gap-3 opacity-40">
               <Zap size={24} className="text-violet-400" />
-              <p className="text-[11px] text-white/40 text-center leading-relaxed">
+              <p className="text-[11px] text-white/40 text-center leading-relaxed whitespace-pre-wrap break-words">
                 Type a PCB engineering goal.<br/>
                 Use <span className="font-mono text-violet-400">@</span> to inject board context.
               </p>
@@ -367,12 +367,12 @@ export const AntigravitySidebar: React.FC = () => {
               return (
                 <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
                   <div className={`
-                    max-w-[92%] px-4 py-3 text-sm leading-relaxed shadow-xl
+                    max-w-[92%] px-4 py-3 text-sm leading-relaxed shadow-xl hover:shadow-2xl transition-all hover:bg-opacity-90
                     ${msg.role === 'user' ? 'bg-indigo-600/80 text-white rounded-[20px] rounded-tr-none border border-white/10' : ''}
-                    ${msg.role === 'agent' ? 'backdrop-blur-md bg-white/[0.04] border border-white/10 text-white/80 rounded-[20px] rounded-tl-none font-medium' : ''}
+                    ${msg.role === 'agent' ? 'backdrop-blur-xl bg-white/[0.06] border border-white/20 text-white/80 rounded-[20px] rounded-tl-none font-medium' : ''}
                     ${msg.role === 'system' ? 'text-[10px] text-indigo-400/60 font-bold tracking-widest uppercase self-center bg-transparent border-none shadow-none px-0 py-1' : ''}
                   `}>
-                    <div className="whitespace-pre-wrap text-sm">{msg.content}</div>
+                    <div className="whitespace-pre-wrap break-words text-sm">{msg.content}</div>
                     {msg.role === 'agent' && msg.model && (
                       <div className="mt-2.5">
                         <ModelBadge model={msg.model} active={isStreaming && msg.content.includes('Booting')} />
@@ -402,7 +402,7 @@ export const AntigravitySidebar: React.FC = () => {
         </div>
 
         {/* Input */}
-        <div className="p-4 bg-white/[0.02] backdrop-blur-2xl border-t border-white/5 shadow-[0_-8px_32px_rgba(0,0,0,0.4)]">
+        <div className="p-4 bg-white/[0.02] backdrop-blur-2xl border-t border-white/5 shadow-[0_-8px_32px_rgba(0,0,0,0.4)] shrink-0">
 
           {/* Context Chips */}
           {selectedContexts.length > 0 && (
@@ -428,7 +428,7 @@ export const AntigravitySidebar: React.FC = () => {
                   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
                 }}
                 placeholder="Describe your PCB engineering goal…"
-                className="w-full bg-white/5 border border-white/10 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 rounded-2xl pl-4 pr-11 py-3.5 text-sm text-white placeholder-white/20 resize-none outline-none transition-all duration-200 min-h-[52px] max-h-[140px] font-sans"
+                className="w-full bg-white/5 border border-white/10 hover:bg-white/10 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 rounded-2xl pl-4 pr-11 py-3.5 text-sm text-white placeholder-white/20 resize-none outline-none transition-all duration-200 min-h-[52px] max-h-[140px] font-sans"
                 rows={1}
               />
 

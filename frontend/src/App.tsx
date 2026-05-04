@@ -110,18 +110,18 @@ export default function App() {
       <Header onRunPipeline={handleRunPipeline} running={pipelineRunning} syncStatus={syncStatus} />
 
       {/* Main IDE Workspace */}
-      <div className="flex flex-1 min-h-0 overflow-hidden relative">
+      <div className="flex flex-row flex-1 min-h-0 min-w-0 overflow-hidden relative">
         
         {/* Center: Main Canvas Area & Bottom Dock */}
-        <main className="flex flex-col flex-1 min-w-0 bg-[#0b0f1a] relative z-0">
-          <div className="flex-1 min-h-0 relative">
+        <main className="flex flex-col flex-1 min-w-0 overflow-hidden relative bg-[#0b0f1a] z-0">
+          <div className="flex-1 min-h-0 min-w-0 relative">
             {view === "PLANNING_BOARD" ? <PlanningBoard /> : <PCBViewer2D />}
           </div>
           
           {/* Bottom Dock */}
           {bottomTab && (
-            <ResizablePanel side="bottom" initialWidth={0} initialHeight={300} minHeight={150} maxHeight={600} className="border-t border-white/10 bg-zinc-900/40 backdrop-blur-3xl shadow-[0_-20px_40px_rgba(0,0,0,0.5)] z-20">
-              <div className="flex items-center justify-between px-4 py-2 border-b border-white/5 bg-black/20">
+            <ResizablePanel side="bottom" initialWidth={0} initialHeight={300} minHeight={150} maxHeight={600} className="border-t border-white/10 bg-zinc-900/40 backdrop-blur-3xl shadow-[0_-20px_40px_rgba(0,0,0,0.5)] z-20 shrink-0">
+              <div className="flex items-center justify-between px-4 py-2 border-b border-white/5 bg-black/20 shrink-0">
                  <div className="flex items-center gap-4">
                     <button onClick={() => setBottomTab('workflow')} className={`text-[11px] font-bold uppercase tracking-widest px-2 py-1 rounded transition-colors ${bottomTab === 'workflow' ? 'text-indigo-400 bg-white/5' : 'text-white/40 hover:text-white'}`}>
                       Workflow
@@ -137,17 +137,17 @@ export default function App() {
                     <ChevronDown size={14} />
                  </button>
               </div>
-              <div className="flex-1 min-h-0 overflow-hidden relative">
+              <div className="flex-1 min-h-0 min-w-0 overflow-hidden relative">
                 {bottomTab === 'workflow' && <WorkflowGraph />}
-                {bottomTab === 'library' && <div className="p-4 h-full"><ComponentLibrary /></div>}
-                {bottomTab === 'validation' && <div className="p-4 h-full"><ValidationPanel /></div>}
+                {bottomTab === 'library' && <div className="p-4 h-full overflow-y-auto"><ComponentLibrary /></div>}
+                {bottomTab === 'validation' && <div className="p-4 h-full overflow-y-auto"><ValidationPanel /></div>}
               </div>
             </ResizablePanel>
           )}
 
           {/* Bottom Dock Bar (when collapsed) */}
           {!bottomTab && (
-            <div className="h-8 border-t border-white/10 bg-zinc-900/60 backdrop-blur-xl flex items-center px-4 gap-4 z-20">
+            <div className="h-8 shrink-0 border-t border-white/10 bg-zinc-900/60 backdrop-blur-xl flex items-center px-4 gap-4 z-20">
               <button onClick={() => setBottomTab('workflow')} className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/50 hover:text-white transition-colors">
                 <ListTree size={12} /> Workflow
               </button>
@@ -163,9 +163,7 @@ export default function App() {
 
         {/* Right Sidebar: AI Panel */}
         {isRightPanelOpen && (
-          <ResizablePanel side="right" initialWidth={420} minWidth={320} maxWidth={800} className="border-l border-white/10 bg-zinc-900/30 backdrop-blur-2xl shadow-[-20px_0_40px_rgba(0,0,0,0.5)] z-10">
-            <AntigravitySidebar />
-          </ResizablePanel>
+          <AntigravitySidebar />
         )}
 
       </div>

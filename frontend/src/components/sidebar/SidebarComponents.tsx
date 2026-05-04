@@ -96,11 +96,11 @@ export const ThoughtBubble: React.FC<{ event: ThoughtEvent }> = ({ event }) => {
         <Brain size={11} className={`text-violet-400 ${event.isStreaming ? 'animate-pulse' : ''}`} />
       </div>
 
-      <div className="flex-1 backdrop-blur-md bg-white/[0.04] border border-white/10 rounded-2xl rounded-tl-none overflow-hidden shadow-xl">
+      <div className="flex-1 backdrop-blur-md bg-white/[0.04] border border-white/10 rounded-2xl rounded-tl-none overflow-hidden shadow-xl max-h-[260px] flex flex-col">
         {/* Header */}
         <button
           onClick={() => setExpanded(e => !e)}
-          className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/5 transition-colors"
+          className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/5 transition-colors shrink-0"
         >
           <div className="flex items-center gap-2">
             <span className="text-[9px] font-bold text-violet-400/80 uppercase tracking-widest">
@@ -123,14 +123,14 @@ export const ThoughtBubble: React.FC<{ event: ThoughtEvent }> = ({ event }) => {
 
         {/* Body */}
         {expanded && (
-          <div className="px-4 pb-3 border-t border-white/5">
-            <p className="text-[11px] leading-relaxed text-white/60 font-mono pt-2.5 whitespace-pre-wrap">
+          <div className="px-4 pb-3 border-t border-white/5 flex-1 overflow-y-auto min-h-0">
+            <p className="text-[11px] leading-relaxed text-white/60 font-mono pt-2.5 whitespace-pre-wrap break-words">
               {event.content || preview}
             </p>
           </div>
         )}
         {!expanded && (
-          <p className="px-4 pb-2.5 text-[10px] text-white/35 font-mono truncate">{preview}</p>
+          <p className="px-4 pb-2.5 text-[10px] text-white/35 font-mono truncate shrink-0">{preview}</p>
         )}
       </div>
     </div>
@@ -152,11 +152,11 @@ export const ScriptCard: React.FC<{ event: ScriptEvent }> = ({ event }) => {
         <Terminal size={10} className={ok ? 'text-emerald-400' : 'text-rose-400'} />
       </div>
 
-      <div className="flex-1 backdrop-blur-md bg-white/[0.04] border border-white/10 rounded-2xl rounded-tl-none overflow-hidden shadow-xl">
+      <div className="flex-1 backdrop-blur-md bg-white/[0.04] border border-white/10 rounded-2xl rounded-tl-none overflow-hidden shadow-xl max-h-[260px] flex flex-col">
         {/* Header */}
         <button
           onClick={() => setExpanded(e => !e)}
-          className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/5 transition-colors"
+          className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/5 transition-colors shrink-0"
         >
           <div className="flex items-center gap-2">
             <span className={`w-1.5 h-1.5 rounded-full ${ok ? 'bg-emerald-400' : 'bg-rose-400'}`} />
@@ -171,20 +171,20 @@ export const ScriptCard: React.FC<{ event: ScriptEvent }> = ({ event }) => {
         </button>
 
         {expanded && (
-          <div className="border-t border-white/5 px-4 pb-3 space-y-2.5 pt-2.5">
+          <div className="border-t border-white/5 px-4 pb-3 space-y-2.5 pt-2.5 flex-1 overflow-hidden flex flex-col">
             {/* Script code */}
-            <div>
+            <div className="shrink-0">
               <p className="text-[9px] text-white/30 uppercase tracking-widest mb-1.5">Python Script</p>
-              <pre className="text-[10px] font-mono text-white/70 bg-black/30 rounded-xl p-3 overflow-x-auto leading-relaxed border border-white/5 max-h-36 overflow-y-auto">
+              <pre className="text-[10px] font-mono text-white/70 bg-black/30 rounded-xl p-3 overflow-x-auto leading-relaxed border border-white/5 whitespace-pre-wrap break-words">
                 {event.script_code}
               </pre>
             </div>
 
             {/* stdout */}
             {event.stdout && (
-              <div>
+              <div className="shrink-0">
                 <p className="text-[9px] text-emerald-400/60 uppercase tracking-widest mb-1.5">stdout</p>
-                <pre className="text-[10px] font-mono text-emerald-300/80 bg-emerald-950/20 rounded-xl p-2.5 border border-emerald-500/10 max-h-24 overflow-y-auto">
+                <pre className="text-[10px] font-mono text-emerald-300/80 bg-emerald-950/20 rounded-xl p-2.5 border border-emerald-500/10 overflow-x-auto whitespace-pre-wrap break-words">
                   {event.stdout}
                 </pre>
               </div>
@@ -192,9 +192,9 @@ export const ScriptCard: React.FC<{ event: ScriptEvent }> = ({ event }) => {
 
             {/* stderr */}
             {event.stderr && (
-              <div>
+              <div className="shrink-0">
                 <p className="text-[9px] text-rose-400/60 uppercase tracking-widest mb-1.5">stderr</p>
-                <pre className="text-[10px] font-mono text-rose-300/80 bg-rose-950/20 rounded-xl p-2.5 border border-rose-500/10 max-h-24 overflow-y-auto">
+                <pre className="text-[10px] font-mono text-rose-300/80 bg-rose-950/20 rounded-xl p-2.5 border border-rose-500/10 overflow-x-auto whitespace-pre-wrap break-words">
                   {event.stderr}
                 </pre>
               </div>
@@ -202,15 +202,15 @@ export const ScriptCard: React.FC<{ event: ScriptEvent }> = ({ event }) => {
 
             {/* Raw JSON sent to IPC — click to reveal */}
             {event.raw_args && (
-              <div>
+              <div className="flex flex-col min-h-0">
                 <button
                   onClick={() => setShowRaw(r => !r)}
-                  className="text-[9px] text-indigo-400/60 hover:text-indigo-400 uppercase tracking-widest flex items-center gap-1 transition-colors"
+                  className="text-[9px] text-indigo-400/60 hover:text-indigo-400 uppercase tracking-widest flex items-center gap-1 transition-colors shrink-0"
                 >
                   <Zap size={9} /> {showRaw ? 'Hide' : 'Show'} Raw KiCad IPC JSON
                 </button>
                 {showRaw && (
-                  <pre className="mt-1.5 text-[10px] font-mono text-white/50 bg-black/30 rounded-xl p-2.5 border border-white/5 overflow-x-auto max-h-32 overflow-y-auto">
+                  <pre className="mt-1.5 text-[10px] font-mono text-white/50 bg-black/30 rounded-xl p-2.5 border border-white/5 overflow-x-auto whitespace-pre-wrap break-words">
                     {JSON.stringify(event.raw_args, null, 2)}
                   </pre>
                 )}
@@ -232,10 +232,10 @@ export const ReflectCard: React.FC<{ event: ReflectEvent }> = ({ event }) => {
       <div className="mt-1 flex-shrink-0 w-6 h-6 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
         <RefreshCw size={10} className="text-amber-400" />
       </div>
-      <div className="flex-1 backdrop-blur-md bg-amber-950/20 border border-amber-500/20 rounded-2xl rounded-tl-none overflow-hidden shadow-xl">
+      <div className="flex-1 backdrop-blur-md bg-amber-950/20 border border-amber-500/20 rounded-2xl rounded-tl-none overflow-hidden shadow-xl max-h-[260px] flex flex-col">
         <button
           onClick={() => setExpanded(e => !e)}
-          className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-amber-500/5 transition-colors"
+          className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-amber-500/5 transition-colors shrink-0"
         >
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
@@ -246,9 +246,9 @@ export const ReflectCard: React.FC<{ event: ReflectEvent }> = ({ event }) => {
           {expanded ? <ChevronDown size={12} className="text-white/30" /> : <ChevronRight size={12} className="text-white/30" />}
         </button>
         {expanded && (
-          <div className="border-t border-amber-500/10 px-4 pb-3 pt-2.5">
-            <p className="text-[10px] text-amber-200/60 mb-2">{event.message}</p>
-            <pre className="text-[10px] font-mono text-white/60 bg-black/30 rounded-xl p-2.5 border border-white/5 overflow-x-auto max-h-28 overflow-y-auto">
+          <div className="border-t border-amber-500/10 px-4 pb-3 pt-2.5 flex-1 overflow-hidden flex flex-col">
+            <p className="text-[10px] text-amber-200/60 mb-2 whitespace-pre-wrap break-words shrink-0">{event.message}</p>
+            <pre className="text-[10px] font-mono text-white/60 bg-black/30 rounded-xl p-2.5 border border-white/5 overflow-x-auto whitespace-pre-wrap break-words">
               {event.corrected_script}
             </pre>
           </div>
@@ -279,10 +279,10 @@ export const ActionLogItem: React.FC<{ tool: ToolExecution }> = ({ tool }) => {
         }
       </div>
 
-      <div className="flex-1 backdrop-blur-md bg-white/[0.03] border border-white/8 rounded-2xl rounded-tl-none overflow-hidden">
+      <div className="flex-1 backdrop-blur-md bg-white/[0.03] border border-white/8 rounded-2xl rounded-tl-none overflow-hidden max-h-[260px] flex flex-col">
         <button
           onClick={() => setShowJson(j => !j)}
-          className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/5 transition-colors text-left"
+          className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/5 transition-colors text-left shrink-0"
         >
           <span className="text-[11px] font-bold text-white/80 font-mono">{tool.tool}</span>
           <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${
@@ -292,13 +292,13 @@ export const ActionLogItem: React.FC<{ tool: ToolExecution }> = ({ tool }) => {
           }`}>{tool.status}</span>
         </button>
         {tool.args.action && (
-          <p className="px-4 pb-1.5 text-[10px] text-white/35 italic">{tool.args.action}</p>
+          <p className="px-4 pb-1.5 text-[10px] text-white/35 italic shrink-0">{tool.args.action}</p>
         )}
         {/* Raw JSON on click */}
         {showJson && (
-          <div className="px-4 pb-3 border-t border-white/5 pt-2">
-            <p className="text-[9px] text-indigo-400/60 uppercase tracking-widest mb-1.5">Raw KiCad IPC JSON</p>
-            <pre className="text-[10px] font-mono text-white/50 bg-black/30 rounded-xl p-2.5 border border-white/5 overflow-x-auto max-h-32 overflow-y-auto">
+          <div className="px-4 pb-3 border-t border-white/5 pt-2 flex-1 overflow-hidden flex flex-col min-h-0">
+            <p className="text-[9px] text-indigo-400/60 uppercase tracking-widest mb-1.5 shrink-0">Raw KiCad IPC JSON</p>
+            <pre className="text-[10px] font-mono text-white/50 bg-black/30 rounded-xl p-2.5 border border-white/5 overflow-x-auto whitespace-pre-wrap break-words">
               {JSON.stringify({ tool: tool.tool, args: tool.args, result: tool.result }, null, 2)}
             </pre>
           </div>
