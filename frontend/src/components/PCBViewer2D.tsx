@@ -157,15 +157,15 @@ export function PCBViewer2D() {
       {/* Empty State / Hints */}
       {!hasData && (
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <div className="w-24 h-24 mb-6 rounded-full bg-indigo-500/5 flex items-center justify-center border border-indigo-500/10 shadow-[0_0_40px_rgba(99,102,241,0.1)]">
-            <Activity size={32} className="text-indigo-400/50" />
+          <div className="w-32 h-32 mb-8 rounded-full bg-indigo-500/5 flex items-center justify-center border border-indigo-500/10 shadow-[0_0_40px_rgba(99,102,241,0.1)]">
+            <Activity size={48} className="text-indigo-400/50" />
           </div>
-          <h2 className="text-xl font-bold text-white/50 tracking-tight mb-2">Awaiting AI Synthesis</h2>
-          <p className="text-xs text-white/30 max-w-sm text-center leading-relaxed">
+          <h2 className="text-3xl font-bold text-white/50 tracking-tight mb-4">Awaiting AI Synthesis</h2>
+          <p className="text-sm text-white/30 max-w-md text-center leading-relaxed">
             Describe your hardware intent in the AI panel to begin autonomous routing and component placement.
           </p>
           <div className="mt-8 flex gap-4">
-            <div className="px-4 py-2 rounded-lg bg-white/[0.02] border border-white/5 text-[10px] text-white/40 font-mono">
+            <div className="px-5 py-3 rounded-xl bg-white/[0.02] border border-white/5 text-xs text-white/40 font-mono">
               try: "Route the ESP32 differential pairs"
             </div>
           </div>

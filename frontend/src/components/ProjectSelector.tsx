@@ -51,13 +51,13 @@ export const ProjectSelector: React.FC = () => {
     <div className="relative">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+        className="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
       >
-        <Folder size={14} className="text-indigo-400" />
-        <span className="text-xs font-medium text-white/90">
+        <Folder size={18} className="text-indigo-400" />
+        <span className="text-sm font-semibold text-white/90">
           {activeProject ? activeProject.name : 'Select Project'}
         </span>
-        <ChevronDown size={14} className="text-white/50" />
+        <ChevronDown size={18} className="text-white/50" />
       </button>
 
       {isOpen && (

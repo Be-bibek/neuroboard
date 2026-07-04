@@ -294,25 +294,25 @@ export const AntigravitySidebar: React.FC = () => {
 
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-white/[0.02] shrink-0">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-violet-600/80 to-indigo-700/80 flex items-center justify-center shadow-lg shadow-violet-600/20">
-                <Zap size={13} className="text-white" fill="currentColor" />
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600/80 to-indigo-700/80 flex items-center justify-center shadow-lg shadow-violet-600/20">
+                <Zap size={16} className="text-white" fill="currentColor" />
               </div>
               <div>
-                <h2 className="text-[13px] font-bold text-white/90 leading-tight">Hardware Coder</h2>
-                <p className="text-[9px] text-white/30 font-medium tracking-wider">Gemini 3 Flash · IPC Live</p>
+                <h2 className="text-base font-bold text-white/90 leading-tight">Hardware Coder</h2>
+                <p className="text-xs text-white/40 font-medium tracking-wider">Gemini 3 Flash · IPC Live</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <button 
                 onClick={() => setIsCollapsed(true)}
-                className="p-1.5 rounded-lg hover:bg-white/8 transition-colors text-white/30 hover:text-white/70"
+                className="p-2 rounded-lg hover:bg-white/8 transition-colors text-white/40 hover:text-white/80"
                 title="Focus Mode"
               >
-                <ChevronRight size={14} />
+                <ChevronRight size={18} />
               </button>
-              <button onClick={() => setIsSettingsOpen(true)} className="p-1.5 rounded-lg hover:bg-white/8 transition-colors text-white/30 hover:text-white/70">
-                <Settings size={14} />
+              <button onClick={() => setIsSettingsOpen(true)} className="p-2 rounded-lg hover:bg-white/8 transition-colors text-white/40 hover:text-white/80">
+                <Settings size={18} />
               </button>
             </div>
           </div>
@@ -321,20 +321,20 @@ export const AntigravitySidebar: React.FC = () => {
         <div className="border-b border-white/5 shrink-0">
           <button
             onClick={() => setShowServers(s => !s)}
-            className="w-full flex items-center justify-between px-5 py-2.5 hover:bg-white/3 transition-colors"
+            className="w-full flex items-center justify-between px-5 py-3 hover:bg-white/3 transition-colors"
           >
-            <div className="flex items-center gap-2">
-              <Activity size={10} className="text-white/30" />
-              <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">PCB Servers</span>
-              <div className="flex gap-1">
+            <div className="flex items-center gap-2.5">
+              <Activity size={14} className="text-white/40" />
+              <span className="text-xs font-bold text-white/40 uppercase tracking-widest">PCB Servers</span>
+              <div className="flex gap-1.5 ml-2">
                 {servers.filter(s => s.status === 'running').map(s => (
-                  <span key={s.name} className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]" />
+                  <span key={s.name} className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]" />
                 ))}
               </div>
             </div>
             {showServers
-              ? <ChevronDown size={11} className="text-white/25" />
-              : <ChevronRight size={11} className="text-white/25" />
+              ? <ChevronDown size={14} className="text-white/40" />
+              : <ChevronRight size={14} className="text-white/40" />
             }
           </button>
           {showServers && (
@@ -476,18 +476,18 @@ export const AntigravitySidebar: React.FC = () => {
           </div>
 
           {/* Footer status bar */}
-          <div className="mt-2 flex items-center justify-between px-1">
-            <div className="flex items-center gap-1.5">
-              <span className={`w-1.5 h-1.5 rounded-full ${isStreaming ? 'bg-violet-400 animate-pulse' : 'bg-teal-400'}`} />
-              <span className="text-[9px] text-white/25 font-medium">
+          <div className="mt-3 flex items-center justify-between px-2">
+            <div className="flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full ${isStreaming ? 'bg-violet-400 animate-pulse' : 'bg-teal-400'}`} />
+              <span className="text-xs text-white/40 font-medium">
                 {isStreaming ? 'Hardware Coder active' : `Context: ${selectedContexts.length ? selectedContexts.join(' + ') : 'none'}`}
               </span>
             </div>
             <button
               onClick={e => { e.stopPropagation(); setShowContextMenu(m => !m); }}
-              className="text-[9px] font-bold text-violet-400/50 hover:text-violet-400 flex items-center gap-1 transition-colors"
+              className="text-xs font-bold text-violet-400/70 hover:text-violet-400 flex items-center gap-1.5 transition-colors"
             >
-              <Zap size={9} />@context
+              <Zap size={12} />@context
             </button>
           </div>
         </div>

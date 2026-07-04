@@ -54,27 +54,27 @@ function Header({ onRunPipeline, running, syncStatus }: { onRunPipeline: () => v
       </div>
 
       {/* Status pills & Manual */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         {/* User Manual Button */}
         <button
           onClick={() => setShowManual(true)}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-2xl border text-xs font-semibold backdrop-blur-md transition-all
+          className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold backdrop-blur-md transition-all
             ${syncStatus !== "CONNECTED" 
               ? "bg-rose-500/20 border-rose-500/50 text-rose-300 animate-[pulse_1.5s_ease-in-out_infinite] hover:bg-rose-500/30 shadow-[0_0_20px_rgba(244,63,94,0.5)]" 
               : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white/80"}`}
         >
-          <Info size={syncStatus !== "CONNECTED" ? 18 : 14} className={syncStatus !== "CONNECTED" ? "text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.8)]" : ""} />
+          <Info size={syncStatus !== "CONNECTED" ? 20 : 18} className={syncStatus !== "CONNECTED" ? "text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.8)]" : ""} />
           How to Setup
         </button>
 
-        <div className="flex items-center gap-2 px-4 py-1.5 rounded-2xl
-                          bg-white/5 border border-white/10 text-white/80 text-xs font-semibold backdrop-blur-md">
-          <span className={`w-2 h-2 rounded-full ${syncStatus === "CONNECTED" ? "bg-emerald-400 shadow-[0_0_8px_theme('colors.emerald.400')]" : "bg-red-500"}`} />
+        <div className="flex items-center gap-2 px-5 py-2 rounded-2xl
+                          bg-white/5 border border-white/10 text-white/80 text-sm font-semibold backdrop-blur-md">
+          <span className={`w-3 h-3 rounded-full ${syncStatus === "CONNECTED" ? "bg-emerald-400 shadow-[0_0_8px_theme('colors.emerald.400')]" : "bg-red-500"}`} />
           {syncStatus === "CONNECTED" ? "KiCad IPC" : "IPC Disconnected"}
         </div>
-        <div className="flex items-center gap-2 px-4 py-1.5 rounded-2xl
-                          bg-white/5 border border-white/10 text-white/80 text-xs font-semibold backdrop-blur-md">
-          <Zap size={12} className="text-amber-400" />
+        <div className="flex items-center gap-2 px-5 py-2 rounded-2xl
+                          bg-white/5 border border-white/10 text-white/80 text-sm font-semibold backdrop-blur-md">
+          <Zap size={16} className="text-amber-400" />
           Hailo-8 · 26 TOPS
         </div>
       </div>
@@ -84,11 +84,11 @@ function Header({ onRunPipeline, running, syncStatus }: { onRunPipeline: () => v
         <button
           onClick={onRunPipeline}
           disabled={running}
-          className="glass-button bg-indigo-600/80 hover:bg-indigo-500 text-white shadow-xl shadow-indigo-500/20"
+          className="glass-button px-6 py-2.5 bg-indigo-600/80 hover:bg-indigo-500 text-white shadow-xl shadow-indigo-500/20 text-sm font-bold"
         >
           {running
-            ? <span className="animate-pulse flex items-center gap-2"><Zap size={16} /> Thinking…</span>
-            : <><Play size={16} fill="currentColor" /> Execute Goal</>}
+            ? <span className="animate-pulse flex items-center gap-2"><Zap size={18} /> Thinking…</span>
+            : <><Play size={18} fill="currentColor" /> Execute Goal</>}
         </button>
       </div>
     </header>
