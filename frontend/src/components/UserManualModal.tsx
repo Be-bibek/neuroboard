@@ -124,6 +124,57 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({ isOpen, onClos
                 <li><strong>Backend Engine:</strong> FastAPI + Python, utilizing an autonomous <em>2D Arithmetic Reflow Engine</em> for instant math-based trace detouring instead of relying on slow LLM pathfinding.</li>
                 <li><strong>The Bridge:</strong> A native IPC socket (<code>api.sock</code>) via <code>kipy</code> hooks directly into KiCad 10's memory, allowing the AI to mutate the board in real-time.</li>
               </ul>
+
+              {/* Architecture Diagram */}
+              <div className="my-8 p-6 rounded-2xl bg-[#09090c] border border-white/10 relative overflow-hidden">
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f15_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f15_1px,transparent_1px)] bg-[size:14px_24px]"></div>
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
+                  
+                  {/* Web UI */}
+                  <div className="w-full md:w-1/3 p-4 rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-600/10 border border-indigo-500/30 text-center shadow-[0_0_20px_rgba(99,102,241,0.1)] backdrop-blur-xl">
+                    <div className="mb-3 inline-flex p-2.5 rounded-xl bg-indigo-500/20"><Box size={24} className="text-indigo-400" /></div>
+                    <h3 className="font-bold text-white mb-1">Web UI</h3>
+                    <p className="text-[10px] text-white/50 uppercase tracking-widest font-bold">R3F • React • Tauri</p>
+                  </div>
+                  
+                  {/* Arrow 1 */}
+                  <div className="flex flex-col items-center shrink-0">
+                    <div className="hidden md:flex w-12 h-px bg-gradient-to-r from-indigo-500/50 to-emerald-500/50 relative items-center justify-end">
+                      <div className="w-2 h-2 border-r-2 border-t-2 border-emerald-500/50 rotate-45 mr-1"></div>
+                    </div>
+                    <div className="md:hidden h-8 w-px bg-gradient-to-b from-indigo-500/50 to-emerald-500/50 relative flex items-end justify-center">
+                      <div className="w-2 h-2 border-r-2 border-b-2 border-emerald-500/50 rotate-45 mb-1"></div>
+                    </div>
+                    <span className="text-[10px] text-emerald-400 font-mono mt-1 bg-emerald-400/10 px-2 py-0.5 rounded">HTTP/WS</span>
+                  </div>
+
+                  {/* Backend */}
+                  <div className="w-full md:w-1/3 p-4 rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-600/10 border border-emerald-500/30 text-center shadow-[0_0_20px_rgba(52,211,153,0.1)] backdrop-blur-xl">
+                    <div className="mb-3 inline-flex p-2.5 rounded-xl bg-emerald-500/20"><Terminal size={24} className="text-emerald-400" /></div>
+                    <h3 className="font-bold text-white mb-1">Backend Engine</h3>
+                    <p className="text-[10px] text-white/50 uppercase tracking-widest font-bold">FastAPI • Python</p>
+                  </div>
+
+                  {/* Arrow 2 */}
+                  <div className="flex flex-col items-center shrink-0">
+                    <div className="hidden md:flex w-12 h-px bg-gradient-to-r from-emerald-500/50 to-rose-500/50 relative items-center justify-end">
+                      <div className="w-2 h-2 border-r-2 border-t-2 border-rose-500/50 rotate-45 mr-1"></div>
+                    </div>
+                    <div className="md:hidden h-8 w-px bg-gradient-to-b from-emerald-500/50 to-rose-500/50 relative flex items-end justify-center">
+                      <div className="w-2 h-2 border-r-2 border-b-2 border-rose-500/50 rotate-45 mb-1"></div>
+                    </div>
+                    <span className="text-[10px] text-rose-400 font-mono mt-1 bg-rose-400/10 px-2 py-0.5 rounded">api.sock</span>
+                  </div>
+
+                  {/* KiCad */}
+                  <div className="w-full md:w-1/3 p-4 rounded-xl bg-gradient-to-br from-rose-500/10 to-red-600/10 border border-rose-500/30 text-center shadow-[0_0_20px_rgba(244,63,94,0.1)] backdrop-blur-xl">
+                    <div className="mb-3 inline-flex p-2.5 rounded-xl bg-rose-500/20"><Cpu size={24} className="text-rose-400" /></div>
+                    <h3 className="font-bold text-white mb-1">KiCad 10</h3>
+                    <p className="text-[10px] text-white/50 uppercase tracking-widest font-bold">Live Digital Twin</p>
+                  </div>
+
+                </div>
+              </div>
             </div>
           </section>
 
@@ -163,6 +214,16 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({ isOpen, onClos
                   </div>
                 </a>
                 
+                <a href="https://bibek-das.vercel.app/" target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    🌐
+                  </div>
+                  <div>
+                    <p className="text-xs text-white/50 font-bold uppercase tracking-wider">Portfolio</p>
+                    <p className="text-sm text-white/90">bibek-das.vercel.app</p>
+                  </div>
+                </a>
+
                 <a href="https://github.com/Be-bibek" target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group">
                   <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Box size={16} />
