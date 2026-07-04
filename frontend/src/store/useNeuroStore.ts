@@ -53,6 +53,10 @@ interface NeuroStore {
   // ── Validation ──
   violations: ValidationViolation[];
   setViolations: (v: ValidationViolation[]) => void;
+
+  // ── 3D Holographic Canvas Telemetry ──
+  boardPositions: Record<string, { x: number; y: number }>;
+  updateBoardPosition: (ref: string, x: number, y: number) => void;
 }
 
 export const useNeuroStore = create<NeuroStore>((set) => ({
@@ -95,4 +99,10 @@ export const useNeuroStore = create<NeuroStore>((set) => ({
   // ── Validation ──
   violations: [],
   setViolations: (v) => set({ violations: v }),
+  
+  // ── 3D Holographic Canvas Telemetry ──
+  boardPositions: {},
+  updateBoardPosition: (ref, x, y) => set((s) => ({
+    boardPositions: { ...s.boardPositions, [ref]: { x, y } }
+  })),
 }));

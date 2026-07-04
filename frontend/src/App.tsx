@@ -79,8 +79,11 @@ function Header({ onRunPipeline, running, syncStatus }: { onRunPipeline: () => v
 }
 
 /* ── Main App ───────────────────────────────────────────────────────────── */
+import { PCBViewer3D } from "./components/PCBViewer3D";
+
 export default function App() {
   const [pipelineRunning, setPipelineRunning] = useState(false);
+  const [show3D, setShow3D] = useState(false);
   const view = useNeuroStore((s) => s.view);
   const syncStatus = useNeuroStore((s) => s.syncStatus);
   
@@ -114,8 +117,28 @@ export default function App() {
         
         {/* Center: Main Canvas Area & Bottom Dock */}
         <main className="flex flex-col flex-1 min-w-0 overflow-hidden relative bg-[#0b0f1a] z-0">
-          <div className="flex-1 min-h-0 min-w-0 relative">
-            {view === "PLANNING_BOARD" ? <PlanningBoard /> : <PCBViewer2D />}
+          <div className="flex-1 min-h-0 min-w-0 relative group">
+            
+            {/* 3D/2D Toggle Button */}
+            {view !== "PLANNING_BOARD" && (
+              <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button 
+                  onClick={() => setShow3D(!show3D)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/50 border border-white/10 text-white/70 hover:text-white hover:bg-black/80 backdrop-blur-md text-xs font-semibold shadow-xl transition-all"
+                >
+                  <Box size={14} className={show3D ? "text-amber-400" : "text-white/50"} />
+                  {show3D ? "3D Hologram Active" : "Enable 3D Hologram"}
+                </button>
+              </div>
+            )}
+
+            {view === "PLANNING_BOARD" ? (
+              <PlanningBoard />
+            ) : show3D ? (
+              <PCBViewer3D />
+            ) : (
+              <PCBViewer2D />
+            )}
           </div>
           
           {/* Bottom Dock */}

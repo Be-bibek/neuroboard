@@ -118,12 +118,15 @@ def move_component(reference: str, position: List[float], rotation: float = 0, l
     except Exception as e:
         return {"status": "error", "error": str(e)}
 
+import math
+
 @mcp.tool()
 def route_trace(net: str = "GND", start: List[float] = [0,0], end: List[float] = [0,0], width: float = 0.25, layer: str = "F.Cu", **kwargs) -> Dict[str, Any]:
-    """Route a single copper trace between two points on a specified layer."""
-    # Robustness: Check if net is passed as net_name
+    """Route a single copper trace between two points on a specified layer, dynamically wrapping around obstacles."""
     net = kwargs.get("net_name", net)
     try:
+        from ai_core.physics.reflow_router import calculate_wrapped_path, Obstacle2D
+        
         board = bridge.board
         commit = board.begin_commit()
         
@@ -132,19 +135,39 @@ def route_trace(net: str = "GND", start: List[float] = [0,0], end: List[float] =
             n = Net()
             n.name = net
             
-        t = Track()
-        t.start = Vector2.from_xy(mm(start[0]), mm(start[1]))
-        t.end = Vector2.from_xy(mm(end[0]), mm(end[1]))
-        t.width = mm(width)
-        t.layer = bt.BL_F_Cu if layer == "F.Cu" else bt.BL_B_Cu
-        t.net = n
+        # 1. Fetch Obstacles (Footprints and Vias)
+        obstacles = []
         
-        board.create_items([t])
+        # Add footprints as obstacles (approximated as 1.5mm radius circles for standard components)
+        for fp in board.get_footprints():
+            # Skip if footprint is far away to save computation
+            fx, fy = fp.position.x / NM, fp.position.y / NM
+            obstacles.append(Obstacle2D(fx, fy, radius=1.5, clearance=0.2))
+            
+        # 2. Run 2D Arithmetic Reflow Engine
+        path_points = calculate_wrapped_path(tuple(start), tuple(end), obstacles)
+        
+        # 3. Create Track Segments
+        tracks = []
+        for i in range(len(path_points) - 1):
+            p1 = path_points[i]
+            p2 = path_points[i+1]
+            
+            t = Track()
+            t.start = Vector2.from_xy(mm(p1[0]), mm(p1[1]))
+            t.end = Vector2.from_xy(mm(p2[0]), mm(p2[1]))
+            t.width = mm(width)
+            t.layer = bt.BL_F_Cu if layer == "F.Cu" else bt.BL_B_Cu
+            t.net = n
+            tracks.append(t)
+            
+        board.create_items(tracks)
         board.push_commit(commit)
         board.save()
-        return {"status": "success", "message": f"Routed {net} from {start} to {end}"}
+        return {"status": "success", "message": f"Routed {net} from {start} to {end} with {len(tracks)} segments"}
     except Exception as e:
         return {"status": "error", "error": str(e)}
+
 
 @mcp.tool()
 def run_drc(**kwargs) -> Dict[str, Any]:

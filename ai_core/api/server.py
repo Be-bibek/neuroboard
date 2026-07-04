@@ -62,6 +62,61 @@ _pipeline      = None
 _orchestrator  = None
 _ipc           = None
 
+# ── Telemetry Background Loop ──────────────────────────────────────────────
+async def telemetry_loop():
+    """Polls KiCad board at 10Hz and sends delta updates for the 3D Holographic Canvas."""
+    from api.ipc_routes import active_ws_connections
+    last_positions = {}
+    
+    while True:
+        try:
+            if active_ws_connections:
+                ipc = _get_ipc()
+                if not ipc.board:
+                    ipc.connect()
+                
+                # Fast poll for footprint positions
+                # We skip full state dump for performance, just track footprint coords
+                board = ipc.board
+                if board:
+                    current_positions = {}
+                    for fp in board.get_footprints():
+                        try: 
+                            ref = fp.reference_field.text.value
+                        except: 
+                            continue
+                            
+                        x = fp.position.x / 1_000_000
+                        y = fp.position.y / 1_000_000
+                        current_positions[ref] = (x, y)
+                        
+                        # Check if it moved compared to last known position
+                        if ref in last_positions:
+                            last_x, last_y = last_positions[ref]
+                            # If moved more than 0.001mm
+                            if abs(x - last_x) > 0.001 or abs(y - last_y) > 0.001:
+                                payload = {"type": "kicad-board-updated", "payload": {"ref": ref, "x": x, "y": y}}
+                                # Broadcast to all WS
+                                dead = []
+                                for ws in active_ws_connections:
+                                    try:
+                                        await ws.send_json(payload)
+                                    except Exception:
+                                        dead.append(ws)
+                                for ws in dead:
+                                    active_ws_connections.remove(ws)
+                                    
+                    last_positions = current_positions
+        except Exception as e:
+            # Silently catch offline errors or kipy errors during poll
+            pass
+            
+        await asyncio.sleep(0.1) # 10Hz
+
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(telemetry_loop())
+
 
 def _get_pipeline():
     global _pipeline

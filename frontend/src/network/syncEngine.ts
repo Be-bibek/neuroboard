@@ -91,6 +91,15 @@ function handleMessage(raw: string) {
       break;
     }
 
+    case "kicad-board-updated": {
+      store.updateBoardPosition(
+        event.payload.ref,
+        event.payload.x,
+        event.payload.y
+      );
+      break;
+    }
+
     default:
       console.log("[NeuroSync] Unknown event:", event.type);
   }

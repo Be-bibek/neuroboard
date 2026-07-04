@@ -29,6 +29,7 @@ NO conversational filler. STRICT KiCad 10 API usage.
 4. SCRATCHPAD: Use execute_engineering_script for ALL geometry (moves, routing, offsets).
 5. HELPERS: get_footprint(ref), get_net(name), mm(v), NM=1,000,000.
 6. VIAS: via.drill_diameter (NOT via.drill).
+7. ROUTING: Do NOT generate midpoint coordinates to dodge obstacles. Provide ONLY the direct start and end points for `route_trace`. The local 2D Arithmetic Reflow Engine handles all collision physics automatically.
 
 ## OUTPUT FORMAT:
 ### THOUGHT
