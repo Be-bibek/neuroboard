@@ -18,10 +18,15 @@ import { ListTree, Box, Activity as ActivityIcon, ChevronDown } from "lucide-rea
 const API = "http://localhost:8000";
 
 /* ── Top Header ─────────────────────────────────────────────────────────── */
+import { UserManualModal } from "./components/UserManualModal";
+import { Info } from "lucide-react";
+
 function Header({ onRunPipeline, running, syncStatus }: { onRunPipeline: () => void; running: boolean; syncStatus: string }) {
   const selectedTemplate = useNeuroStore((s) => s.selectedTemplate);
+  const [showManual, setShowManual] = useState(false);
   
   return (
+    <>
     <header className="flex items-center justify-between px-6 py-4
                        backdrop-blur-xl bg-zinc-900/30 border-b border-white/10 flex-shrink-0 z-50">
       {/* Brand & Project Selector */}
@@ -48,11 +53,23 @@ function Header({ onRunPipeline, running, syncStatus }: { onRunPipeline: () => v
         <ProjectSelector />
       </div>
 
-      {/* Status pills */}
+      {/* Status pills & Manual */}
       <div className="flex items-center gap-3">
+        {/* User Manual Button */}
+        <button
+          onClick={() => setShowManual(true)}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-2xl border text-xs font-semibold backdrop-blur-md transition-all
+            ${syncStatus !== "CONNECTED" 
+              ? "bg-indigo-500/20 border-indigo-500/40 text-indigo-300 animate-pulse hover:bg-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.3)]" 
+              : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white/80"}`}
+        >
+          <Info size={14} />
+          How to Setup
+        </button>
+
         <div className="flex items-center gap-2 px-4 py-1.5 rounded-2xl
                           bg-white/5 border border-white/10 text-white/80 text-xs font-semibold backdrop-blur-md">
-          <span className={`w-2 h-2 rounded-full ${syncStatus === "CONNECTED" ? "bg-emerald-400 shadow-[0_0_8px_theme('colors.emerald.400')]" : "bg-red-500 animate-pulse"}`} />
+          <span className={`w-2 h-2 rounded-full ${syncStatus === "CONNECTED" ? "bg-emerald-400 shadow-[0_0_8px_theme('colors.emerald.400')]" : "bg-red-500"}`} />
           {syncStatus === "CONNECTED" ? "KiCad IPC" : "IPC Disconnected"}
         </div>
         <div className="flex items-center gap-2 px-4 py-1.5 rounded-2xl
@@ -75,6 +92,8 @@ function Header({ onRunPipeline, running, syncStatus }: { onRunPipeline: () => v
         </button>
       </div>
     </header>
+    <UserManualModal isOpen={showManual} onClose={() => setShowManual(false)} />
+    </>
   );
 }
 
