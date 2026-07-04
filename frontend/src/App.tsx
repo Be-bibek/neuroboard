@@ -60,10 +60,10 @@ function Header({ onRunPipeline, running, syncStatus }: { onRunPipeline: () => v
           onClick={() => setShowManual(true)}
           className={`flex items-center gap-2 px-3 py-1.5 rounded-2xl border text-xs font-semibold backdrop-blur-md transition-all
             ${syncStatus !== "CONNECTED" 
-              ? "bg-indigo-500/20 border-indigo-500/40 text-indigo-300 animate-pulse hover:bg-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.3)]" 
+              ? "bg-rose-500/20 border-rose-500/50 text-rose-300 animate-[pulse_1.5s_ease-in-out_infinite] hover:bg-rose-500/30 shadow-[0_0_20px_rgba(244,63,94,0.5)]" 
               : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white/80"}`}
         >
-          <Info size={14} />
+          <Info size={syncStatus !== "CONNECTED" ? 18 : 14} className={syncStatus !== "CONNECTED" ? "text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.8)]" : ""} />
           How to Setup
         </button>
 
