@@ -68,8 +68,8 @@ export function PCBViewer2D() {
       ctx.lineJoin = "round";
       state.tracks.forEach((track: any) => {
         ctx.beginPath();
-        ctx.moveTo(track.start[0] * SCALE + OFFSET_X - 150, track.start[1] * SCALE + OFFSET_Y - 100);
-        ctx.lineTo(track.end[0] * SCALE + OFFSET_X - 150, track.end[1] * SCALE + OFFSET_Y - 100);
+        ctx.moveTo((track.start[0] - 150) * SCALE + OFFSET_X, (track.start[1] - 100) * SCALE + OFFSET_Y);
+        ctx.lineTo((track.end[0] - 150) * SCALE + OFFSET_X, (track.end[1] - 100) * SCALE + OFFSET_Y);
         ctx.stroke();
       });
     }
@@ -77,8 +77,8 @@ export function PCBViewer2D() {
     // Draw Footprints
     if (state.footprints) {
       state.footprints.forEach((fp: any) => {
-        const x = fp.x * SCALE + OFFSET_X - 150;
-        const y = fp.y * SCALE + OFFSET_Y - 100;
+        const x = (fp.x - 150) * SCALE + OFFSET_X;
+        const y = (fp.y - 100) * SCALE + OFFSET_Y;
         
         const isModified = lastModifiedId === fp.ref;
         

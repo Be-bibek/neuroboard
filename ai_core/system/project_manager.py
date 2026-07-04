@@ -15,15 +15,25 @@ class ProjectManager:
         
     def list_projects(self) -> List[Dict[str, str]]:
         projects = []
-        # Find all .kicad_pro files
-        for pro_file in self.workspace_dir.rglob("*.kicad_pro"):
-            pcb_file = pro_file.with_suffix(".kicad_pcb")
-            projects.append({
-                "name": pro_file.stem,
-                "path": str(pro_file.parent),
-                "pro_file": str(pro_file),
-                "pcb_file": str(pcb_file) if pcb_file.exists() else None
-            })
+        
+        # Directories to scan
+        scan_dirs = [self.workspace_dir]
+        
+        # Also scan user's specific pi-hat directory
+        pi_hat_dir = Path(r"C:\Users\Bibek\Documents\pi-hat")
+        if pi_hat_dir.exists():
+            scan_dirs.append(pi_hat_dir)
+            
+        for d in scan_dirs:
+            # Find all .kicad_pro files
+            for pro_file in d.rglob("*.kicad_pro"):
+                pcb_file = pro_file.with_suffix(".kicad_pcb")
+                projects.append({
+                    "name": pro_file.stem,
+                    "path": str(pro_file.parent),
+                    "pro_file": str(pro_file),
+                    "pcb_file": str(pcb_file) if pcb_file.exists() else None
+                })
         return projects
         
     def load_project(self, project_path: str) -> bool:

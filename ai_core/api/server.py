@@ -91,20 +91,25 @@ async def telemetry_loop():
                         current_positions[ref] = (x, y)
                         
                         # Check if it moved compared to last known position
+                        moved = False
                         if ref in last_positions:
                             last_x, last_y = last_positions[ref]
-                            # If moved more than 0.001mm
                             if abs(x - last_x) > 0.001 or abs(y - last_y) > 0.001:
-                                payload = {"type": "kicad-board-updated", "payload": {"ref": ref, "x": x, "y": y}}
-                                # Broadcast to all WS
-                                dead = []
-                                for ws in active_ws_connections:
-                                    try:
-                                        await ws.send_json(payload)
-                                    except Exception:
-                                        dead.append(ws)
-                                for ws in dead:
-                                    active_ws_connections.remove(ws)
+                                moved = True
+                        else:
+                            moved = True
+                            
+                        if moved:
+                            payload = {"type": "kicad-board-updated", "payload": {"ref": ref, "x": x, "y": y}}
+                            # Broadcast to all WS
+                            dead = []
+                            for ws in active_ws_connections:
+                                try:
+                                    await ws.send_json(payload)
+                                except Exception:
+                                    dead.append(ws)
+                            for ws in dead:
+                                active_ws_connections.remove(ws)
                                     
                     last_positions = current_positions
         except Exception as e:
