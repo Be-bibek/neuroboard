@@ -109,6 +109,93 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({ isOpen, onClos
             </div>
           </section>
 
+          <hr className="border-white/10" />
+
+          {/* Section 4: System Architecture */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-3 text-lg font-bold text-white">
+              <Cpu className="text-white/70" />
+              4. System Architecture
+            </div>
+            <div className="pl-9 space-y-3 text-sm text-white/60 leading-relaxed">
+              <p>NeuroBoard acts as a <strong>Zero-Install Web Client with a Local Hardware Daemon</strong>. This creates a bidirectional, low-latency Digital Twin of your physical PCB.</p>
+              <ul className="list-disc list-inside space-y-1 mt-2">
+                <li><strong>Frontend:</strong> React, Tauri, and React Three Fiber (R3F) for a holographic 60fps telemetry dashboard.</li>
+                <li><strong>Backend Engine:</strong> FastAPI + Python, utilizing an autonomous <em>2D Arithmetic Reflow Engine</em> for instant math-based trace detouring instead of relying on slow LLM pathfinding.</li>
+                <li><strong>The Bridge:</strong> A native IPC socket (<code>api.sock</code>) via <code>kipy</code> hooks directly into KiCad 10's memory, allowing the AI to mutate the board in real-time.</li>
+              </ul>
+            </div>
+          </section>
+
+          {/* Section 5: Future Roadmap */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-3 text-lg font-bold text-white">
+              <Terminal className="text-white/70" />
+              5. Future Roadmap
+            </div>
+            <div className="pl-9 space-y-3 text-sm text-white/60 leading-relaxed">
+              <p>The journey doesn't stop here. Here is what we are building next:</p>
+              <ul className="list-disc list-inside space-y-1 mt-2">
+                <li><strong>Multi-Layer Auto-Routing:</strong> Expanding the arithmetic engine to seamlessly transition between 4-layer and 8-layer boards with intelligent via placements.</li>
+                <li><strong>Semantic Schematic Understanding:</strong> Allowing the AI to read schematic nets and suggest bypass capacitor placements automatically.</li>
+                <li><strong>Real-time DRC Validation:</strong> Instantly highlighting design rule violations on the holographic canvas before they are even committed to KiCad.</li>
+              </ul>
+            </div>
+          </section>
+
+          {/* Section 6: Get In Touch */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-3 text-lg font-bold text-white">
+              <BookOpen className="text-white/70" />
+              6. Thanks & Get In Touch
+            </div>
+            <div className="pl-9 space-y-4">
+              <p className="text-sm text-white/60">Thank you for exploring NeuroBoard! If you have questions, want to collaborate, or just want to say hi, feel free to reach out to me.</p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <a href="mailto:bibekdas1055@gmail.com" className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    ✉️
+                  </div>
+                  <div>
+                    <p className="text-xs text-white/50 font-bold uppercase tracking-wider">Email</p>
+                    <p className="text-sm text-white/90">bibekdas1055@gmail.com</p>
+                  </div>
+                </a>
+                
+                <a href="https://github.com/Be-bibek" target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Box size={16} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-white/50 font-bold uppercase tracking-wider">GitHub</p>
+                    <p className="text-sm text-white/90">Be-bibek</p>
+                  </div>
+                </a>
+
+                <a href="https://linkedin.com/in/bibek-das" target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    💼
+                  </div>
+                  <div>
+                    <p className="text-xs text-white/50 font-bold uppercase tracking-wider">LinkedIn</p>
+                    <p className="text-sm text-white/90">Bibek Das</p>
+                  </div>
+                </a>
+
+                <a href="https://instagram.com/bibek-das" target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    📸
+                  </div>
+                  <div>
+                    <p className="text-xs text-white/50 font-bold uppercase tracking-wider">Instagram</p>
+                    <p className="text-sm text-white/90">Bibek Das</p>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </section>
+
         </div>
         
         {/* Footer */}
