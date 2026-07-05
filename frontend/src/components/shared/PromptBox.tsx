@@ -10,10 +10,10 @@ interface PromptBoxProps {
 
 export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: PromptBoxProps) {
   const [input, setInput] = useState("");
-  const { modelSelection, setModelSelection, autoDrc, setAutoDrc } = useNeuroStore();
+  const { agentSelection, setAgentSelection, modelSelection, setModelSelection, autoDrc, setAutoDrc } = useNeuroStore();
   
   // Dropdown states
-  const [openDropdown, setOpenDropdown] = useState<"context" | "model" | "github" | null>(null);
+  const [openDropdown, setOpenDropdown] = useState<"agent" | "context" | "model" | "github" | null>(null);
 
   // Close dropdowns on outside click
   const boxRef = useRef<HTMLDivElement>(null);
@@ -78,10 +78,10 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
       <div className="h-px w-[calc(100%-48px)] mx-auto bg-white/5" />
 
       {/* Bottom Toolbar */}
-      <div className="flex items-center justify-between px-6 py-4">
+      <div className="flex items-center justify-between px-6 py-4 overflow-x-auto gap-4 scrollbar-hide">
         
         {/* Left Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {/* Add PDF/Stubs */}
           <button 
             title="Add PDF or Stubs"
@@ -90,6 +90,31 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
             <Plus size={18} />
           </button>
           
+          {/* Agent Dropdown */}
+          <div className="relative">
+            <button 
+              className={`flex items-center gap-2 px-4 h-10 rounded-full border ${openDropdown === 'agent' ? 'bg-white/10 border-white/20' : 'border-white/10'} text-slate-300 hover:bg-white/10 transition-colors font-medium text-sm`}
+              onClick={() => setOpenDropdown(openDropdown === "agent" ? null : "agent")}
+            >
+              {agentSelection} <ChevronDown size={14} className="text-slate-500" />
+            </button>
+            {openDropdown === "agent" && (
+              <div className="absolute top-full left-0 mt-2 w-48 bg-zinc-900 border border-white/10 rounded-xl shadow-2xl py-2 z-50 overflow-hidden backdrop-blur-xl">
+                <div className="px-3 py-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Select Agent</div>
+                {["Planner", "Agent"].map(a => (
+                  <button 
+                    key={a}
+                    className="w-full text-left px-4 py-2 hover:bg-white/5 text-sm text-slate-300 flex items-center justify-between"
+                    onClick={() => { setAgentSelection(a); setOpenDropdown(null); }}
+                  >
+                    {a}
+                    {agentSelection === a && <Check size={14} className="text-emerald-500" />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Context Dropdown */}
           <div className="relative">
             <button 
@@ -180,7 +205,7 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
         </div>
 
         {/* Right Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <button 
             onClick={() => setInput("")}
             className="flex items-center justify-center w-10 h-10 rounded-full border border-white/10 text-slate-500 hover:text-slate-300 hover:bg-white/10 transition-colors"

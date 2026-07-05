@@ -114,19 +114,31 @@ export function TemplateSelector() {
   );
 
   return (
-    <div className="flex flex-col w-full h-full bg-[#0b0f1a] text-slate-100 overflow-y-auto items-center pt-16 sm:pt-24">
+    <div className="flex flex-col w-full h-full bg-[#0b0f1a] text-slate-100 overflow-y-auto items-center pt-12 sm:pt-20">
       {/* Hero Section */}
-      <div className="w-full max-w-4xl flex flex-col items-center text-center mb-16 px-4 sm:px-6">
-        <h1 className="text-4xl sm:text-6xl font-bold text-white tracking-tight mb-4 font-serif">What should I design?</h1>
-        <p className="text-base sm:text-xl text-slate-400 mb-10 max-w-2xl">
-          Schematics, PCB routing, DRC fixes — describe it in plain language inside KiCad.
+      <div className="w-full max-w-4xl flex flex-col items-center text-center mb-12 px-4 sm:px-6">
+        <h1 className="text-4xl sm:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400 tracking-tight mb-4 font-serif">
+          Prompt-to-Hardware
+        </h1>
+        <p className="text-base sm:text-xl text-slate-400 mb-8 max-w-2xl font-light">
+          The World's First Mobile AI Compiler for Native KiCad Designs.
         </p>
         
-        <PromptBox onSubmitStart={handlePromptSubmit} className="shadow-2xl shadow-indigo-900/20" />
+        <div className="w-full max-w-3xl flex flex-col items-center">
+          <PromptBox onSubmitStart={handlePromptSubmit} className="shadow-[0_0_40px_rgba(79,70,229,0.15)] w-full" />
+          
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-500">
+            <span className="font-semibold text-slate-400 mr-2">Try:</span>
+            <button onClick={() => handlePromptSubmit("Design schematics for an audio amplifier")} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">Design schematics</button>
+            <button onClick={() => handlePromptSubmit("Review my PCB-generated BOM")} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">Review PCB BOM</button>
+            <button onClick={() => handlePromptSubmit("Design a Raspberry Pi HAT")} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">Raspberry Pi</button>
+            <button onClick={() => handlePromptSubmit("Design an Arduino Uno shield")} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">Arduino Uno</button>
+          </div>
+        </div>
       </div>
 
       {/* Quick Start Options */}
-      <div className="w-full max-w-6xl px-4 sm:px-8 pb-16">
+      <div className="w-full max-w-6xl px-4 sm:px-8 pb-10 flex-1">
         <div className="flex items-center gap-4 mb-8">
           <div className="h-px bg-white/5 flex-1"></div>
           <h2 className="text-xs sm:text-sm font-semibold text-slate-600 uppercase tracking-widest">Or choose a quick start template</h2>
@@ -136,6 +148,19 @@ export function TemplateSelector() {
         <Section label="Raspberry Pi" items={rpi} />
         <Section label="Arduino" items={arduino} />
         <Section label="Custom" items={custom} />
+      </div>
+
+      {/* Footer */}
+      <div className="w-full border-t border-white/5 bg-black/20 py-6 mt-auto">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🧠</span>
+            <span className="font-semibold text-slate-400">NeuroBoard AI</span>
+          </div>
+          <div>
+            Developed by <a href="https://bibek-das.vercel.app/" target="_blank" rel="noreferrer" className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">Bibek Das</a>
+          </div>
+        </div>
       </div>
     </div>
   );
