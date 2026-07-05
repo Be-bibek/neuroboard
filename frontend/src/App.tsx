@@ -27,23 +27,23 @@ function Header({ onRunPipeline, running, syncStatus }: { onRunPipeline: () => v
   
   return (
     <>
-    <header className="flex flex-wrap lg:flex-nowrap items-center justify-between px-4 sm:px-6 py-4
-                       backdrop-blur-xl bg-zinc-900/30 border-b border-white/10 flex-shrink-0 z-50 gap-4 w-full">
+    <header className="flex flex-wrap lg:flex-nowrap items-center justify-between px-3 sm:px-6 py-2 sm:py-4
+                       backdrop-blur-xl bg-zinc-900/30 border-b border-white/10 flex-shrink-0 z-50 gap-2 w-full">
       {/* Brand & Project Selector */}
-      <div className="flex flex-wrap items-center gap-4 sm:gap-6 w-full lg:w-auto justify-between lg:justify-start">
-        <div className="flex items-center gap-3 sm:gap-4">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600
+      <div className="flex items-center gap-2 sm:gap-6 w-full lg:w-auto justify-between lg:justify-start">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600
                            flex items-center justify-center shadow-2xl shadow-indigo-500/20 active:scale-95 transition-transform shrink-0">
-            <CircuitBoard size={22} className="text-white" />
+            <CircuitBoard className="text-white w-4 h-4 sm:w-[22px] sm:h-[22px]" />
           </div>
-          <div className="min-w-0 flex-1">
-            <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight truncate">NeuroBoard</h1>
+          <div className="min-w-0">
+            <h1 className="text-base sm:text-xl font-bold text-white tracking-tight truncate">NeuroBoard</h1>
             {selectedTemplate ? (
-              <span className="text-[10px] sm:text-xs text-indigo-400 font-medium block truncate">
+              <span className="text-[9px] sm:text-xs text-indigo-400 font-medium block truncate">
                 {selectedTemplate.icon} {selectedTemplate.name}
               </span>
             ) : (
-              <span className="text-[10px] sm:text-xs text-indigo-400 font-medium block truncate">v5.0 · Autonomous Agent</span>
+              <span className="text-[9px] sm:text-xs text-indigo-400 font-medium block truncate">v5.0 · Autonomous Agent</span>
             )}
           </div>
         </div>
@@ -55,43 +55,43 @@ function Header({ onRunPipeline, running, syncStatus }: { onRunPipeline: () => v
         </div>
       </div>
 
-      {/* Status pills & Manual */}
-      <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full lg:w-auto justify-center">
+      {/* Status pills & Actions */}
+      <div className="flex items-center gap-2 sm:gap-4 w-full lg:w-auto justify-center sm:justify-end mt-1 lg:mt-0">
         {/* User Manual Button */}
         <button
           onClick={() => setShowManual(true)}
-          className={`flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl border text-xs sm:text-sm font-semibold backdrop-blur-md transition-all flex-1 sm:flex-none whitespace-nowrap
+          className={`flex items-center justify-center gap-2 p-2 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl border text-sm font-semibold backdrop-blur-md transition-all
             ${syncStatus !== "CONNECTED" 
               ? "bg-rose-500/20 border-rose-500/50 text-rose-300 animate-[pulse_1.5s_ease-in-out_infinite] hover:bg-rose-500/30 shadow-[0_0_20px_rgba(244,63,94,0.5)]" 
               : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white/80"}`}
         >
           <Info size={syncStatus !== "CONNECTED" ? 18 : 16} className={`shrink-0 ${syncStatus !== "CONNECTED" ? "text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.8)]" : ""}`} />
-          <span>How to Setup</span>
+          <span className="hidden sm:inline">How to Setup</span>
         </button>
 
-        <div className="flex items-center justify-center gap-2 px-3 sm:px-5 py-1.5 sm:py-2 rounded-2xl
-                          bg-white/5 border border-white/10 text-white/80 text-xs sm:text-sm font-semibold backdrop-blur-md flex-1 sm:flex-none whitespace-nowrap">
-          <span className={`shrink-0 w-2 h-2 sm:w-3 sm:h-3 rounded-full ${syncStatus === "CONNECTED" ? "bg-emerald-400 shadow-[0_0_8px_theme('colors.emerald.400')]" : "bg-red-500"}`} />
-          <span>{syncStatus === "CONNECTED" ? "KiCad IPC" : "IPC Disconnected"}</span>
+        {/* IPC Status */}
+        <div className="flex items-center justify-center gap-2 p-2.5 sm:px-5 sm:py-2 rounded-xl sm:rounded-2xl
+                          bg-white/5 border border-white/10 text-white/80 text-sm font-semibold backdrop-blur-md">
+          <span className={`shrink-0 w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${syncStatus === "CONNECTED" ? "bg-emerald-400 shadow-[0_0_8px_theme('colors.emerald.400')]" : "bg-red-500"}`} />
+          <span className="hidden sm:inline">{syncStatus === "CONNECTED" ? "KiCad IPC" : "IPC Disconnected"}</span>
         </div>
         
+        {/* Hailo Status (Desktop only) */}
         <div className="hidden sm:flex items-center gap-2 px-5 py-2 rounded-2xl
                           bg-white/5 border border-white/10 text-white/80 text-sm font-semibold backdrop-blur-md whitespace-nowrap">
           <Zap size={16} className="text-amber-400 shrink-0" />
           <span>Hailo-8 · 26 TOPS</span>
         </div>
-      </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-4 w-full lg:w-auto mt-2 lg:mt-0">
+        {/* Action Button */}
         <button
           onClick={onRunPipeline}
           disabled={running}
-          className="glass-button w-full lg:w-auto px-6 py-2.5 bg-indigo-600/80 hover:bg-indigo-500 text-white shadow-xl shadow-indigo-500/20 text-sm font-bold flex justify-center"
+          className="glass-button p-2 sm:px-6 sm:py-2.5 bg-indigo-600/80 hover:bg-indigo-500 text-white shadow-xl shadow-indigo-500/20 text-sm font-bold flex justify-center rounded-xl sm:rounded-2xl"
         >
           {running
-            ? <span className="animate-pulse flex items-center gap-2"><Zap size={18} /> Thinking…</span>
-            : <><Play size={18} fill="currentColor" /> Execute Goal</>}
+            ? <span className="animate-pulse flex items-center gap-2"><Zap size={18} /> <span className="hidden sm:inline">Thinking…</span></span>
+            : <><Play size={18} fill="currentColor" /> <span className="hidden sm:inline">Execute Goal</span></>}
         </button>
       </div>
     </header>
