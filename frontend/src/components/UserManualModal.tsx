@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, X, Box, Terminal, Cpu } from 'lucide-react';
+import { BookOpen, X, Box, Terminal, Cpu, Zap } from 'lucide-react';
 
 interface UserManualModalProps {
   isOpen: boolean;
