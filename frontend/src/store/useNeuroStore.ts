@@ -65,6 +65,10 @@ interface NeuroStore {
   setModelSelection: (model: string) => void;
   autoDrc: boolean;
   setAutoDrc: (val: boolean) => void;
+
+  // ── Startup Handoff ──
+  initialPrompt: string;
+  setInitialPrompt: (prompt: string) => void;
 }
 
 export const useNeuroStore = create<NeuroStore>((set) => ({
@@ -117,8 +121,12 @@ export const useNeuroStore = create<NeuroStore>((set) => ({
   // ── Global Config ──
   agentSelection: "Agent",
   setAgentSelection: (agent) => set({ agentSelection: agent }),
-  modelSelection: "GPT-4o mini",
+  modelSelection: "Gemini 3.1 Pro",
   setModelSelection: (model) => set({ modelSelection: model }),
   autoDrc: true,
   setAutoDrc: (val) => set({ autoDrc: val }),
+
+  // ── Startup Handoff ──
+  initialPrompt: "",
+  setInitialPrompt: (prompt) => set({ initialPrompt: prompt }),
 }));

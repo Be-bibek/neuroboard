@@ -1,6 +1,7 @@
 import { TEMPLATES } from "../templates/registry";
 import { useNeuroStore } from "../store/useNeuroStore";
 import type { PCBTemplate } from "../templates/registry";
+import { PromptBox } from "./shared/PromptBox";
 
 // ── Category label map ─────────────────────────────────────────────────────
 const CATEGORY_LABEL: Record<string, string> = {
@@ -77,14 +78,21 @@ function TemplateCard({
   );
 }
 
-// ── Template Selector Screen ───────────────────────────────────────────────
 export function TemplateSelector() {
   const selectTemplate = useNeuroStore((s) => s.selectTemplate);
+  const setInitialPrompt = useNeuroStore((s) => s.setInitialPrompt);
 
   // Group templates by category
   const rpi = TEMPLATES.filter((t) => t.category === "RPI");
   const arduino = TEMPLATES.filter((t) => t.category === "ARDUINO");
   const custom = TEMPLATES.filter((t) => t.category === "CUSTOM");
+
+  const handlePromptSubmit = (prompt: string) => {
+    setInitialPrompt(prompt);
+    // Auto-select Custom to boot the IDE workspace
+    const customTemplate = custom[0] || TEMPLATES[0];
+    selectTemplate(customTemplate);
+  };
 
   const Section = ({
     label,
@@ -106,24 +114,25 @@ export function TemplateSelector() {
   );
 
   return (
-    <div className="flex flex-col w-full h-full bg-slate-950 text-slate-100 overflow-y-auto">
-      {/* Header */}
-      <div className="flex items-center gap-4 px-8 pt-8 pb-6 border-b border-slate-800">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-teal-900/50">
-          <span className="text-2xl">🧠</span>
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-slate-100 tracking-tight">
-            NeuroBoard
-          </h1>
-          <p className="text-sm text-slate-400">
-            Select a PCB template to begin AI-powered design
-          </p>
-        </div>
+    <div className="flex flex-col w-full h-full bg-[#0b0f1a] text-slate-100 overflow-y-auto items-center pt-16 sm:pt-24">
+      {/* Hero Section */}
+      <div className="w-full max-w-4xl flex flex-col items-center text-center mb-16 px-4 sm:px-6">
+        <h1 className="text-4xl sm:text-6xl font-bold text-white tracking-tight mb-4 font-serif">What should I design?</h1>
+        <p className="text-base sm:text-xl text-slate-400 mb-10 max-w-2xl">
+          Schematics, PCB routing, DRC fixes — describe it in plain language inside KiCad.
+        </p>
+        
+        <PromptBox onSubmitStart={handlePromptSubmit} className="shadow-2xl shadow-indigo-900/20" />
       </div>
 
-      {/* Template list */}
-      <div className="flex-1 px-8 pt-6 pb-10">
+      {/* Quick Start Options */}
+      <div className="w-full max-w-6xl px-4 sm:px-8 pb-16">
+        <div className="flex items-center gap-4 mb-8">
+          <div className="h-px bg-white/5 flex-1"></div>
+          <h2 className="text-xs sm:text-sm font-semibold text-slate-600 uppercase tracking-widest">Or choose a quick start template</h2>
+          <div className="h-px bg-white/5 flex-1"></div>
+        </div>
+
         <Section label="Raspberry Pi" items={rpi} />
         <Section label="Arduino" items={arduino} />
         <Section label="Custom" items={custom} />

@@ -8,6 +8,7 @@ import {
   ChatItem, MCPServer, Message, ToolExecution,
   ModelBadge, ContextChip, ThoughtBubble, ScriptCard, ReflectCard, ActionLogItem,
 } from './sidebar/SidebarComponents';
+import { useNeuroStore } from '../store/useNeuroStore';
 
 const API = 'http://localhost:8000';
 
@@ -79,6 +80,9 @@ export const AntigravitySidebar: React.FC = () => {
   const esRef = useRef<EventSource | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const { width, onMouseDown } = useResizable(380, 320, 700);
+
+  const initialPrompt = useNeuroStore(s => s.initialPrompt);
+  const setInitialPrompt = useNeuroStore(s => s.setInitialPrompt);
 
   // Scroll to bottom on new items
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [items]);
@@ -256,6 +260,14 @@ export const AntigravitySidebar: React.FC = () => {
     window.addEventListener("central_prompt_submit", handlePopupSubmit);
     return () => window.removeEventListener("central_prompt_submit", handlePopupSubmit);
   }, []);
+
+  // Execute initial prompt from Homescreen transition if exists
+  useEffect(() => {
+    if (initialPrompt) {
+      handleSendRef.current(initialPrompt);
+      setInitialPrompt(""); // Clear after firing
+    }
+  }, [initialPrompt, setInitialPrompt]);
 
   // Close context menu on outside click
   useEffect(() => {
