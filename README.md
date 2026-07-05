@@ -390,6 +390,28 @@ npm run tauri dev
 5. Check that MCP server dots are **green** in the sidebar
 6. Type a prompt like *"Route the SPI bus"* and press Enter
 
+### Mobile & Remote Access
+
+You can control NeuroBoard from your mobile phone while it interacts with KiCad on your desktop PC.
+
+**Option 1: Local Wi-Fi (Same Network)**
+1. Ensure your phone and PC are on the same Wi-Fi network.
+2. Start the backend bound to your local IP address:
+   ```bash
+   uvicorn ai_core.api.server:app --host 0.0.0.0 --port 8000
+   ```
+3. Open the frontend on your mobile browser (using the frontend's local network IP or your GitHub Pages link) and point the backend URL to your PC's local IP address (e.g., `http://192.168.1.5:8000`).
+
+**Option 2: Cloud Tunneling (Access Anywhere)**
+If you want to run AI PCB routing while on a mobile data network (like 5G):
+1. Install a secure tunnel like **Ngrok** on your desktop PC.
+2. Run the tunnel to expose the backend:
+   ```bash
+   ngrok http 8000
+   ```
+3. Copy the secure HTTPS link provided by Ngrok (e.g., `https://8a2b.ngrok.app`).
+4. Open NeuroBoard on your phone and set the Backend URL to that Ngrok link. Commands will securely tunnel over the internet straight into your desktop KiCad instance!
+
 ---
 
 ## ⚙️ How the Pipeline Works

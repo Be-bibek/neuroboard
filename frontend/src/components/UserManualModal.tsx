@@ -178,11 +178,34 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({ isOpen, onClos
             </div>
           </section>
 
-          {/* Section 5: Future Roadmap */}
+          {/* Section 5: Mobile & Remote Access */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-3 text-lg font-bold text-white">
+              <Zap className="text-white/70" />
+              5. Mobile & Remote Access
+            </div>
+            <div className="pl-9 space-y-3 text-sm text-white/60 leading-relaxed">
+              <p>You can run and control NeuroBoard entirely from your mobile phone while it interacts with KiCad on your desktop PC! Here is how to connect it:</p>
+              
+              <div className="space-y-2 mt-4">
+                <p className="text-xs font-bold text-white/80 uppercase tracking-widest text-indigo-400">Option 1: Local Wi-Fi (Same Network)</p>
+                <p className="text-sm text-white/60">If your phone is on the same Wi-Fi as your desktop, start the backend on your PC by binding it to your local IP: <code>uvicorn server:app --host 0.0.0.0 --port 8000</code>. Then, open the NeuroBoard frontend on your mobile browser and it will connect directly over your local network.</p>
+              </div>
+
+              <div className="space-y-2 mt-4">
+                <p className="text-xs font-bold text-white/80 uppercase tracking-widest text-emerald-400">Option 2: Cloud Tunneling (Access Anywhere)</p>
+                <p className="text-sm text-white/60">Want to run AI PCB routing while on a train over 5G? Install a secure tunnel like <strong>Ngrok</strong> on your desktop PC and run <code>ngrok http 8000</code>. Open NeuroBoard on your phone and it will securely route your commands over the internet straight into your desktop KiCad instance!</p>
+              </div>
+            </div>
+          </section>
+
+          <hr className="border-white/10" />
+
+          {/* Section 6: Future Roadmap */}
           <section className="space-y-4">
             <div className="flex items-center gap-3 text-lg font-bold text-white">
               <Terminal className="text-white/70" />
-              5. Future Roadmap
+              6. Future Roadmap
             </div>
             <div className="pl-9 space-y-3 text-sm text-white/60 leading-relaxed">
               <p>The journey doesn't stop here. Here is what we are building next:</p>
@@ -194,11 +217,11 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({ isOpen, onClos
             </div>
           </section>
 
-          {/* Section 6: Get In Touch */}
+          {/* Section 7: Get In Touch */}
           <section className="space-y-4">
             <div className="flex items-center gap-3 text-lg font-bold text-white">
               <BookOpen className="text-white/70" />
-              6. Thanks & Get In Touch
+              7. Thanks & Get In Touch
             </div>
             <div className="pl-9 space-y-4">
               <p className="text-sm text-white/60">Thank you for exploring NeuroBoard! If you have questions, want to collaborate, or just want to say hi, feel free to reach out to me.</p>
