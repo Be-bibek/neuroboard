@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { PromptBox } from "./shared/PromptBox";
+import { Activity } from "lucide-react";
 
 export function PCBViewer2D() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -156,13 +156,18 @@ export function PCBViewer2D() {
 
       {/* Empty State / Hints */}
       {!hasData && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 z-30">
-          <div className="w-full max-w-4xl flex flex-col items-center text-center">
-            <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tight mb-4 font-serif">What should I design?</h1>
-            <p className="text-base sm:text-lg text-slate-400 mb-10 max-w-2xl">
-              Schematics, PCB routing, DRC fixes — describe it in plain language inside KiCad.
-            </p>
-            <PromptBox className="shadow-2xl shadow-indigo-900/10 pointer-events-auto" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <div className="w-32 h-32 mb-8 rounded-full bg-indigo-500/5 flex items-center justify-center border border-indigo-500/10 shadow-[0_0_40px_rgba(99,102,241,0.1)]">
+            <Activity size={48} className="text-indigo-400/50" />
+          </div>
+          <h2 className="text-3xl font-bold text-white/50 tracking-tight mb-4">Awaiting AI Synthesis</h2>
+          <p className="text-sm text-white/30 max-w-md text-center leading-relaxed">
+            Describe your hardware intent in the AI panel to begin autonomous routing and component placement.
+          </p>
+          <div className="mt-8 flex gap-4">
+            <div className="px-5 py-3 rounded-xl bg-white/[0.02] border border-white/5 text-xs text-white/40 font-mono">
+              try: "Route the ESP32 differential pairs"
+            </div>
           </div>
         </div>
       )}
