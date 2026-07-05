@@ -152,11 +152,30 @@ export function TemplateSelector() {
 
       {/* Footer */}
       <div className="w-full border-t border-white/5 bg-black/20 py-6 mt-auto">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-slate-500">
           <div className="flex items-center gap-2">
             <span className="text-xl">🧠</span>
             <span className="font-semibold text-slate-400">NeuroBoard AI</span>
           </div>
+
+          <div className="flex items-center gap-4">
+            <a href="https://bibek-das.vercel.app/" target="_blank" rel="noopener noreferrer" className="opacity-70 hover:opacity-100 transition-opacity">
+              <img src="https://github.com/Be-bibek/Be-bibek/blob/main/portfolio.svg?raw=true" alt="Portfolio" width="32" className="rounded" />
+            </a>
+            <a href="mailto:bibekdas1055@gmail.com" className="opacity-70 hover:opacity-100 transition-opacity">
+              <img src="https://skillicons.dev/icons?i=gmail" alt="Gmail" width="32" />
+            </a>
+            <a href="https://www.linkedin.com/in/bibek-das-364367323/" target="_blank" rel="noopener noreferrer" className="opacity-70 hover:opacity-100 transition-opacity">
+              <img src="https://skillicons.dev/icons?i=linkedin" alt="LinkedIn" width="32" />
+            </a>
+            <a href="https://www.instagram.com/bibek_ai_deas/" target="_blank" rel="noopener noreferrer" className="opacity-70 hover:opacity-100 transition-opacity">
+              <img src="https://skillicons.dev/icons?i=instagram" alt="Instagram" width="32" />
+            </a>
+            <a href="https://youtube.com/@be-bibek" target="_blank" rel="noopener noreferrer" className="opacity-70 hover:opacity-100 transition-opacity">
+              <img src="https://github.com/Be-bibek/Be-bibek/blob/main/youtube.svg?raw=true" alt="YouTube" width="32" />
+            </a>
+          </div>
+
           <div>
             Developed by <a href="https://bibek-das.vercel.app/" target="_blank" rel="noreferrer" className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">Bibek Das</a>
           </div>

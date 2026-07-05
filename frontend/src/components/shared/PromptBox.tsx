@@ -14,6 +14,13 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
   
   // Dropdown states
   const [openDropdown, setOpenDropdown] = useState<"agent" | "context" | "model" | "github" | null>(null);
+  const [activeContexts, setActiveContexts] = useState<string[]>([]);
+
+  const toggleContext = (ctx: string) => {
+    setActiveContexts(prev => 
+      prev.includes(ctx) ? prev.filter(c => c !== ctx) : [...prev, ctx]
+    );
+  };
 
   // Close dropdowns on outside click
   const boxRef = useRef<HTMLDivElement>(null);
@@ -38,7 +45,7 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
 
   const handleSubmit = () => {
     if (!input.trim()) return;
-    
+
     if (onSubmitStart) {
       onSubmitStart(input);
     } else {
@@ -47,18 +54,42 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
         new CustomEvent("central_prompt_submit", { detail: input })
       );
     }
-    
+
     setInput("");
   };
 
   const MODELS = ["Gemini 1.5 Pro", "Gemini 1.5 Flash", "Claude 3.5 Sonnet", "GPT-4o"];
 
   return (
-    <div 
+    <div
       ref={boxRef}
       className={`w-full max-w-3xl bg-zinc-900/60 backdrop-blur-3xl rounded-[24px] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-white/10 flex flex-col overflow-visible relative ${className}`}
     >
-      
+
+      {/* Active Context Pills */}
+      {activeContexts.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 px-6 pt-5 pb-1">
+          {activeContexts.includes("nets") && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-900/30 border border-amber-700/50 rounded-full text-amber-400 text-sm font-medium">
+              <Network size={14} /> @nets 
+              <button onClick={() => toggleContext("nets")} className="ml-1 opacity-70 hover:opacity-100"><X size={14} /></button>
+            </div>
+          )}
+          {activeContexts.includes("mem") && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-900/30 border border-emerald-700/50 rounded-full text-emerald-400 text-sm font-medium">
+              <FileCode2 size={14} /> @mem 
+              <button onClick={() => toggleContext("mem")} className="ml-1 opacity-70 hover:opacity-100"><X size={14} /></button>
+            </div>
+          )}
+          {activeContexts.includes("board") && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-900/30 border border-purple-700/50 rounded-full text-purple-400 text-sm font-medium">
+              <Cpu size={14} /> @board 
+              <button onClick={() => toggleContext("board")} className="ml-1 opacity-70 hover:opacity-100"><X size={14} /></button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Text Area */}
       <textarea
         value={input}
@@ -70,7 +101,7 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
           }
         }}
         placeholder="Describe your PCB engineering goal..."
-        className="w-full h-32 resize-none bg-transparent outline-none p-6 text-slate-200 text-lg placeholder-slate-500 font-serif"
+        className={`w-full h-32 resize-none bg-transparent outline-none px-6 pb-6 ${activeContexts.length > 0 ? 'pt-2' : 'pt-6'} text-slate-200 text-lg placeholder-slate-500 font-serif`}
         autoFocus={autoFocus}
       />
 
@@ -79,20 +110,20 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
 
       {/* Bottom Toolbar */}
       <div className="flex flex-wrap items-center justify-between px-6 py-4 gap-y-4">
-        
+
         {/* Left Controls */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Add PDF/Stubs */}
-          <button 
+          <button
             title="Add PDF or Stubs"
             className="flex items-center justify-center w-10 h-10 rounded-full border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
           >
             <Plus size={18} />
           </button>
-          
+
           {/* Agent Dropdown */}
           <div className="relative">
-            <button 
+            <button
               className={`flex items-center gap-2 px-4 h-10 rounded-full border ${openDropdown === 'agent' ? 'bg-white/10 border-white/20' : 'border-white/10'} text-slate-300 hover:bg-white/10 transition-colors font-medium text-sm`}
               onClick={() => setOpenDropdown(openDropdown === "agent" ? null : "agent")}
             >
@@ -102,7 +133,7 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
               <div className="absolute top-full left-0 mt-2 w-48 bg-zinc-900 border border-white/10 rounded-xl shadow-2xl py-2 z-50 overflow-hidden backdrop-blur-xl">
                 <div className="px-3 py-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Select Agent</div>
                 {["Planner", "Agent"].map(a => (
-                  <button 
+                  <button
                     key={a}
                     className="w-full text-left px-4 py-2 hover:bg-white/5 text-sm text-slate-300 flex items-center justify-between"
                     onClick={() => { setAgentSelection(a); setOpenDropdown(null); }}
@@ -117,7 +148,7 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
 
           {/* Context Dropdown */}
           <div className="relative">
-            <button 
+            <button
               className={`flex items-center gap-2 px-4 h-10 rounded-full border ${openDropdown === 'context' ? 'bg-white/10 border-white/20' : 'border-white/10'} text-slate-300 hover:bg-white/10 transition-colors font-medium text-sm`}
               onClick={() => setOpenDropdown(openDropdown === "context" ? null : "context")}
             >
@@ -126,16 +157,25 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
             {openDropdown === "context" && (
               <div className="absolute top-full left-0 mt-2 w-48 bg-zinc-900 border border-white/10 rounded-xl shadow-2xl py-2 z-50 overflow-hidden backdrop-blur-xl">
                 <div className="px-3 py-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Context Providers</div>
-                <button className="w-full text-left px-4 py-2 hover:bg-white/5 text-sm text-slate-300 flex items-center gap-2"><Cpu size={14} className="text-purple-400"/> @board</button>
-                <button className="w-full text-left px-4 py-2 hover:bg-white/5 text-sm text-slate-300 flex items-center gap-2"><FileCode2 size={14} className="text-emerald-400"/> @mem</button>
-                <button className="w-full text-left px-4 py-2 hover:bg-white/5 text-sm text-slate-300 flex items-center gap-2"><Network size={14} className="text-amber-400"/> @nets</button>
+                <button onClick={() => toggleContext("board")} className="w-full text-left px-4 py-2 hover:bg-white/5 text-sm text-slate-300 flex items-center justify-between">
+                  <div className="flex items-center gap-2"><Cpu size={14} className="text-purple-400" /> @board</div>
+                  {activeContexts.includes("board") && <Check size={14} className="text-emerald-500" />}
+                </button>
+                <button onClick={() => toggleContext("mem")} className="w-full text-left px-4 py-2 hover:bg-white/5 text-sm text-slate-300 flex items-center justify-between">
+                  <div className="flex items-center gap-2"><FileCode2 size={14} className="text-emerald-400" /> @mem</div>
+                  {activeContexts.includes("mem") && <Check size={14} className="text-emerald-500" />}
+                </button>
+                <button onClick={() => toggleContext("nets")} className="w-full text-left px-4 py-2 hover:bg-white/5 text-sm text-slate-300 flex items-center justify-between">
+                  <div className="flex items-center gap-2"><Network size={14} className="text-amber-400" /> @nets</div>
+                  {activeContexts.includes("nets") && <Check size={14} className="text-emerald-500" />}
+                </button>
               </div>
             )}
           </div>
 
           {/* Model Dropdown */}
           <div className="relative">
-            <button 
+            <button
               className={`flex items-center gap-2 px-4 h-10 rounded-full border ${openDropdown === 'model' ? 'bg-white/10 border-white/20' : 'border-white/10'} text-slate-300 hover:bg-white/10 transition-colors font-medium text-sm`}
               onClick={() => setOpenDropdown(openDropdown === "model" ? null : "model")}
             >
@@ -145,7 +185,7 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
               <div className="absolute top-full left-0 mt-2 w-56 bg-zinc-900 border border-white/10 rounded-xl shadow-2xl py-2 z-50 overflow-hidden backdrop-blur-xl">
                 <div className="px-3 py-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Select Model</div>
                 {MODELS.map(m => (
-                  <button 
+                  <button
                     key={m}
                     className="w-full text-left px-4 py-2 hover:bg-white/5 text-sm text-slate-300 flex items-center justify-between"
                     onClick={() => { setModelSelection(m); setOpenDropdown(null); }}
@@ -160,7 +200,7 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
 
           {/* GitHub Menu */}
           <div className="relative ml-1">
-            <button 
+            <button
               className={`flex items-center justify-center w-10 h-10 rounded-xl border ${openDropdown === 'github' ? 'bg-white/10 border-white/20 text-white' : 'border-white/10 text-slate-400'} hover:bg-white/10 hover:text-white transition-colors`}
               onClick={() => setOpenDropdown(openDropdown === "github" ? null : "github")}
             >
@@ -171,17 +211,17 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
                 <div className="px-4 py-2 text-xs text-gray-500 dark:text-slate-400 border-b border-gray-100 dark:border-white/5 mb-1">
                   Connected: <span className="font-medium text-gray-800 dark:text-slate-200">@bibek</span>
                 </div>
-                
+
                 <button className="w-full text-left px-4 py-1.5 hover:bg-gray-100 dark:hover:bg-white/5 text-sm text-gray-700 dark:text-slate-300">Status</button>
                 <button className="w-full text-left px-4 py-1.5 hover:bg-gray-100 dark:hover:bg-white/5 text-sm text-gray-700 dark:text-slate-300">Push (commit + push)</button>
                 <button className="w-full text-left px-4 py-1.5 hover:bg-gray-100 dark:hover:bg-white/5 text-sm text-gray-700 dark:text-slate-300 border-b border-gray-100 dark:border-white/5 pb-2 mb-1">Pull latest</button>
-                
+
                 <button className="w-full text-left px-4 py-1.5 hover:bg-gray-100 dark:hover:bg-white/5 text-sm text-gray-700 dark:text-slate-300">New branch...</button>
                 <button className="w-full text-left px-4 py-1.5 hover:bg-gray-100 dark:hover:bg-white/5 text-sm text-gray-700 dark:text-slate-300">List branches</button>
                 <button className="w-full text-left px-4 py-1.5 hover:bg-gray-100 dark:hover:bg-white/5 text-sm text-gray-700 dark:text-slate-300">List pull requests</button>
                 <button className="w-full text-left px-4 py-1.5 hover:bg-gray-100 dark:hover:bg-white/5 text-sm text-gray-700 dark:text-slate-300">List repositories</button>
                 <button className="w-full text-left px-4 py-1.5 hover:bg-gray-100 dark:hover:bg-white/5 text-sm text-gray-700 dark:text-slate-300 border-b border-gray-100 dark:border-white/5 pb-2 mb-1">List issues</button>
-                
+
                 <button className="w-full text-left px-4 py-1.5 hover:bg-gray-100 dark:hover:bg-white/5 text-sm text-gray-700 dark:text-slate-300">How to get a GitHub token...</button>
                 <button className="w-full text-left px-4 py-1.5 hover:bg-red-50 dark:hover:bg-rose-500/10 text-sm text-red-600 dark:text-rose-400">Disconnect</button>
               </div>
@@ -190,14 +230,14 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
 
           <label className="flex items-center gap-2 ml-2 cursor-pointer group">
             <div className="relative flex items-center justify-center w-5 h-5 rounded border border-white/20 bg-black/20 group-hover:border-indigo-500 transition-colors overflow-hidden">
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 checked={autoDrc}
                 onChange={(e) => setAutoDrc(e.target.checked)}
-                className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full" 
+                className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full"
               />
               {autoDrc && <div className="absolute inset-0 bg-indigo-500 flex items-center justify-center">
-                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               </div>}
             </div>
             <span className="text-sm font-medium text-slate-400 group-hover:text-slate-200 transition-colors">Auto ERC/DRC</span>
@@ -206,18 +246,18 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
 
         {/* Right Controls */}
         <div className="flex items-center gap-2">
-          <button 
+          <button
             onClick={() => setInput("")}
             className="flex items-center justify-center w-10 h-10 rounded-full border border-white/10 text-slate-500 hover:text-slate-300 hover:bg-white/10 transition-colors"
           >
             <X size={18} />
           </button>
-          <button 
+          <button
             className="flex items-center justify-center w-10 h-10 rounded-full border border-white/10 text-slate-500 hover:text-slate-300 hover:bg-white/10 transition-colors"
           >
             <Undo2 size={18} />
           </button>
-          <button 
+          <button
             onClick={handleSubmit}
             disabled={!input.trim()}
             className="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-600 text-white hover:bg-indigo-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(79,70,229,0.4)]"
