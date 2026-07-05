@@ -280,7 +280,7 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
         </div>
 
         {/* Right Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mt-2 sm:mt-0 max-sm:w-full max-sm:justify-end ml-auto">
           <button
             onClick={() => setInput("")}
             className="flex items-center justify-center w-10 h-10 rounded-full border border-white/10 text-slate-500 hover:text-slate-300 hover:bg-white/10 transition-colors"

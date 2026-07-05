@@ -101,11 +101,11 @@ export function TemplateSelector() {
     label: string;
     items: PCBTemplate[];
   }) => (
-    <div className="mb-8">
+    <div className="mb-8 flex-1">
       <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">
         {label}
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
         {items.map((t) => (
           <TemplateCard key={t.id} template={t} onSelect={() => selectTemplate(t)} />
         ))}
@@ -114,7 +114,7 @@ export function TemplateSelector() {
   );
 
   return (
-    <div className="flex flex-col w-full h-full bg-[#0b0f1a] text-slate-100 overflow-y-auto items-center pt-12 sm:pt-20">
+    <div className="flex flex-col w-full h-full bg-slate-900 text-slate-100 overflow-y-auto items-center pt-12 sm:pt-20">
       {/* Hero Section */}
       <div className="w-full max-w-4xl flex flex-col items-center text-center mb-12 px-4 sm:px-6">
         <h1 className="text-4xl sm:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400 tracking-tight mb-4 font-serif">
@@ -145,9 +145,11 @@ export function TemplateSelector() {
           <div className="h-px bg-white/5 flex-1"></div>
         </div>
 
-        <Section label="Raspberry Pi" items={rpi} />
-        <Section label="Arduino" items={arduino} />
-        <Section label="Custom" items={custom} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <Section label="Raspberry Pi" items={rpi} />
+          <Section label="Arduino" items={arduino} />
+          <Section label="Custom" items={custom} />
+        </div>
       </div>
 
       {/* Footer */}
@@ -159,6 +161,7 @@ export function TemplateSelector() {
           </div>
 
           <div className="flex items-center gap-4">
+            <span className="font-semibold text-slate-400 mr-2">Connect with me:</span>
             <a href="https://bibek-das.vercel.app/" target="_blank" rel="noopener noreferrer" className="opacity-70 hover:opacity-100 transition-opacity">
               <img src="https://github.com/Be-bibek/Be-bibek/blob/main/portfolio.svg?raw=true" alt="Portfolio" width="32" className="rounded" />
             </a>
