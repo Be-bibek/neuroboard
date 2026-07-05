@@ -57,6 +57,14 @@ interface NeuroStore {
   // ── 3D Holographic Canvas Telemetry ──
   boardPositions: Record<string, { x: number; y: number }>;
   updateBoardPosition: (ref: string, x: number, y: number) => void;
+
+  // ── Global Config / Prompt Settings ──
+  agentSelection: string;
+  setAgentSelection: (agent: string) => void;
+  modelSelection: string;
+  setModelSelection: (model: string) => void;
+  autoDrc: boolean;
+  setAutoDrc: (val: boolean) => void;
 }
 
 export const useNeuroStore = create<NeuroStore>((set) => ({
@@ -105,4 +113,12 @@ export const useNeuroStore = create<NeuroStore>((set) => ({
   updateBoardPosition: (ref, x, y) => set((s) => ({
     boardPositions: { ...s.boardPositions, [ref]: { x, y } }
   })),
+
+  // ── Global Config ──
+  agentSelection: "Agent",
+  setAgentSelection: (agent) => set({ agentSelection: agent }),
+  modelSelection: "GPT-4o mini",
+  setModelSelection: (model) => set({ modelSelection: model }),
+  autoDrc: true,
+  setAutoDrc: (val) => set({ autoDrc: val }),
 }));

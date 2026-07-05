@@ -105,8 +105,8 @@ export const AntigravitySidebar: React.FC = () => {
       : s));
   };
 
-  const handleSend = () => {
-    const intent = input.trim();
+  const handleSend = (overrideInput?: string) => {
+    const intent = (typeof overrideInput === 'string' ? overrideInput : input).trim();
     if (!intent || isStreaming) return;
 
     // Add user message with @context chips rendered inline
@@ -240,8 +240,22 @@ export const AntigravitySidebar: React.FC = () => {
       updateAgent({ content: '❌ Connection lost. Check backend.' });
       setIsStreaming(false);
       es.close();
+      esRef.current = null;
     };
   };
+
+  const handleSendRef = useRef(handleSend);
+  useEffect(() => { handleSendRef.current = handleSend; });
+
+  // Listen for Pop-Out AI prompt submissions
+  useEffect(() => {
+    const handlePopupSubmit = (e: any) => {
+      const text = e.detail;
+      if (text && typeof text === 'string') handleSendRef.current(text);
+    };
+    window.addEventListener("central_prompt_submit", handlePopupSubmit);
+    return () => window.removeEventListener("central_prompt_submit", handlePopupSubmit);
+  }, []);
 
   // Close context menu on outside click
   useEffect(() => {
@@ -466,7 +480,7 @@ export const AntigravitySidebar: React.FC = () => {
               )}
 
               <button
-                onClick={handleSend}
+                onClick={() => handleSend()}
                 disabled={!input.trim() || isStreaming}
                 className="absolute right-2.5 bottom-2.5 p-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-25 text-white rounded-xl transition-all shadow-lg shadow-violet-600/25 hover:scale-110 active:scale-95"
               >

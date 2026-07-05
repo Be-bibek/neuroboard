@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { CircuitBoard, Zap, Play } from "lucide-react";
+import { CircuitBoard, Zap, Play, ExternalLink } from "lucide-react";
 import { useNeuroStore } from "./store/useNeuroStore";
 // ── Core Views ─────────────────────────────────────────────────────────────
 import { TemplateSelector } from "./components/TemplateSelector";
@@ -82,6 +82,16 @@ function Header({ onRunPipeline, running, syncStatus }: { onRunPipeline: () => v
           <Zap size={16} className="text-amber-400 shrink-0" />
           <span>Hailo-8 · 26 TOPS</span>
         </div>
+
+        {/* Pop-Out Prompt Button */}
+        <button
+          onClick={() => window.open("/#/popup/prompt", "_blank", "width=750,height=220,menubar=no,toolbar=no,location=no,status=no")}
+          className="hidden md:flex items-center justify-center gap-2 p-2 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl border bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white/80 transition-all text-sm font-semibold"
+          title="Pop Out AI Prompt over KiCad"
+        >
+          <ExternalLink size={16} />
+          <span className="hidden lg:inline">Pop-Out AI</span>
+        </button>
 
         {/* Action Button */}
         <button
