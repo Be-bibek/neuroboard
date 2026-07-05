@@ -43,6 +43,41 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Animated Placeholder Logic
+  const PROMPTS = [
+    "Describe your PCB engineering goal...",
+    "Route the ESP32 differential pairs...",
+    "Design an audio amplifier schematic...",
+    "Generate a BOM for a Raspberry Pi HAT...",
+    "Fix the DRC errors on the Arduino shield..."
+  ];
+
+  const [placeholder, setPlaceholder] = useState("");
+  const [promptIndex, setPromptIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const currentPrompt = PROMPTS[promptIndex];
+    let typingSpeed = isDeleting ? 30 : 60;
+
+    if (!isDeleting && charIndex === currentPrompt.length) {
+      typingSpeed = 2500; // Pause at end of typing
+      setIsDeleting(true);
+    } else if (isDeleting && charIndex === 0) {
+      setIsDeleting(false);
+      setPromptIndex((prev) => (prev + 1) % PROMPTS.length);
+      typingSpeed = 500; // Pause before typing next
+    }
+
+    const timer = setTimeout(() => {
+      setPlaceholder(currentPrompt.substring(0, charIndex + (isDeleting ? -1 : 1)));
+      setCharIndex((prev) => prev + (isDeleting ? -1 : 1));
+    }, typingSpeed);
+
+    return () => clearTimeout(timer);
+  }, [charIndex, isDeleting, promptIndex]);
+
   const handleSubmit = () => {
     if (!input.trim()) return;
 
@@ -100,7 +135,7 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
             handleSubmit();
           }
         }}
-        placeholder="Describe your PCB engineering goal..."
+        placeholder={placeholder}
         className={`w-full h-32 resize-none bg-transparent outline-none px-6 pb-6 ${activeContexts.length > 0 ? 'pt-2' : 'pt-6'} text-slate-200 text-lg placeholder-slate-500 font-serif`}
         autoFocus={autoFocus}
       />
