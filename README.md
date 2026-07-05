@@ -1,13 +1,34 @@
-# 🧠 NeuroBoard
+<h1 align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:312e81,50:4f46e5,100:6366f1&height=240&section=header&text=NeuroBoard&fontSize=64&fontColor=ffffff&animation=twinkling&fontAlignY=38&desc=Mobile%20Programmatic%20EDA%20%E2%80%A2%20Generative%20AI-Native%20Circuit%20Synthesizer&descAlignY=62&descSize=18" alt="NeuroBoard Banner" />
+</h1>
+
+<p align="center">
+  <img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&size=20&duration=4000&pause=1000&color=818CF8&center=true&vCenter=true&width=900&lines=The+World's+First+Mobile+AI+Compiler+for+Native+KiCad;The+First+Solo-Developer+Agentic+Framework+for+Text-to-PCB;The+First+Multi-LLM+Native+KiCad+Generator+Built+for+Mobile" alt="Typing SVG Taglines" />
+</p>
+
+<div align="center"> 
+  <a href="https://bibek-das.vercel.app/" target="_blank" rel="noopener noreferrer">
+    <img src="https://github.com/Be-bibek/Be-bibek/blob/main/portfolio.svg?raw=true" alt="Portfolio" width="48" />
+  </a>
+  <a href="mailto:bibekdas1055@gmail.com">
+    <img src="https://skillicons.dev/icons?i=gmail" alt="Gmail" />
+  </a>
+  <a href="https://www.linkedin.com/in/bibek-das-364367323/" target="_blank">
+    <img src="https://skillicons.dev/icons?i=linkedin" alt="LinkedIn" />
+  </a>
+  <a href="https://www.instagram.com/bibek_ai_deas/" target="_blank">
+    <img src="https://skillicons.dev/icons?i=instagram" alt="Instagram" />
+  </a>
+  <a href="https://youtube.com/@be-bibek" target="_blank">
+    <img src="https://github.com/Be-bibek/Be-bibek/blob/main/youtube.svg?raw=true" alt="YouTube" width="48" />
+  </a>
+</div>
+<br/>
+
+> **"I built the world's first mobile-native, AI-driven EDA compiler that translates natural language prompts into fully structured, production-ready KiCad hardware files. Leveraging cross-model orchestration via Anthropic and Google APIs, the app automates the entire 'step-zero' hardware planning and schematic compilation process directly from a smartphone screen."**
 
 <p align="center">
   <img src="https://cdn.dribbble.com/userupload/25266435/file/original-80b47ebe181ae73b3afb9098bdaf594a.gif" width="600" alt="NeuroBoard Isometric PCB Animation" />
-</p>
-
-<h2 align="center">The World's First Prompt-to-Hardware Compiler</h2>
-
-<p align="center">
-  <b>Bridging AI Intent with Professional Engineering through KiCad 10 Native IPC</b>
 </p>
 
 <p align="center">
