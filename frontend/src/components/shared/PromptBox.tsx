@@ -78,10 +78,10 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
       <div className="h-px w-[calc(100%-48px)] mx-auto bg-white/5" />
 
       {/* Bottom Toolbar */}
-      <div className="flex items-center justify-between px-6 py-4 overflow-x-auto gap-4 scrollbar-hide">
+      <div className="flex flex-wrap items-center justify-between px-6 py-4 gap-y-4">
         
         {/* Left Controls */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Add PDF/Stubs */}
           <button 
             title="Add PDF or Stubs"
@@ -205,7 +205,7 @@ export function PromptBox({ onSubmitStart, className = "", autoFocus = true }: P
         </div>
 
         {/* Right Controls */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2">
           <button 
             onClick={() => setInput("")}
             className="flex items-center justify-center w-10 h-10 rounded-full border border-white/10 text-slate-500 hover:text-slate-300 hover:bg-white/10 transition-colors"
