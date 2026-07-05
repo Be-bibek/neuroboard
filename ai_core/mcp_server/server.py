@@ -14,6 +14,10 @@ try:
     from kipy.board_types import Net, Track, Via, Zone, board_types_pb2 as bt, ZoneType, ZoneBorderStyle, IslandRemovalMode
     from kipy.geometry import Vector2, PolygonWithHoles, PolyLineNode
     from kipy.util.units import from_mm
+    from ai_core.physics.reflow_router import (
+        Obstacle2D, calculate_wrapped_path,
+        ComponentBox2D, resolve_aabb_collision
+    )
 except ImportError as e:
     logging.warning(f"Could not import KiCad IPC bindings: {e}")
 
@@ -88,33 +92,84 @@ def place_component(footprint: str, position: List[float], layer: str = "F.Cu", 
 
 @mcp.tool()
 def move_component(reference: str, position: List[float], rotation: float = 0, layer: Optional[str] = None, **kwargs) -> Dict[str, Any]:
-    """Move a component to a new XY position with optional rotation and layer flip."""
+    """Move a component to a new XY position with optional rotation and layer flip.
+    Uses the AABB Packing Engine to resolve collisions before committing to KiCad."""
     try:
         board = bridge.board
         commit = board.begin_commit()
-        
-        found = False
+
+        # --- STEP 1: Locate the component being moved ---
+        moving_fp = None
         for fp in board.get_footprints():
-            ref = ""
-            try: ref = fp.reference_field.text.value
-            except: continue
-            
-            if ref == reference:
-                fp.position = Vector2.from_xy(mm(position[0]), mm(position[1]))
-                fp.orientation.degrees = rotation
-                if layer == "B.Cu":
-                    fp.layer = bt.BL_B_Cu
-                elif layer == "F.Cu":
-                    fp.layer = bt.BL_F_Cu
-                found = True
-                break
-        
-        if not found:
+            try:
+                if fp.reference_field.text.value == reference:
+                    moving_fp = fp
+                    break
+            except:
+                continue
+
+        if moving_fp is None:
             return {"status": "error", "message": f"Component {reference} not found"}
-            
+
+        # --- STEP 2: Get real physical bounding box of the moving component ---
+        # kipy reports position in nanometers; we work in mm throughout
+        target_x, target_y = position[0], position[1]
+
+        try:
+            m_bbox = moving_fp.get_bounding_box()
+            m_width  = (m_bbox.right - m_bbox.left) / NM
+            m_height = (m_bbox.bottom - m_bbox.top) / NM
+        except Exception:
+            # Fallback: assume 2mm x 2mm if bounding box unavailable
+            m_width, m_height = 2.0, 2.0
+
+        moving_box = ComponentBox2D(reference, target_x, target_y, m_width, m_height)
+
+        # --- STEP 3: Build obstacle list from ALL other footprints ---
+        obstacles: List[ComponentBox2D] = []
+        for fp in board.get_footprints():
+            try:
+                ref = fp.reference_field.text.value
+            except:
+                continue
+            if ref == reference:
+                continue  # Skip the component we are moving
+
+            try:
+                bbox  = fp.get_bounding_box()
+                f_w   = (bbox.right - bbox.left) / NM
+                f_h   = (bbox.bottom - bbox.top) / NM
+                f_x   = fp.position.x / NM
+                f_y   = fp.position.y / NM
+                obstacles.append(ComponentBox2D(ref, f_x, f_y, f_w, f_h))
+            except:
+                # If bounding box fails, approximate as 2mm circle-equivalent square
+                f_x = fp.position.x / NM
+                f_y = fp.position.y / NM
+                obstacles.append(ComponentBox2D(ref, f_x, f_y, 2.0, 2.0))
+
+        # --- STEP 4: AABB Collision Resolution ---
+        safe_x, safe_y = resolve_aabb_collision(moving_box, obstacles)
+
+        # --- STEP 5: Apply the resolved, collision-free coordinate ---
+        moving_fp.position = Vector2.from_xy(mm(safe_x), mm(safe_y))
+        moving_fp.orientation.degrees = rotation
+        if layer == "B.Cu":
+            moving_fp.layer = bt.BL_B_Cu
+        elif layer == "F.Cu":
+            moving_fp.layer = bt.BL_F_Cu
+
         board.push_commit(commit)
         board.save()
-        return {"status": "success", "message": f"Moved {reference} to {position}"}
+
+        was_adjusted = (abs(safe_x - target_x) > 0.01 or abs(safe_y - target_y) > 0.01)
+        return {
+            "status": "success",
+            "message": f"Moved {reference} to ({safe_x:.3f}, {safe_y:.3f}) mm",
+            "requested": position,
+            "resolved": [round(safe_x, 3), round(safe_y, 3)],
+            "collision_adjusted": was_adjusted
+        }
     except Exception as e:
         return {"status": "error", "error": str(e)}
 
