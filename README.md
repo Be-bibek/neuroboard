@@ -630,6 +630,10 @@ Contributions are welcome! Follow this workflow:
 ---
 
 ## 📄 License
+> [!WARNING]  
+> **⚖️ LEGAL NOTICE & LICENSE: CC BY-NC 4.0**  
+> **Copyright (c) 2026 Bibek Das. All rights reserved.**  
+> This repository is strictly for **educational and study purposes**. Under the Creative Commons Non-Commercial License, you may read and study this code, but **you are legally prohibited from using this codebase for any commercial purposes**, including startups, monetization, or revenue generation. Unauthorized commercial deployment is strictly tracked and enforced.
 
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
