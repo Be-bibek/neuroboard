@@ -13,7 +13,7 @@ kicad:
   binary_path: "C:/Program Files/KiCad/10.0/bin/kicad.exe"
 
 library:
-  base_path: "C:/Users/Bibek/NeuroBoard/lib"
+  base_path: "D:/neuro-hub/NeuroBoard/lib"
   tools:
     jlc2kicadlib: "C:/Users/Bibek/AppData/Roaming/Python/Python314/Scripts/JLC2KiCadLib.exe"
   cache:

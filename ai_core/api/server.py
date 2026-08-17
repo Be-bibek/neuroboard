@@ -57,6 +57,9 @@ app.add_middleware(
 from api.ipc_routes import router as ipc_router, active_ws_connections
 app.include_router(ipc_router)
 
+from api.multiplayer_routes import router as multiplayer_router
+app.include_router(multiplayer_router)
+
 # ── Lazy-load heavy modules (avoids import errors if deps missing) ─────────
 _pipeline      = None
 _orchestrator  = None

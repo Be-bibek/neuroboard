@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { PCBTemplate, PCBModule } from "../templates/registry";
+import type { CollaboratorPresence, SubCircuitLock } from "../types/multiplayer";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -69,6 +70,18 @@ interface NeuroStore {
   // ── Startup Handoff ──
   initialPrompt: string;
   setInitialPrompt: (prompt: string) => void;
+
+  // ── Multiplayer Collaboration ──
+  multiplayerStatus: "OFFLINE" | "CONNECTING" | "CONNECTED";
+  setMultiplayerStatus: (s: "OFFLINE" | "CONNECTING" | "CONNECTED") => void;
+  collaborators: Map<string, CollaboratorPresence>;
+  upsertCollaborator: (peer: CollaboratorPresence) => void;
+  removeCollaborator: (userId: string) => void;
+  activeLocks: Map<string, SubCircuitLock>;
+  setLock: (lock: SubCircuitLock) => void;
+  clearLock: (elementId: string) => void;
+  roomId: string | null;
+  setRoomId: (id: string | null) => void;
 }
 
 export const useNeuroStore = create<NeuroStore>((set) => ({
@@ -129,4 +142,36 @@ export const useNeuroStore = create<NeuroStore>((set) => ({
   // ── Startup Handoff ──
   initialPrompt: "",
   setInitialPrompt: (prompt) => set({ initialPrompt: prompt }),
+
+  // ── Multiplayer Collaboration ──
+  multiplayerStatus: "OFFLINE",
+  setMultiplayerStatus: (s) => set({ multiplayerStatus: s }),
+  collaborators: new Map(),
+  upsertCollaborator: (peer) =>
+    set((s) => {
+      const next = new Map(s.collaborators);
+      next.set(peer.userId, peer);
+      return { collaborators: next };
+    }),
+  removeCollaborator: (userId) =>
+    set((s) => {
+      const next = new Map(s.collaborators);
+      next.delete(userId);
+      return { collaborators: next };
+    }),
+  activeLocks: new Map(),
+  setLock: (lock) =>
+    set((s) => {
+      const next = new Map(s.activeLocks);
+      next.set(lock.elementId, lock);
+      return { activeLocks: next };
+    }),
+  clearLock: (elementId) =>
+    set((s) => {
+      const next = new Map(s.activeLocks);
+      next.delete(elementId);
+      return { activeLocks: next };
+    }),
+  roomId: null,
+  setRoomId: (id) => set({ roomId: id }),
 }));

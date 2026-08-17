@@ -19,6 +19,7 @@ const API = "http://localhost:8000";
 
 /* ── Top Header ─────────────────────────────────────────────────────────── */
 import { UserManualModal } from "./components/UserManualModal";
+import { CollaboratorPills } from "./components/inspector/CollaboratorPills";
 import { Info } from "lucide-react";
 
 function Header({ onRunPipeline, running, syncStatus }: { onRunPipeline: () => void; running: boolean; syncStatus: string }) {
@@ -57,6 +58,8 @@ function Header({ onRunPipeline, running, syncStatus }: { onRunPipeline: () => v
 
       {/* Status pills & Actions */}
       <div className="flex items-center gap-2 sm:gap-4 w-full lg:w-auto justify-center sm:justify-end mt-1 lg:mt-0">
+        {/* Multiplayer Collaborator Pills */}
+        <CollaboratorPills />
         {/* User Manual Button */}
         <button
           onClick={() => setShowManual(true)}

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Activity } from "lucide-react";
+import { MultiplayerOverlay } from "./inspector/MultiplayerOverlay";
 
 export function PCBViewer2D() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -153,6 +154,9 @@ export function PCBViewer2D() {
       {/* Grid Pattern Overlay with animation */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.03] animate-[pulse_4s_ease-in-out_infinite]" 
            style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+
+      {/* Multiplayer Overlay — live cursors + lock bounding boxes */}
+      <MultiplayerOverlay />
 
       {/* Empty State / Hints */}
       {!hasData && (

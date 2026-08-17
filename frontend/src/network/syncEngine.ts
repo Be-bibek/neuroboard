@@ -100,6 +100,41 @@ function handleMessage(raw: string) {
       break;
     }
 
+    // ── Multiplayer Presence & Delta Events ─────────────────────────────
+    case "PEER_JOINED": {
+      store.upsertCollaborator(event.payload.peer);
+      store.appendLog(`[Collab] ${event.payload.peer.displayName} joined the session`);
+      break;
+    }
+
+    case "PEER_LEFT": {
+      store.removeCollaborator(event.payload.userId);
+      store.appendLog(`[Collab] A collaborator left the session`);
+      break;
+    }
+
+    case "PRESENCE_UPDATE": {
+      store.upsertCollaborator(event.payload.peer);
+      break;
+    }
+
+    case "LOCK_ACQUIRED": {
+      store.setLock(event.payload.lock);
+      break;
+    }
+
+    case "LOCK_RELEASED": {
+      store.clearLock(event.payload.elementId);
+      break;
+    }
+
+    case "LOCK_DENIED": {
+      store.appendLog(
+        `[Collab] Lock denied for ${event.payload.elementId} — held by ${event.payload.lockedBy}`
+      );
+      break;
+    }
+
     default:
       console.log("[NeuroSync] Unknown event:", event.type);
   }

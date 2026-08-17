@@ -1,0 +1,4 @@
+- [x] Approved AABB implementation plan
+- [/] Add `ComponentBox2D` class and `resolve_aabb_collision` to `reflow_router.py`
+- [ ] Update `move_component` in `server.py` to use AABB snapping
+- [ ] Verify the build/import works correctly
