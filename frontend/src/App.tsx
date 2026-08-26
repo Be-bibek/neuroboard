@@ -115,8 +115,10 @@ function Header({ onRunPipeline, running, syncStatus }: { onRunPipeline: () => v
 
 /* ── Main App ───────────────────────────────────────────────────────────── */
 import { PCBViewer3D } from "./components/PCBViewer3D";
+import { FloatingCopilot } from "./components/FloatingCopilot";
 
 export default function App() {
+  const [isFloatingMode, setIsFloatingMode] = useState(true);
   const [pipelineRunning, setPipelineRunning] = useState(false);
   const [show3D, setShow3D] = useState(false);
   const view = useNeuroStore((s) => s.view);
@@ -139,13 +141,25 @@ export default function App() {
     }
   };
 
-  if (view === "TEMPLATE_SELECT") {
+  if (view === "TEMPLATE_SELECT" && !isFloatingMode) {
     return <TemplateSelector />;
+  }
+
+  if (isFloatingMode) {
+    return <FloatingCopilot onToggleMode={() => setIsFloatingMode(false)} />;
   }
 
   return (
     <div className="flex flex-col w-full h-screen bg-[#0b0f1a] text-white/90 overflow-hidden font-sans antialiased">
       <Header onRunPipeline={handleRunPipeline} running={pipelineRunning} syncStatus={syncStatus} />
+      
+      {/* Added Studio Mode Toggle in Header Area */}
+      <button 
+        onClick={() => setIsFloatingMode(true)}
+        className="absolute top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-semibold backdrop-blur-md shadow-lg hover:bg-emerald-500/30 transition-all"
+      >
+        Switch to Floating Copilot Mode
+      </button>
 
       {/* Main IDE Workspace */}
       <div className="flex flex-row flex-1 min-h-0 min-w-0 overflow-hidden relative">

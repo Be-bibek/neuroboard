@@ -12,9 +12,16 @@
   "app": {
     "windows": [
       {
-        "title": "frontend",
-        "width": 800,
-        "height": 600
+        "label": "main",
+        "title": "NeuroBoard Copilot",
+        "width": 680,
+        "height": 380,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "center": true,
+        "skipTaskbar": false,
+        "shadow": false
       }
     ],
     "security": {
